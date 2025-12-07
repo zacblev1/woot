@@ -4,65 +4,64 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Retro Terminal Palette */
-  --background: #0d1117; /* Deep dark background */
-  --foreground: #00ff41; /* Classic Terminal Green */
-  
-  --card: #0d1117;
-  --card-foreground: #00ff41;
-  
-  --popover: #0d1117;
-  --popover-foreground: #00ff41;
-  
-  --primary: #00ff41;
-  --primary-foreground: #0d1117;
-  
-  --secondary: #003b00; /* Darker green for backgrounds */
-  --secondary-foreground: #00ff41;
-  
-  --muted: #161b22;
-  --muted-foreground: #008f11; /* Dimmed green */
-  
-  --accent: #00ff41;
-  --accent-foreground: #0d1117;
-  
-  --destructive: #ff0000; /* Error red */
-  --destructive-foreground: #0d1117;
-  
-  --border: #003b00;
-  --input: #003b00;
-  --ring: #00ff41;
-  
-  --radius: 0px; /* No rounded corners in terminals */
+  /* Lumon-inspired Terminal Palette */
+  --background: #0a1628;
+  --foreground: #e8f4f8;
+
+  --card: #0d1e36;
+  --card-foreground: #e8f4f8;
+
+  --popover: #0d1e36;
+  --popover-foreground: #e8f4f8;
+
+  --primary: #4fd1c5;
+  --primary-foreground: #0a1628;
+
+  --secondary: #1a365d;
+  --secondary-foreground: #81e6d9;
+
+  --muted: #1a2744;
+  --muted-foreground: #94a3b8;
+
+  --accent: #4fd1c5;
+  --accent-foreground: #0a1628;
+
+  --destructive: #f56565;
+  --destructive-foreground: #0a1628;
+
+  --border: #2d4a6f;
+  --input: #1a365d;
+  --ring: #4fd1c5;
+
+  --radius: 0px;
 }
 
 .dark {
-  /* Same retro terminal theme for dark mode */
-  --background: #0d1117;
-  --foreground: #00ff41;
-  --card: #0d1117;
-  --card-foreground: #00ff41;
-  --popover: #0d1117;
-  --popover-foreground: #00ff41;
-  --primary: #00ff41;
-  --primary-foreground: #0d1117;
-  --secondary: #003b00;
-  --secondary-foreground: #00ff41;
-  --muted: #161b22;
-  --muted-foreground: #008f11;
-  --accent: #00ff41;
-  --accent-foreground: #0d1117;
-  --destructive: #ff0000;
-  --destructive-foreground: #0d1117;
-  --border: #003b00;
-  --input: #003b00;
-  --ring: #00ff41;
+  --background: #0a1628;
+  --foreground: #e8f4f8;
+  --card: #0d1e36;
+  --card-foreground: #e8f4f8;
+  --popover: #0d1e36;
+  --popover-foreground: #e8f4f8;
+  --primary: #4fd1c5;
+  --primary-foreground: #0a1628;
+  --secondary: #1a365d;
+  --secondary-foreground: #81e6d9;
+  --muted: #1a2744;
+  --muted-foreground: #94a3b8;
+  --accent: #4fd1c5;
+  --accent-foreground: #0a1628;
+  --destructive: #f56565;
+  --destructive-foreground: #0a1628;
+  --border: #2d4a6f;
+  --input: #1a365d;
+  --ring: #4fd1c5;
 }
 
 @theme inline {
-  --font-sans: "Courier New", Courier, monospace;
-  --font-mono: "Courier New", Courier, monospace;
-  
+  --font-sans: "JetBrains Mono", "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+  --font-mono: "JetBrains Mono", "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -82,7 +81,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --radius-sm: 0px;
   --radius-md: 0px;
   --radius-lg: 0px;
@@ -94,76 +93,32 @@
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
-  
-  body {
-    @apply bg-background text-foreground font-mono overflow-x-hidden min-h-screen;
-    text-shadow: 0 0 2px var(--primary); /* Phosphor glow */
-  }
 
-  /* CRT Scanline Effect */
-  body::before {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.25) 50%
-    );
-    background-size: 100% 4px;
-    z-index: 9999;
-    pointer-events: none;
-    animation: scanlines 10s linear infinite;
-  }
-  
-  /* CRT Flicker & Vignette */
-  body::after {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
-    z-index: 9998;
-    pointer-events: none;
-    animation: flicker 0.15s infinite;
+  body {
+    @apply bg-background text-foreground font-mono;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
     background: var(--primary);
     color: var(--background);
-    text-shadow: none;
   }
 }
 
-@keyframes scanlines {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100%; }
-}
-
-@keyframes flicker {
-  0% { opacity: 0.97; }
-  50% { opacity: 1; }
-  100% { opacity: 0.98; }
-}
-
-/* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
   background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border: 2px solid var(--background);
+  background: var(--muted);
 }
 
-::-webkit-scrollbar-track {
-  background: var(--muted);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
