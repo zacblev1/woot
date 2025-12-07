@@ -1179,14 +1179,14 @@ export function Terminal() {
 
   return (
     <div
-      className="h-full w-full bg-background p-3 sm:p-4 md:p-6 font-mono text-xs sm:text-sm md:text-base cursor-text flex flex-col overflow-hidden"
+      className="h-full w-full bg-background p-4 md:p-6 font-mono text-sm md:text-base cursor-text flex flex-col"
       onClick={() => inputRef.current?.focus()}
     >
-      <div ref={terminalRef} className="flex-1 overflow-y-auto overflow-x-hidden pb-2">
+      <div ref={terminalRef} className="flex-1 overflow-y-auto">
         {history.map((line, i) => (
           <div
             key={i}
-            className={`whitespace-pre-wrap break-words leading-relaxed ${
+            className={`whitespace-pre-wrap ${
               line.type === "input"
                 ? "text-primary"
                 : line.type === "error"
@@ -1231,15 +1231,15 @@ export function Terminal() {
         ))}
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pt-2 border-t border-border/50">
-        <span className="text-primary text-xs sm:text-sm md:text-base shrink-0">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
         <input
           ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-foreground min-w-0 text-xs sm:text-sm md:text-base"
+          className="flex-1 bg-transparent outline-none text-foreground"
           autoFocus
           spellCheck={false}
           autoComplete="off"
