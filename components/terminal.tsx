@@ -902,7 +902,10 @@ export function Terminal() {
 
       if (currentDirectory === "~/books") {
         const results = booksData.filter(
-          (b) => b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term),
+          (b) => {
+            const authorStr = Array.isArray(b.author) ? b.author.join(", ") : b.author
+            return b.title.toLowerCase().includes(term) || authorStr.toLowerCase().includes(term)
+          },
         )
         if (results.length === 0) return `No results for "${term}"`
         const list = results.map((b) => {
@@ -1057,7 +1060,7 @@ export function Terminal() {
     setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${trimmedCmd}` }])
 
     if (gameState.active) {
-      let result: string | string[]
+      let result: string | (string | { wordle: string })[]
       if (gameState.type === "number") {
         result = handleNumberGame(trimmedCmd)
       } else if (gameState.type === "wordle") {
@@ -1075,7 +1078,7 @@ export function Terminal() {
       const lines = Array.isArray(result) ? result : [result]
       lines.forEach((line) => {
         if (typeof line === "object" && "wordle" in line) {
-          setHistory((prev) => [...prev, { type: "wordle", content: line.wordle }])
+          setHistory((prev) => [...prev, { type: "wordle", content: (line as { wordle: string }).wordle }])
         } else {
           setHistory((prev) => [...prev, { type: "output", content: String(line) }])
         }
@@ -1176,14 +1179,14 @@ export function Terminal() {
 
   return (
     <div
-      className="h-full w-full bg-background p-4 md:p-6 font-mono text-sm md:text-base cursor-text flex flex-col"
+      className="h-full w-full bg-background p-3 sm:p-4 md:p-6 font-mono text-xs sm:text-sm md:text-base cursor-text flex flex-col overflow-hidden"
       onClick={() => inputRef.current?.focus()}
     >
-      <div ref={terminalRef} className="flex-1 overflow-y-auto">
+      <div ref={terminalRef} className="flex-1 overflow-y-auto overflow-x-hidden pb-2">
         {history.map((line, i) => (
           <div
             key={i}
-            className={`whitespace-pre-wrap ${
+            className={`whitespace-pre-wrap break-words leading-relaxed ${
               line.type === "input"
                 ? "text-primary"
                 : line.type === "error"
@@ -1228,15 +1231,15 @@ export function Terminal() {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pt-2 border-t border-border/50">
+        <span className="text-primary text-xs sm:text-sm md:text-base shrink-0">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
         <input
           ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-foreground"
+          className="flex-1 bg-transparent outline-none text-foreground min-w-0 text-xs sm:text-sm md:text-base"
           autoFocus
           spellCheck={false}
           autoComplete="off"
