@@ -100,7 +100,12 @@
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     height: 100%;
-    height: 100dvh;
+  }
+
+  @supports (height: 100dvh) {
+    html, body {
+      height: 100dvh;
+    }
   }
 
   ::selection {

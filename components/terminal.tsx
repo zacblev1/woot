@@ -188,6 +188,21 @@ export function Terminal() {
     }
   }, [history])
 
+  // Scroll input into view when focused (for mobile keyboard)
+  useEffect(() => {
+    const input = inputRef.current
+    if (!input) return
+
+    const handleFocus = () => {
+      setTimeout(() => {
+        input.scrollIntoView({ behavior: "smooth", block: "end" })
+      }, 300)
+    }
+
+    input.addEventListener("focus", handleFocus)
+    return () => input.removeEventListener("focus", handleFocus)
+  }, [])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
