@@ -136,75 +136,80 @@ export function Terminal() {
   const [vfs] = useState(() => {
     const fs = new VirtualFileSystem()
 
-    const savedFS = localStorage.getItem("vfs-state")
-    if (savedFS) {
-      fs.fromJSON(savedFS)
-    } else {
-      // Populate defaults only if no save found
-      // Populate books
-      const booksDir = fs.createDir("/home/zachary/books")
-      booksData.forEach((book, i) => {
-        // Create a "file" for each book. 
-        // Using a simple naming convention or slug would be better, but title works for now.
-        // Cleaning title for filename sanity
-        const filename = book.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
-        if (booksDir.children) {
-          booksDir.children[filename] = {
-            name: filename,
-            type: "file",
-            parent: booksDir,
-            content: book
-          }
-        }
-      })
+    // Populate defaults initially (SSR safe)
 
-      // Populate vinyl
-      const vinylDir = fs.createDir("/home/zachary/vinyl")
-      vinylData.forEach((record) => {
-        const filename = record.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
-        if (vinylDir.children) {
-          vinylDir.children[filename] = {
-            name: filename,
-            type: "file",
-            parent: vinylDir,
-            content: record
-          }
+    // Populate books
+    const booksDir = fs.createDir("/home/zachary/books")
+    booksData.forEach((book, i) => {
+      const filename = book.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      if (booksDir.children) {
+        booksDir.children[filename] = {
+          name: filename,
+          type: "file",
+          parent: booksDir,
+          content: book
         }
-      })
-
-      // Populate hardware
-      const hwDir = fs.createDir("/home/zachary/hardware")
-      hardwareData.forEach((device) => {
-        const filename = device.name.toLowerCase().replace(/[^a-z0-9]/g, "-")
-        if (hwDir.children) {
-          hwDir.children[filename] = {
-            name: filename,
-            type: "file",
-            parent: hwDir,
-            content: device
-          }
-        }
-      })
-
-      // Populate games
-      const gamesDir = fs.createDir("/home/zachary/games")
-      const games = ["number", "wordle", "trivia", "blackjack", "rps"]
-      games.forEach(g => {
-        if (gamesDir.children) {
-          gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
-        }
-      })
-
-      // Populate style
-      const styleDir = fs.createDir("/home/zachary/style")
-      if (styleDir.children) {
-        styleDir.children["theme"] = { name: "theme", type: "file", parent: styleDir, content: "config" }
-        styleDir.children["font"] = { name: "font", type: "file", parent: styleDir, content: "config" }
       }
+    })
+
+    // Populate vinyl
+    const vinylDir = fs.createDir("/home/zachary/vinyl")
+    vinylData.forEach((record) => {
+      const filename = record.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      if (vinylDir.children) {
+        vinylDir.children[filename] = {
+          name: filename,
+          type: "file",
+          parent: vinylDir,
+          content: record
+        }
+      }
+    })
+
+    // Populate hardware
+    const hwDir = fs.createDir("/home/zachary/hardware")
+    hardwareData.forEach((device) => {
+      const filename = device.name.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      if (hwDir.children) {
+        hwDir.children[filename] = {
+          name: filename,
+          type: "file",
+          parent: hwDir,
+          content: device
+        }
+      }
+    })
+
+    // Populate games
+    const gamesDir = fs.createDir("/home/zachary/games")
+    const games = ["number", "wordle", "trivia", "blackjack", "rps"]
+    games.forEach(g => {
+      if (gamesDir.children) {
+        gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
+      }
+    })
+
+    // Populate style
+    const styleDir = fs.createDir("/home/zachary/style")
+    if (styleDir.children) {
+      styleDir.children["theme"] = { name: "theme", type: "file", parent: styleDir, content: "config" }
+      styleDir.children["font"] = { name: "font", type: "file", parent: styleDir, content: "config" }
     }
 
     return fs
   })
+
+  // Force update mapping for React reactivity on deep VFS changes
+  const [, forceUpdate] = useState(0)
+
+  // Load from localStorage on mount (Client-side only)
+  useEffect(() => {
+    const savedFS = localStorage.getItem("vfs-state")
+    if (savedFS) {
+      vfs.fromJSON(savedFS)
+      forceUpdate(n => n + 1)
+    }
+  }, [vfs])
 
   // Persistence helper
   const saveFileSystem = () => {
