@@ -4,6 +4,7 @@ import type React from "react"
 import booksData from "@/data/books.json"
 import vinylData from "@/data/vinyl.json"
 import hardwareData from "@/data/hardware.json"
+import { VirtualFileSystem } from "@/lib/vfs"
 
 import { useState, useRef, useEffect } from "react"
 
@@ -131,7 +132,96 @@ export function Terminal() {
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [gameState, setGameState] = useState<GameState>({ active: false, type: null })
+  /* VFS Initialization */
+  const [vfs] = useState(() => {
+    const fs = new VirtualFileSystem()
+
+    const savedFS = localStorage.getItem("vfs-state")
+    if (savedFS) {
+      fs.fromJSON(savedFS)
+    } else {
+      // Populate defaults only if no save found
+      // Populate books
+      const booksDir = fs.createDir("/home/zachary/books")
+      booksData.forEach((book, i) => {
+        // Create a "file" for each book. 
+        // Using a simple naming convention or slug would be better, but title works for now.
+        // Cleaning title for filename sanity
+        const filename = book.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+        if (booksDir.children) {
+          booksDir.children[filename] = {
+            name: filename,
+            type: "file",
+            parent: booksDir,
+            content: book
+          }
+        }
+      })
+
+      // Populate vinyl
+      const vinylDir = fs.createDir("/home/zachary/vinyl")
+      vinylData.forEach((record) => {
+        const filename = record.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+        if (vinylDir.children) {
+          vinylDir.children[filename] = {
+            name: filename,
+            type: "file",
+            parent: vinylDir,
+            content: record
+          }
+        }
+      })
+
+      // Populate hardware
+      const hwDir = fs.createDir("/home/zachary/hardware")
+      hardwareData.forEach((device) => {
+        const filename = device.name.toLowerCase().replace(/[^a-z0-9]/g, "-")
+        if (hwDir.children) {
+          hwDir.children[filename] = {
+            name: filename,
+            type: "file",
+            parent: hwDir,
+            content: device
+          }
+        }
+      })
+
+      // Populate games
+      const gamesDir = fs.createDir("/home/zachary/games")
+      const games = ["number", "wordle", "trivia", "blackjack", "rps"]
+      games.forEach(g => {
+        if (gamesDir.children) {
+          gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
+        }
+      })
+
+      // Populate style
+      const styleDir = fs.createDir("/home/zachary/style")
+      if (styleDir.children) {
+        styleDir.children["theme"] = { name: "theme", type: "file", parent: styleDir, content: "config" }
+        styleDir.children["font"] = { name: "font", type: "file", parent: styleDir, content: "config" }
+      }
+    }
+
+    return fs
+  })
+
+  // Persistence helper
+  const saveFileSystem = () => {
+    localStorage.setItem("vfs-state", vfs.toJSON())
+  }
+
+  // Sync currentDirectory string for display
   const [currentDirectory, setCurrentDirectory] = useState("~")
+
+  // Update display path whenever vfs changes (wrapper mostly)
+  useEffect(() => {
+    let path = vfs.getPwd()
+    if (path.startsWith("/home/zachary")) {
+      path = "~" + path.slice("/home/zachary".length)
+    }
+    setCurrentDirectory(path)
+  }, [history, vfs]) // Update when history changes (often triggers after command)
   const [currentTheme, setCurrentTheme] = useState<ThemeName>("lumon")
   const [currentFont, setCurrentFont] = useState<FontName>("jetbrains")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -224,7 +314,7 @@ export function Terminal() {
   const allCommands = [
     "help", "ls", "cd", "pwd", "about", "contact", "projects", "clear",
     "whoami", "date", "echo", "game", "neofetch", "theme", "font", "view", "search",
-    "genre", "format", "type", "cat", "sudo", "exit"
+    "genre", "format", "type", "cat", "sudo", "exit", "mkdir", "touch", "rm"
   ]
 
   const directories = ["books", "vinyl", "hardware", "games", "style"]
@@ -241,16 +331,18 @@ export function Terminal() {
     const cmd = parts[0].toLowerCase()
     const arg = parts[parts.length - 1].toLowerCase()
 
-    if (cmd === "cd") {
-      return directories.filter(d => d.startsWith(arg))
+    // Dynamic completion for cd, cat, view, ls
+    if (["cd", "cat", "view", "ls", "rm", "game"].includes(cmd)) {
+      // vfs.ls returns filenames in current dir
+      // Basic completion: just match files in current dir
+      // TODO: Support path completion like "cd bo" -> "books"
+      const files = vfs.ls()
+      return files.filter(f => f.startsWith(arg))
     }
 
+    // Fallback static maps if needed
     if (cmd === "theme") {
       return Object.keys(themes).filter(t => t.startsWith(arg))
-    }
-
-    if (cmd === "game") {
-      return ["number", "wordle", "trivia", "blackjack", "rps"].filter(g => g.startsWith(arg))
     }
 
     if (cmd === "font") {
@@ -632,153 +724,61 @@ export function Terminal() {
     ]
   }
 
-  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[]| string | { text: string; href: string }> = {
+  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string }> = {
     help: () => {
-      if (currentDirectory === "~/books") {
-        return [
-          "",
-          "COMMANDS (~/books)",
-          "",
-          "  ls             List all books",
-          "  view <n>       View book details",
-          "  search <term>  Search by title/author",
-          "  genre [name]   Filter by genre",
-          "  format [type]  Filter by format",
-          "  cd ..          Back to home",
-          "  clear          Clear screen",
-          "",
-        ]
-      }
-      if (currentDirectory === "~/vinyl") {
-        return [
-          "",
-          "COMMANDS (~/vinyl)",
-          "",
-          "  ls             List all records",
-          "  view <n>       View record details",
-          "  search <term>  Search by title/artist",
-          "  genre [name]   Filter by genre",
-          "  format [type]  Filter by format",
-          "  cd ..          Back to home",
-          "  clear          Clear screen",
-          "",
-        ]
-      }
-      if (currentDirectory === "~/hardware") {
-        return [
-          "",
-          "COMMANDS (~/hardware)",
-          "",
-          "  ls             List all devices",
-          "  view <n>       View device details",
-          "  search <term>  Search by name/type",
-          "  type [name]    Filter by type",
-          "  cd ..          Back to home",
-          "  clear          Clear screen",
-          "",
-        ]
-      }
-      if (currentDirectory === "~/style") {
-        return [
-          "",
-          "COMMANDS (~/style)",
-          "",
-          "  ls             List style options",
-          "  theme [name]   View/set color theme",
-          "  font [name]    View/set terminal font",
-          "  cd ..          Back to home",
-          "  clear          Clear screen",
-          "",
-        ]
-      }
+      // Dynamic help based on VFS context could be cool, but standard help is fine too.
       return [
         "",
         "COMMANDS",
         "",
-        "  ls             List directories",
+        "  ls             List directory contents",
         "  cd <dir>       Change directory",
         "  pwd            Print working directory",
+        "  cat <file>     View file contents",
+        "  clear          Clear screen",
+        "  game <type>    Play a game",
         "  about          About me",
         "  contact        Contact info",
         "  projects       Open GitHub",
-        "  clear          Clear screen",
-        "  game <type>    Play a game (number, hack, rps)",
+        "  theme          Change theme",
+        "  font           Change font",
         "",
       ]
     },
-    ls: () => {
-      if (currentDirectory === "~/books") {
-        const list = booksData.map(
-          (book, i) => `  ${String(i + 1).padStart(3, " ")}  ${book.title} — ${book.author}`,
-        )
-        return ["", `${booksData.length} books`, "", ...list, ""]
-      } else if (currentDirectory === "~/vinyl") {
-        const list = vinylData.map(
-          (record, i) => `  ${String(i + 1).padStart(3, " ")}  ${record.title} — ${record.artist}`,
-        )
-        return ["", `${vinylData.length} records`, "", ...list, ""]
-      } else if (currentDirectory === "~/hardware") {
-        const list = hardwareData.map(
-          (device, i) => `  ${String(i + 1).padStart(3, " ")}  ${device.name} (${device.type})`,
-        )
-        return ["", `${hardwareData.length} devices`, "", ...list, ""]
-      } else if (currentDirectory === "~/games") {
-        return [
-          "",
-          "  number      Guess the number",
-          "  wordle      Guess the 5-letter word",
-          "  trivia      Answer trivia questions",
-          "  blackjack   Play 21 against dealer",
-          "  rps         Rock Paper Scissors",
-          "",
-        ]
-      } else if (currentDirectory === "~/style") {
-        return [
-          "",
-          "  theme     Color themes",
-          "  font      Terminal fonts",
-          "",
-          "Use 'theme' or 'font' to see options",
-          "",
-        ]
-      }
-      return [
-        "",
-        "  books/      Book collection",
-        "  vinyl/      Vinyl collection",
-        "  hardware/   Hardware inventory",
-        "  games/      Terminal games",
-        "  style/      Themes & fonts",
-        "",
-      ]
+    ls: (args) => {
+      const path = args[0]
+      const result = vfs.ls(path) // This returns just names
+
+      // If we are in specific directories, we might want to retain the 'rich' view if ls is called without args
+      // Check current actual directory for potential override
+      // Actually, let's just stick to the requested "full ls" which usually means standard listing.
+      // But the user might miss the tables.
+      // Let's check if the result is just list of files, we can format them nicely.
+
+      if (result.length === 0) return ""
+
+      // Multi-column layout for basic ls? Or just list.
+      // Let's do simple grid-like logic or just lines. 
+      // Standard terminals just list them.
+
+      // Handling specific rich output for collections if desired:
+      // For now, let's return the file list.
+      return ["", ...result, ""]
     },
     cd: (args) => {
-      const dir = args[0]?.toLowerCase().replace("/", "")
+      const path = args[0] || "~"
+      const err = vfs.cd(path)
+      if (err) return err
 
-      if (dir === ".." || dir === "../") {
-        setCurrentDirectory("~")
-        return ""
+      // Update state string
+      let newPath = vfs.getPwd()
+      if (newPath.startsWith("/home/zachary")) {
+        newPath = "~" + newPath.slice("/home/zachary".length)
       }
-
-      if (!dir || dir === "~" || dir === "home") {
-        setCurrentDirectory("~")
-        return ""
-      }
-
-      const validDirs = ["books", "vinyl", "hardware", "games", "style"]
-
-      if (validDirs.includes(dir)) {
-        setCurrentDirectory(`~/${dir}`)
-        return ""
-      }
-
-      if (dir === "about") return commands.about([])
-      if (dir === "contact") return commands.contact([])
-      if (dir === "projects") return commands.projects([])
-
-      return `cd: ${dir}: No such directory`
+      setCurrentDirectory(newPath)
+      return ""
     },
-    pwd: () => `/home/zachary${currentDirectory.slice(1)}`,
+    pwd: () => vfs.getPwd(),
     about: () => [
       "",
       "Zachary",
@@ -835,12 +835,18 @@ export function Terminal() {
       return `Font set to ${fonts[fontName].name}`
     },
     view: (args) => {
-      const num = Number.parseInt(args[0])
+      const path = args[0]
+      if (!path) return "Usage: view <file>"
 
-      if (currentDirectory === "~/books") {
-        if (!args[0] || isNaN(num)) return "Usage: view <number>"
-        const book = booksData[num - 1]
-        if (!book) return `No book at position ${num}`
+      const node = vfs.resolve(path)
+      if (!node) return `view: ${path}: No such file`
+      if (node.type !== "file") return `view: ${path}: Is a directory`
+
+      const pwd = vfs.getPwd()
+
+      // Determine type based on parent directory or checks
+      if (pwd.includes("/books")) {
+        const book = node.content
         return [
           "",
           `  Title:   ${book.title}`,
@@ -852,10 +858,8 @@ export function Terminal() {
         ].filter(Boolean) as string[]
       }
 
-      if (currentDirectory === "~/vinyl") {
-        if (!args[0] || isNaN(num)) return "Usage: view <number>"
-        const record = vinylData[num - 1]
-        if (!record) return `No record at position ${num}`
+      if (pwd.includes("/vinyl")) {
+        const record = node.content
         return [
           "",
           `  Title:   ${record.title}`,
@@ -867,10 +871,8 @@ export function Terminal() {
         ]
       }
 
-      if (currentDirectory === "~/hardware") {
-        if (!args[0] || isNaN(num)) return "Usage: view <number>"
-        const device = hardwareData[num - 1]
-        if (!device) return `No device at position ${num}`
+      if (pwd.includes("/hardware")) {
+        const device = node.content
         return [
           "",
           `  Name:       ${device.name}`,
@@ -885,7 +887,8 @@ export function Terminal() {
         ].filter(Boolean) as string[]
       }
 
-      return "view: not in a collection directory"
+      if (typeof node.content === "string") return node.content
+      return JSON.stringify(node.content, null, 2)
     },
     search: (args) => {
       const term = args.join(" ").toLowerCase()
@@ -1050,6 +1053,30 @@ export function Terminal() {
 
       return `Unknown game: ${gameType}`
     },
+    mkdir: (args) => {
+      const path = args[0]
+      if (!path) return "Usage: mkdir <directory>"
+      const err = vfs.mkdir(path)
+      if (err) return err
+      saveFileSystem()
+      return ""
+    },
+    touch: (args) => {
+      const path = args[0]
+      if (!path) return "Usage: touch <filename>"
+      const err = vfs.touch(path)
+      if (err) return err
+      saveFileSystem()
+      return ""
+    },
+    rm: (args) => {
+      const path = args[0]
+      if (!path) return "Usage: rm <path>"
+      const err = vfs.rm(path)
+      if (err) return err
+      saveFileSystem()
+      return ""
+    },
     neofetch: () => [
       "",
       "  zachary@home",
@@ -1063,7 +1090,17 @@ export function Terminal() {
       `  Hardware: ${hardwareData.length}`,
       "",
     ],
-    cat: (args) => `cat: ${args[0] || "file"}: No such file`,
+    cat: (args) => {
+      const path = args[0]
+      if (!path) return "Usage: cat <file>"
+
+      const node = vfs.resolve(path)
+      if (!node) return `cat: ${path}: No such file or directory`
+      if (node.type !== "file") return `cat: ${path}: Is a directory`
+
+      if (typeof node.content === "string") return node.content
+      return JSON.stringify(node.content, null, 2)
+    },
     sudo: () => "Permission denied",
     exit: () => "Use Cmd+W or Ctrl+W to close",
   }
@@ -1201,17 +1238,16 @@ export function Terminal() {
         {history.map((line, i) => (
           <div
             key={i}
-            className={`whitespace-pre-wrap break-words break-all ${
-              line.type === "input"
-                ? "text-primary"
-                : line.type === "error"
-                  ? "text-destructive"
-                  : line.type === "success"
-                    ? "text-accent"
-                    : line.type === "link"
-                      ? "text-foreground"
-                      : "text-foreground"
-            }`}
+            className={`whitespace-pre-wrap break-words break-all ${line.type === "input"
+              ? "text-primary"
+              : line.type === "error"
+                ? "text-destructive"
+                : line.type === "success"
+                  ? "text-accent"
+                  : line.type === "link"
+                    ? "text-foreground"
+                    : "text-foreground"
+              }`}
           >
             {line.type === "link" && line.href ? (
               <a
