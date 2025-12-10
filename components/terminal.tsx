@@ -38,90 +38,70 @@ function highlightInput(text: string): ReactNode {
 function highlightLine(text: string): ReactNode {
   if (!text || text.trim() === "") return text
 
-  // Define patterns and their corresponding styles
-  const patterns: { regex: RegExp; className: string; group?: number }[] = [
-    // Section headers (ALL CAPS at start of line, like NAME, SYNOPSIS, etc.)
-    { regex: /^(\s*)(NAME|SYNOPSIS|DESCRIPTION|EXAMPLES|EXAMPLE|SEE ALSO|COMMANDS|GAMES|THEMES|FONTS|NAVIGATION|COLLECTIONS|FILES|INFO|OTHER|STYLE)(\s*)$/g, className: "text-accent font-bold" },
-    // Paths (~/something or /home/something)
-    { regex: /(~\/[\w\-\/]*|\/home\/[\w\-\/]+)/g, className: "text-primary" },
-    // Arguments in angle brackets <arg>
-    { regex: /(<[\w\s\-\.]+>)/g, className: "text-muted-foreground italic" },
-    // Optional arguments in square brackets [arg]
-    { regex: /(\[[\w\s\-\.]+\])/g, className: "text-muted-foreground italic" },
-    // Labels with colon (Title:, Author:, etc.)
-    { regex: /^(\s*[\w\s]+:)(?=\s)/gm, className: "text-accent" },
-    // Commands in man pages (indented command names)
-    { regex: /^(\s{4})(ls|cd|pwd|cat|view|man|help|search|genre|format|type|game|theme|font|neofetch|mkdir|touch|rm|about|contact|projects|clear|whoami|date|echo|exit|sudo)(\s|$)/gm, className: "", group: 2 },
-    // Numbers (standalone)
-    { regex: /\b(\d+)\b/g, className: "text-primary" },
-    // Starred/active item indicator
-    { regex: /^(\s*\*\s)/gm, className: "text-accent font-bold" },
-  ]
-
-  // Build segments with highlighting
   type Segment = { text: string; className?: string }
-  let segments: Segment[] = [{ text }]
+  const segments: Segment[] = []
+  let remaining = text
 
-  for (const { regex, className, group } of patterns) {
-    const newSegments: Segment[] = []
+  // Simple sequential pattern matching - no complex regex loops
+  // Check for section headers first (entire line)
+  const headerMatch = text.match(/^(\s*)(NAME|SYNOPSIS|DESCRIPTION|EXAMPLES|EXAMPLE|SEE ALSO|COMMANDS|GAMES|THEMES|FONTS|NAVIGATION|COLLECTIONS|FILES|INFO|OTHER|STYLE)(\s*)$/)
+  if (headerMatch) {
+    return <span className="text-accent font-bold">{text}</span>
+  }
 
-    for (const segment of segments) {
-      // Skip already-styled segments
-      if (segment.className) {
-        newSegments.push(segment)
-        continue
-      }
+  // Check for label lines (Key: value)
+  const labelMatch = text.match(/^(\s*)([\w\s]+)(:)(\s+)(.*)$/)
+  if (labelMatch) {
+    const [, indent, label, colon, space, value] = labelMatch
+    return (
+      <>
+        <span>{indent}</span>
+        <span className="text-accent">{label}{colon}</span>
+        <span>{space}{value}</span>
+      </>
+    )
+  }
 
-      const str = segment.text
-      let lastIndex = 0
-      const localRegex = new RegExp(regex.source, regex.flags)
-      let match
+  // For other lines, do simple inline replacements
+  // Split by special patterns and rebuild
+  const parts: ReactNode[] = []
+  let idx = 0
 
-      while ((match = localRegex.exec(str)) !== null) {
-        // Add text before match
-        if (match.index > lastIndex) {
-          newSegments.push({ text: str.slice(lastIndex, match.index) })
-        }
+  // Match paths, args, numbers inline
+  const inlineRegex = /(~\/[\w\-\/]*|\/home\/[\w\-\/]+|<[\w\s\-\.]+>|\[[\w\s\-\.]+\]|\b\d+\b)/g
+  let match
+  let lastIdx = 0
 
-        // Add matched text with style
-        const matchedText = group !== undefined ? match[group] : match[0]
-        const beforeGroup = group !== undefined ? match[0].slice(0, match[0].indexOf(matchedText)) : ""
-        const afterGroup = group !== undefined ? match[0].slice(match[0].indexOf(matchedText) + matchedText.length) : ""
-
-        if (beforeGroup) newSegments.push({ text: beforeGroup })
-        newSegments.push({ text: matchedText, className })
-        if (afterGroup) newSegments.push({ text: afterGroup })
-
-        lastIndex = localRegex.lastIndex
-
-        // Prevent infinite loops on zero-length matches
-        if (match[0].length === 0) localRegex.lastIndex++
-      }
-
-      // Add remaining text
-      if (lastIndex < str.length) {
-        newSegments.push({ text: str.slice(lastIndex) })
-      }
-
-      // If no matches, keep original
-      if (lastIndex === 0) {
-        newSegments.push(segment)
-      }
+  while ((match = inlineRegex.exec(text)) !== null) {
+    // Add text before match
+    if (match.index > lastIdx) {
+      parts.push(<span key={idx++}>{text.slice(lastIdx, match.index)}</span>)
     }
 
-    segments = newSegments
+    const matched = match[0]
+    let className = "text-foreground"
+
+    if (matched.startsWith("~/") || matched.startsWith("/home/")) {
+      className = "text-primary"
+    } else if (matched.startsWith("<") || matched.startsWith("[")) {
+      className = "text-muted-foreground italic"
+    } else if (/^\d+$/.test(matched)) {
+      className = "text-primary"
+    }
+
+    parts.push(<span key={idx++} className={className}>{matched}</span>)
+    lastIdx = inlineRegex.lastIndex
   }
 
-  // Convert segments to React elements
-  if (segments.length === 1 && !segments[0].className) {
-    return text
+  // Add remaining text
+  if (lastIdx < text.length) {
+    parts.push(<span key={idx++}>{text.slice(lastIdx)}</span>)
   }
 
-  return segments.map((seg, i) =>
-    seg.className
-      ? <span key={i} className={seg.className}>{seg.text}</span>
-      : <span key={i}>{seg.text}</span>
-  )
+  if (parts.length === 0) return text
+  if (parts.length === 1 && lastIdx === 0) return text
+
+  return <>{parts}</>
 }
 
 interface TerminalLine {
