@@ -6,7 +6,123 @@ import vinylData from "@/data/vinyl.json"
 import hardwareData from "@/data/hardware.json"
 import { VirtualFileSystem } from "@/lib/vfs"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, type ReactNode } from "react"
+
+// Highlight input lines (prompt + command)
+function highlightInput(text: string): ReactNode {
+  // Input format: "~/path $ command args"
+  const match = text.match(/^(.*?\$\s*)(\S+)?(.*)$/)
+  if (!match) return text
+
+  const [, prompt, command, args] = match
+  const validCommands = [
+    "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
+    "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
+    "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
+  ]
+
+  return (
+    <>
+      <span className="text-muted-foreground">{prompt}</span>
+      {command && (
+        <span className={validCommands.includes(command.toLowerCase()) ? "text-accent font-semibold" : "text-foreground"}>
+          {command}
+        </span>
+      )}
+      {args && <span className="text-foreground">{args}</span>}
+    </>
+  )
+}
+
+// Syntax highlighting for terminal output
+function highlightLine(text: string): ReactNode {
+  if (!text || text.trim() === "") return text
+
+  // Define patterns and their corresponding styles
+  const patterns: { regex: RegExp; className: string; group?: number }[] = [
+    // Section headers (ALL CAPS at start of line, like NAME, SYNOPSIS, etc.)
+    { regex: /^(\s*)(NAME|SYNOPSIS|DESCRIPTION|EXAMPLES|EXAMPLE|SEE ALSO|COMMANDS|GAMES|THEMES|FONTS|NAVIGATION|COLLECTIONS|FILES|INFO|OTHER|STYLE)(\s*)$/g, className: "text-accent font-bold" },
+    // Paths (~/something or /home/something)
+    { regex: /(~\/[\w\-\/]*|\/home\/[\w\-\/]+)/g, className: "text-primary" },
+    // Arguments in angle brackets <arg>
+    { regex: /(<[\w\s\-\.]+>)/g, className: "text-muted-foreground italic" },
+    // Optional arguments in square brackets [arg]
+    { regex: /(\[[\w\s\-\.]+\])/g, className: "text-muted-foreground italic" },
+    // Labels with colon (Title:, Author:, etc.)
+    { regex: /^(\s*[\w\s]+:)(?=\s)/gm, className: "text-accent" },
+    // Commands in man pages (indented command names)
+    { regex: /^(\s{4})(ls|cd|pwd|cat|view|man|help|search|genre|format|type|game|theme|font|neofetch|mkdir|touch|rm|about|contact|projects|clear|whoami|date|echo|exit|sudo)(\s|$)/gm, className: "", group: 2 },
+    // Numbers (standalone)
+    { regex: /\b(\d+)\b/g, className: "text-primary" },
+    // Starred/active item indicator
+    { regex: /^(\s*\*\s)/gm, className: "text-accent font-bold" },
+  ]
+
+  // Build segments with highlighting
+  type Segment = { text: string; className?: string }
+  let segments: Segment[] = [{ text }]
+
+  for (const { regex, className, group } of patterns) {
+    const newSegments: Segment[] = []
+
+    for (const segment of segments) {
+      // Skip already-styled segments
+      if (segment.className) {
+        newSegments.push(segment)
+        continue
+      }
+
+      const str = segment.text
+      let lastIndex = 0
+      const localRegex = new RegExp(regex.source, regex.flags)
+      let match
+
+      while ((match = localRegex.exec(str)) !== null) {
+        // Add text before match
+        if (match.index > lastIndex) {
+          newSegments.push({ text: str.slice(lastIndex, match.index) })
+        }
+
+        // Add matched text with style
+        const matchedText = group !== undefined ? match[group] : match[0]
+        const beforeGroup = group !== undefined ? match[0].slice(0, match[0].indexOf(matchedText)) : ""
+        const afterGroup = group !== undefined ? match[0].slice(match[0].indexOf(matchedText) + matchedText.length) : ""
+
+        if (beforeGroup) newSegments.push({ text: beforeGroup })
+        newSegments.push({ text: matchedText, className })
+        if (afterGroup) newSegments.push({ text: afterGroup })
+
+        lastIndex = localRegex.lastIndex
+
+        // Prevent infinite loops on zero-length matches
+        if (match[0].length === 0) localRegex.lastIndex++
+      }
+
+      // Add remaining text
+      if (lastIndex < str.length) {
+        newSegments.push({ text: str.slice(lastIndex) })
+      }
+
+      // If no matches, keep original
+      if (lastIndex === 0) {
+        newSegments.push(segment)
+      }
+    }
+
+    segments = newSegments
+  }
+
+  // Convert segments to React elements
+  if (segments.length === 1 && !segments[0].className) {
+    return text
+  }
+
+  return segments.map((seg, i) =>
+    seg.className
+      ? <span key={i} className={seg.className}>{seg.text}</span>
+      : <span key={i}>{seg.text}</span>
+  )
+}
 
 interface TerminalLine {
   type: "input" | "output" | "error" | "success" | "link" | "wordle"
@@ -1707,7 +1823,9 @@ export function Terminal() {
                     : "text-foreground"
               }`}
           >
-            {line.type === "link" && line.href ? (
+            {line.type === "input" ? (
+              highlightInput(line.content)
+            ) : line.type === "link" && line.href ? (
               <a
                 href={line.href}
                 target="_blank"
@@ -1734,7 +1852,7 @@ export function Terminal() {
                 })}
               </span>
             ) : (
-              line.content
+              highlightLine(line.content)
             )}
           </div>
         ))}
