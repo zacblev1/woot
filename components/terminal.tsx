@@ -1201,7 +1201,7 @@ export function Terminal() {
         {history.map((line, i) => (
           <div
             key={i}
-            className={`whitespace-pre-wrap ${
+            className={`whitespace-pre-wrap break-words break-all ${
               line.type === "input"
                 ? "text-primary"
                 : line.type === "error"
@@ -1254,7 +1254,7 @@ export function Terminal() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-foreground"
+          className="flex-1 bg-transparent outline-none text-foreground text-base md:text-sm"
           autoFocus
           spellCheck={false}
           autoComplete="off"
