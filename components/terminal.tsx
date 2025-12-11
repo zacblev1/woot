@@ -11,7 +11,7 @@ import { useState, useRef, useEffect, type ReactNode } from "react"
 // Highlight input lines (prompt + command)
 function highlightInput(text: string): ReactNode {
   // Input format: "~/path $ command args"
-  const match = text.match(/^(.*?\$\s*)(\S+)?(.*)$/)
+  const match = text.match(/^(.*?\$\s*)(\S+)?(\s.*)?$/)
   if (!match) return text
 
   const [, prompt, command, args] = match
@@ -21,11 +21,13 @@ function highlightInput(text: string): ReactNode {
     "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
   ]
 
+  const isValid = command ? validCommands.includes(command.toLowerCase()) : false
+
   return (
     <>
       <span className="text-muted-foreground">{prompt}</span>
       {command && (
-        <span className={validCommands.includes(command.toLowerCase()) ? "text-accent font-semibold" : "text-foreground"}>
+        <span className={isValid ? "text-accent font-semibold" : "text-destructive"}>
           {command}
         </span>
       )}
@@ -38,68 +40,65 @@ function highlightInput(text: string): ReactNode {
 function highlightLine(text: string): ReactNode {
   if (!text || text.trim() === "") return text
 
-  type Segment = { text: string; className?: string }
-  const segments: Segment[] = []
-  let remaining = text
-
-  // Simple sequential pattern matching - no complex regex loops
-  // Check for section headers first (entire line)
-  const headerMatch = text.match(/^(\s*)(NAME|SYNOPSIS|DESCRIPTION|EXAMPLES|EXAMPLE|SEE ALSO|COMMANDS|GAMES|THEMES|FONTS|NAVIGATION|COLLECTIONS|FILES|INFO|OTHER|STYLE)(\s*)$/)
-  if (headerMatch) {
+  // Check for section headers (entire line is a header keyword)
+  const headerKeywords = ["NAME", "SYNOPSIS", "DESCRIPTION", "EXAMPLES", "EXAMPLE", "SEE ALSO", "COMMANDS", "GAMES", "THEMES", "FONTS", "NAVIGATION", "COLLECTIONS", "FILES", "INFO", "OTHER", "STYLE"]
+  const trimmed = text.trim()
+  if (headerKeywords.includes(trimmed)) {
     return <span className="text-accent font-bold">{text}</span>
   }
 
-  // Check for label lines (Key: value)
-  const labelMatch = text.match(/^(\s*)([\w\s]+)(:)(\s+)(.*)$/)
+  // Check for label lines (indented "Label:  value" format, like in view output)
+  // Must start with spaces, then a capitalized word, then colon, then spaces, then value
+  const labelMatch = text.match(/^(\s{2,})([\w]+)(:)(\s{2,})(.+)$/)
   if (labelMatch) {
     const [, indent, label, colon, space, value] = labelMatch
     return (
       <>
-        <span>{indent}</span>
+        {indent}
         <span className="text-accent">{label}{colon}</span>
-        <span>{space}{value}</span>
+        {space}<span className="text-foreground">{value}</span>
       </>
     )
   }
 
-  // For other lines, do simple inline replacements
-  // Split by special patterns and rebuild
+  // Build highlighted parts for inline patterns
   const parts: ReactNode[] = []
-  let idx = 0
+  let key = 0
 
-  // Match paths, args, numbers inline
-  const inlineRegex = /(~\/[\w\-\/]*|\/home\/[\w\-\/]+|<[\w\s\-\.]+>|\[[\w\s\-\.]+\]|\b\d+\b)/g
-  let match
+  // Match paths, arguments in brackets, and standalone numbers
+  const inlineRegex = /(~\/[\w\-\/]*|\/home\/[\w\-\/]+|<[\w\s\-\.]+>|\[[\w\-\.]+\])/g
   let lastIdx = 0
+  let match
 
   while ((match = inlineRegex.exec(text)) !== null) {
-    // Add text before match
+    // Text before match
     if (match.index > lastIdx) {
-      parts.push(<span key={idx++}>{text.slice(lastIdx, match.index)}</span>)
+      parts.push(text.slice(lastIdx, match.index))
     }
 
     const matched = match[0]
-    let className = "text-foreground"
-
     if (matched.startsWith("~/") || matched.startsWith("/home/")) {
-      className = "text-primary"
-    } else if (matched.startsWith("<") || matched.startsWith("[")) {
-      className = "text-muted-foreground italic"
-    } else if (/^\d+$/.test(matched)) {
-      className = "text-primary"
+      parts.push(<span key={key++} className="text-primary">{matched}</span>)
+    } else if (matched.startsWith("<")) {
+      parts.push(<span key={key++} className="text-muted-foreground">{matched}</span>)
+    } else if (matched.startsWith("[")) {
+      parts.push(<span key={key++} className="text-muted-foreground">{matched}</span>)
+    } else {
+      parts.push(matched)
     }
 
-    parts.push(<span key={idx++} className={className}>{matched}</span>)
     lastIdx = inlineRegex.lastIndex
   }
 
-  // Add remaining text
+  // Remaining text
   if (lastIdx < text.length) {
-    parts.push(<span key={idx++}>{text.slice(lastIdx)}</span>)
+    parts.push(text.slice(lastIdx))
   }
 
-  if (parts.length === 0) return text
-  if (parts.length === 1 && lastIdx === 0) return text
+  // If no matches were found, return original text
+  if (parts.length === 0 || (parts.length === 1 && typeof parts[0] === "string")) {
+    return text
+  }
 
   return <>{parts}</>
 }
@@ -1840,19 +1839,121 @@ export function Terminal() {
 
       <div className="flex items-center gap-2 shrink-0">
         <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-foreground text-base md:text-sm"
-          autoFocus
-          spellCheck={false}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
+        <div className="flex-1 relative">
+          {/* Highlighted overlay */}
+          <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
+            {(() => {
+              if (!input) return null
+
+              const validCommands = [
+                "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
+                "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
+                "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
+              ]
+
+              // Tokenize the input
+              const tokens: { type: string; value: string }[] = []
+              let remaining = input
+              let isFirstToken = true
+
+              while (remaining.length > 0) {
+                // Match leading whitespace
+                const wsMatch = remaining.match(/^(\s+)/)
+                if (wsMatch) {
+                  tokens.push({ type: "space", value: wsMatch[1] })
+                  remaining = remaining.slice(wsMatch[1].length)
+                  continue
+                }
+
+                // Match quoted strings
+                const quoteMatch = remaining.match(/^(["'])([^"']*)(["'])?/)
+                if (quoteMatch) {
+                  tokens.push({ type: "string", value: quoteMatch[0] })
+                  remaining = remaining.slice(quoteMatch[0].length)
+                  isFirstToken = false
+                  continue
+                }
+
+                // Match flags (--flag or -f)
+                const flagMatch = remaining.match(/^(--?\w+)/)
+                if (flagMatch && !isFirstToken) {
+                  tokens.push({ type: "flag", value: flagMatch[1] })
+                  remaining = remaining.slice(flagMatch[1].length)
+                  continue
+                }
+
+                // Match numbers
+                const numMatch = remaining.match(/^(\d+)(?=\s|$)/)
+                if (numMatch && !isFirstToken) {
+                  tokens.push({ type: "number", value: numMatch[1] })
+                  remaining = remaining.slice(numMatch[1].length)
+                  continue
+                }
+
+                // Match paths (contains / or starts with ~ or .)
+                const pathMatch = remaining.match(/^([~.]?[\w\-./]+)/)
+                if (pathMatch && !isFirstToken && (pathMatch[1].includes("/") || pathMatch[1].startsWith("~") || pathMatch[1].startsWith("."))) {
+                  tokens.push({ type: "path", value: pathMatch[1] })
+                  remaining = remaining.slice(pathMatch[1].length)
+                  continue
+                }
+
+                // Match word (command or argument)
+                const wordMatch = remaining.match(/^(\S+)/)
+                if (wordMatch) {
+                  if (isFirstToken) {
+                    const isValid = validCommands.includes(wordMatch[1].toLowerCase())
+                    tokens.push({ type: isValid ? "command" : "invalid", value: wordMatch[1] })
+                    isFirstToken = false
+                  } else {
+                    tokens.push({ type: "argument", value: wordMatch[1] })
+                  }
+                  remaining = remaining.slice(wordMatch[1].length)
+                  continue
+                }
+
+                // Fallback: single character
+                tokens.push({ type: "text", value: remaining[0] })
+                remaining = remaining.slice(1)
+              }
+
+              return tokens.map((token, i) => {
+                switch (token.type) {
+                  case "command":
+                    return <span key={i} className="text-accent font-semibold">{token.value}</span>
+                  case "invalid":
+                    return <span key={i} className="text-destructive">{token.value}</span>
+                  case "path":
+                    return <span key={i} className="text-primary">{token.value}</span>
+                  case "string":
+                    return <span key={i} className="text-yellow-400">{token.value}</span>
+                  case "flag":
+                    return <span key={i} className="text-purple-400">{token.value}</span>
+                  case "number":
+                    return <span key={i} className="text-orange-400">{token.value}</span>
+                  case "argument":
+                    return <span key={i} className="text-muted-foreground">{token.value}</span>
+                  default:
+                    return <span key={i}>{token.value}</span>
+                }
+              })
+            })()}
+          </div>
+          {/* Actual input (transparent text) */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-transparent outline-none text-transparent caret-foreground text-base md:text-sm relative z-10"
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
+        </div>
       </div>
     </div>
   )
