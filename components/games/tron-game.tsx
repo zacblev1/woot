@@ -89,19 +89,27 @@ export function TronGame({ onExit }: TronGameProps) {
                 return
             }
 
-            // Arrow keys for movement (only during gameplay)
+            // Arrow keys and WASD for movement (only during gameplay)
             if (gameState === "playing") {
                 switch (e.key) {
                     case "ArrowUp":
+                    case "w":
+                    case "W":
                         if (playerDir.current !== "DOWN") playerNextDir.current = "UP"
                         break
                     case "ArrowDown":
+                    case "s":
+                    case "S":
                         if (playerDir.current !== "UP") playerNextDir.current = "DOWN"
                         break
                     case "ArrowLeft":
+                    case "a":
+                    case "A":
                         if (playerDir.current !== "RIGHT") playerNextDir.current = "LEFT"
                         break
                     case "ArrowRight":
+                    case "d":
+                    case "D":
                         if (playerDir.current !== "LEFT") playerNextDir.current = "RIGHT"
                         break
                 }
@@ -505,7 +513,7 @@ export function TronGame({ onExit }: TronGameProps) {
                             TRON
                         </h1>
                         <div className="flex flex-col gap-2 text-center text-slate-400 font-mono text-sm">
-                            <p>USE ARROW KEYS TO MOVE</p>
+                            <p>USE ARROW KEYS OR WASD TO MOVE</p>
                             <p>AVOID WALLS AND TRAILS</p>
                         </div>
                         <button
