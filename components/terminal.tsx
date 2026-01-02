@@ -5,6 +5,12 @@ import booksData from "@/data/books.json"
 import vinylData from "@/data/vinyl.json"
 import hardwareData from "@/data/hardware.json"
 import { VirtualFileSystem } from "@/lib/vfs"
+import dynamic from "next/dynamic"
+
+const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
+  loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
+})
+
 
 import { useState, useRef, useEffect, type ReactNode } from "react"
 
@@ -111,8 +117,9 @@ interface TerminalLine {
 
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | null
   data?: any
+
 }
 
 const themes = {
@@ -423,10 +430,11 @@ const manPages: Record<string, string[]> = {
     "    trivia      Answer 5 trivia questions",
     "    blackjack   Play 21 against the dealer",
     "    rps         Rock Paper Scissors",
+    "    tron        Light Cycle Arcade Game",
     "",
     "EXAMPLES",
     "    game wordle",
-    "    game blackjack",
+    "    game tron",
     "",
   ],
   theme: [
@@ -711,7 +719,7 @@ export function Terminal() {
 
     // Populate games
     const gamesDir = fs.createDir("/home/zachary/games")
-    const games = ["number", "wordle", "trivia", "blackjack", "rps"]
+    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron"]
     games.forEach(g => {
       if (gamesDir.children) {
         gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
@@ -1603,6 +1611,11 @@ export function Terminal() {
       if (gameType === "trivia") return startTriviaGame()
       if (gameType === "blackjack") return startBlackjackGame()
       if (gameType === "rps") return startRPSGame()
+      if (gameType === "tron") {
+        setGameState({ active: true, type: "tron" })
+        return [] // No text output, UI takes over
+      }
+
 
       return `Unknown game: ${gameType}`
     },
@@ -1784,177 +1797,187 @@ export function Terminal() {
 
   return (
     <div
-      className="h-full w-full bg-background p-4 md:p-6 font-mono text-sm md:text-base cursor-text flex flex-col"
+      className="h-full w-full bg-background p-4 md:p-6 font-mono text-sm md:text-base cursor-text flex flex-col relative"
       onClick={() => inputRef.current?.focus()}
     >
-      <div ref={terminalRef} className="flex-1 overflow-y-auto">
-        {history.map((line, i) => (
-          <div
-            key={i}
-            className={`whitespace-pre-wrap break-words break-all ${line.type === "input"
-              ? "text-primary"
-              : line.type === "error"
-                ? "text-destructive"
-                : line.type === "success"
-                  ? "text-accent"
-                  : line.type === "link"
-                    ? "text-foreground"
-                    : "text-foreground"
-              }`}
-          >
-            {line.type === "input" ? (
-              highlightInput(line.content)
-            ) : line.type === "link" && line.href ? (
-              <a
-                href={line.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary hover:underline transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {line.content}
-              </a>
-            ) : line.type === "wordle" ? (
-              <span className="font-mono tracking-widest">
-                {line.content.split(",").map((pair, idx) => {
-                  const [mark, letter] = pair.split(":")
-                  const colorClass = mark === "X"
-                    ? "text-green-400"
-                    : mark === "?"
-                      ? "text-yellow-400"
-                      : "text-muted-foreground"
-                  return (
-                    <span key={idx} className={`${colorClass} font-bold`}>
-                      {letter}
-                    </span>
-                  )
-                })}
-              </span>
-            ) : (
-              highlightLine(line.content)
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
-        <div className="flex-1 relative">
-          {/* Highlighted overlay */}
-          <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
-            {(() => {
-              if (!input) return null
-
-              const validCommands = [
-                "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
-                "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
-                "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
-              ]
-
-              // Tokenize the input
-              const tokens: { type: string; value: string }[] = []
-              let remaining = input
-              let isFirstToken = true
-
-              while (remaining.length > 0) {
-                // Match leading whitespace
-                const wsMatch = remaining.match(/^(\s+)/)
-                if (wsMatch) {
-                  tokens.push({ type: "space", value: wsMatch[1] })
-                  remaining = remaining.slice(wsMatch[1].length)
-                  continue
-                }
-
-                // Match quoted strings
-                const quoteMatch = remaining.match(/^(["'])([^"']*)(["'])?/)
-                if (quoteMatch) {
-                  tokens.push({ type: "string", value: quoteMatch[0] })
-                  remaining = remaining.slice(quoteMatch[0].length)
-                  isFirstToken = false
-                  continue
-                }
-
-                // Match flags (--flag or -f)
-                const flagMatch = remaining.match(/^(--?\w+)/)
-                if (flagMatch && !isFirstToken) {
-                  tokens.push({ type: "flag", value: flagMatch[1] })
-                  remaining = remaining.slice(flagMatch[1].length)
-                  continue
-                }
-
-                // Match numbers
-                const numMatch = remaining.match(/^(\d+)(?=\s|$)/)
-                if (numMatch && !isFirstToken) {
-                  tokens.push({ type: "number", value: numMatch[1] })
-                  remaining = remaining.slice(numMatch[1].length)
-                  continue
-                }
-
-                // Match paths (contains / or starts with ~ or .)
-                const pathMatch = remaining.match(/^([~.]?[\w\-./]+)/)
-                if (pathMatch && !isFirstToken && (pathMatch[1].includes("/") || pathMatch[1].startsWith("~") || pathMatch[1].startsWith("."))) {
-                  tokens.push({ type: "path", value: pathMatch[1] })
-                  remaining = remaining.slice(pathMatch[1].length)
-                  continue
-                }
-
-                // Match word (command or argument)
-                const wordMatch = remaining.match(/^(\S+)/)
-                if (wordMatch) {
-                  if (isFirstToken) {
-                    const isValid = validCommands.includes(wordMatch[1].toLowerCase())
-                    tokens.push({ type: isValid ? "command" : "invalid", value: wordMatch[1] })
-                    isFirstToken = false
-                  } else {
-                    tokens.push({ type: "argument", value: wordMatch[1] })
-                  }
-                  remaining = remaining.slice(wordMatch[1].length)
-                  continue
-                }
-
-                // Fallback: single character
-                tokens.push({ type: "text", value: remaining[0] })
-                remaining = remaining.slice(1)
-              }
-
-              return tokens.map((token, i) => {
-                switch (token.type) {
-                  case "command":
-                    return <span key={i} className="text-accent font-semibold">{token.value}</span>
-                  case "invalid":
-                    return <span key={i} className="text-destructive">{token.value}</span>
-                  case "path":
-                    return <span key={i} className="text-primary">{token.value}</span>
-                  case "string":
-                    return <span key={i} className="text-yellow-400">{token.value}</span>
-                  case "flag":
-                    return <span key={i} className="text-purple-400">{token.value}</span>
-                  case "number":
-                    return <span key={i} className="text-orange-400">{token.value}</span>
-                  case "argument":
-                    return <span key={i} className="text-muted-foreground">{token.value}</span>
-                  default:
-                    return <span key={i}>{token.value}</span>
-                }
-              })
-            })()}
-          </div>
-          {/* Actual input (transparent text) */}
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full bg-transparent outline-none text-transparent caret-foreground text-base md:text-sm relative z-10"
-            autoFocus
-            spellCheck={false}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-          />
+      {gameState.type === "tron" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <TronGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
-      </div>
+      ) : (
+        <>
+
+          <div ref={terminalRef} className="flex-1 overflow-y-auto">
+            {history.map((line, i) => (
+              <div
+                key={i}
+                className={`whitespace-pre-wrap break-words break-all ${line.type === "input"
+                  ? "text-primary"
+                  : line.type === "error"
+                    ? "text-destructive"
+                    : line.type === "success"
+                      ? "text-accent"
+                      : line.type === "link"
+                        ? "text-foreground"
+                        : "text-foreground"
+                  }`}
+              >
+                {line.type === "input" ? (
+                  highlightInput(line.content)
+                ) : line.type === "link" && line.href ? (
+                  <a
+                    href={line.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary hover:underline transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {line.content}
+                  </a>
+                ) : line.type === "wordle" ? (
+                  <span className="font-mono tracking-widest">
+                    {line.content.split(",").map((pair, idx) => {
+                      const [mark, letter] = pair.split(":")
+                      const colorClass = mark === "X"
+                        ? "text-green-400"
+                        : mark === "?"
+                          ? "text-yellow-400"
+                          : "text-muted-foreground"
+                      return (
+                        <span key={idx} className={`${colorClass} font-bold`}>
+                          {letter}
+                        </span>
+                      )
+                    })}
+                  </span>
+                ) : (
+                  highlightLine(line.content)
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
+            <div className="flex-1 relative">
+              {/* Highlighted overlay */}
+              <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
+                {(() => {
+                  if (!input) return null
+
+                  const validCommands = [
+                    "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
+                    "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
+                    "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
+                  ]
+
+                  // Tokenize the input
+                  const tokens: { type: string; value: string }[] = []
+                  let remaining = input
+                  let isFirstToken = true
+
+                  while (remaining.length > 0) {
+                    // Match leading whitespace
+                    const wsMatch = remaining.match(/^(\s+)/)
+                    if (wsMatch) {
+                      tokens.push({ type: "space", value: wsMatch[1] })
+                      remaining = remaining.slice(wsMatch[1].length)
+                      continue
+                    }
+
+                    // Match quoted strings
+                    const quoteMatch = remaining.match(/^(["'])([^"']*)(["'])?/)
+                    if (quoteMatch) {
+                      tokens.push({ type: "string", value: quoteMatch[0] })
+                      remaining = remaining.slice(quoteMatch[0].length)
+                      isFirstToken = false
+                      continue
+                    }
+
+                    // Match flags (--flag or -f)
+                    const flagMatch = remaining.match(/^(--?\w+)/)
+                    if (flagMatch && !isFirstToken) {
+                      tokens.push({ type: "flag", value: flagMatch[1] })
+                      remaining = remaining.slice(flagMatch[1].length)
+                      continue
+                    }
+
+                    // Match numbers
+                    const numMatch = remaining.match(/^(\d+)(?=\s|$)/)
+                    if (numMatch && !isFirstToken) {
+                      tokens.push({ type: "number", value: numMatch[1] })
+                      remaining = remaining.slice(numMatch[1].length)
+                      continue
+                    }
+
+                    // Match paths (contains / or starts with ~ or .)
+                    const pathMatch = remaining.match(/^([~.]?[\w\-./]+)/)
+                    if (pathMatch && !isFirstToken && (pathMatch[1].includes("/") || pathMatch[1].startsWith("~") || pathMatch[1].startsWith("."))) {
+                      tokens.push({ type: "path", value: pathMatch[1] })
+                      remaining = remaining.slice(pathMatch[1].length)
+                      continue
+                    }
+
+                    // Match word (command or argument)
+                    const wordMatch = remaining.match(/^(\S+)/)
+                    if (wordMatch) {
+                      if (isFirstToken) {
+                        const isValid = validCommands.includes(wordMatch[1].toLowerCase())
+                        tokens.push({ type: isValid ? "command" : "invalid", value: wordMatch[1] })
+                        isFirstToken = false
+                      } else {
+                        tokens.push({ type: "argument", value: wordMatch[1] })
+                      }
+                      remaining = remaining.slice(wordMatch[1].length)
+                      continue
+                    }
+
+                    // Fallback: single character
+                    tokens.push({ type: "text", value: remaining[0] })
+                    remaining = remaining.slice(1)
+                  }
+
+                  return tokens.map((token, i) => {
+                    switch (token.type) {
+                      case "command":
+                        return <span key={i} className="text-accent font-semibold">{token.value}</span>
+                      case "invalid":
+                        return <span key={i} className="text-destructive">{token.value}</span>
+                      case "path":
+                        return <span key={i} className="text-primary">{token.value}</span>
+                      case "string":
+                        return <span key={i} className="text-yellow-400">{token.value}</span>
+                      case "flag":
+                        return <span key={i} className="text-purple-400">{token.value}</span>
+                      case "number":
+                        return <span key={i} className="text-orange-400">{token.value}</span>
+                      case "argument":
+                        return <span key={i} className="text-muted-foreground">{token.value}</span>
+                      default:
+                        return <span key={i}>{token.value}</span>
+                    }
+                  })
+                })()}
+              </div>
+              {/* Actual input (transparent text) */}
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full bg-transparent outline-none text-transparent caret-foreground text-base md:text-sm relative z-10"
+                autoFocus
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
+
