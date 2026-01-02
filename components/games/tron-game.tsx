@@ -70,24 +70,46 @@ export function TronGame({ onExit }: TronGameProps) {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            switch (e.key) {
-                case "ArrowUp":
-                    if (playerDir.current !== "DOWN") playerNextDir.current = "UP"
-                    break
-                case "ArrowDown":
-                    if (playerDir.current !== "UP") playerNextDir.current = "DOWN"
-                    break
-                case "ArrowLeft":
-                    if (playerDir.current !== "RIGHT") playerNextDir.current = "LEFT"
-                    break
-                case "ArrowRight":
-                    if (playerDir.current !== "LEFT") playerNextDir.current = "RIGHT"
-                    break
+            // Menu/Game Over: Enter or Space to start/restart
+            if (e.key === "Enter" || e.key === " ") {
+                if (gameState === "menu") {
+                    e.preventDefault()
+                    startGame(false)
+                } else if (gameState === "gameover") {
+                    e.preventDefault()
+                    // If player won, advance to next level; otherwise restart
+                    startGame(winner === "player")
+                }
+                return
+            }
+
+            // Escape to exit
+            if (e.key === "Escape") {
+                onExit()
+                return
+            }
+
+            // Arrow keys for movement (only during gameplay)
+            if (gameState === "playing") {
+                switch (e.key) {
+                    case "ArrowUp":
+                        if (playerDir.current !== "DOWN") playerNextDir.current = "UP"
+                        break
+                    case "ArrowDown":
+                        if (playerDir.current !== "UP") playerNextDir.current = "DOWN"
+                        break
+                    case "ArrowLeft":
+                        if (playerDir.current !== "RIGHT") playerNextDir.current = "LEFT"
+                        break
+                    case "ArrowRight":
+                        if (playerDir.current !== "LEFT") playerNextDir.current = "RIGHT"
+                        break
+                }
             }
         }
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [])
+    }, [gameState, winner, startGame, onExit])
 
     // AI Logic - Flood Fill Heuristic
     const countReachable = (startPos: Point, trails: Set<string>, w: number, h: number, maxDepth: number = 50): number => {
@@ -493,12 +515,10 @@ export function TronGame({ onExit }: TronGameProps) {
                             <Monitor className="w-5 h-5" />
                             START GAME
                         </button>
-                        <button
-                            onClick={onExit}
-                            className="px-6 py-2 text-slate-500 hover:text-white transition-colors text-sm"
-                        >
-                            EXIT
-                        </button>
+                        <div className="flex gap-4 text-slate-600 text-xs font-mono">
+                            <span>[ENTER] Start</span>
+                            <span>[ESC] Exit</span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -529,23 +549,33 @@ export function TronGame({ onExit }: TronGameProps) {
                                         EXIT
                                     </button>
                                 </div>
+                                <div className="flex gap-4 text-slate-600 text-xs font-mono mt-2">
+                                    <span>[ENTER] Next Level</span>
+                                    <span>[ESC] Exit</span>
+                                </div>
                             </div>
                         ) : (
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => startGame(false)}
-                                    className="flex items-center gap-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded transition-colors"
-                                >
-                                    <RefreshCw className="w-4 h-4" />
-                                    RETRY
-                                </button>
-                                <button
-                                    onClick={onExit}
-                                    className="flex items-center gap-2 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded transition-colors"
-                                >
-                                    <X className="w-4 h-4" />
-                                    EXIT
-                                </button>
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => startGame(false)}
+                                        className="flex items-center gap-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded transition-colors"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                        RETRY
+                                    </button>
+                                    <button
+                                        onClick={onExit}
+                                        className="flex items-center gap-2 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded transition-colors"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        EXIT
+                                    </button>
+                                </div>
+                                <div className="flex gap-4 text-slate-600 text-xs font-mono">
+                                    <span>[ENTER] Retry</span>
+                                    <span>[ESC] Exit</span>
+                                </div>
                             </div>
                         )}
                     </div>
