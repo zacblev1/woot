@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Types, VFS context, Vitest setup, characterization tests
 - [x] **Phase 2: Core Hooks** - Extract state management into reusable hooks
-- [ ] **Phase 3: Games** - Extract 6 game modules with proper state isolation
+- [x] **Phase 3: Games** - Extract 6 game modules with proper state isolation
 - [ ] **Phase 4: Commands** - CommandRegistry and CommandExecutor architecture
 - [ ] **Phase 5: UI Components** - Display components with memoization
 - [ ] **Phase 6: Cleanup** - Remove dead code, verify final architecture
@@ -70,11 +70,11 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Game types, Number game, RPS game extraction
-- [ ] 03-02-PLAN.md — Wordle game extraction with word list
-- [ ] 03-03-PLAN.md — Trivia and Blackjack game extraction
-- [ ] 03-04-PLAN.md — Tron Set-based collision optimization
-- [ ] 03-05-PLAN.md — GameController and integration tests
+- [x] 03-01-PLAN.md — Game types, Number game, RPS game extraction
+- [x] 03-02-PLAN.md — Wordle game extraction with word list
+- [x] 03-03-PLAN.md — Trivia and Blackjack game extraction
+- [x] 03-04-PLAN.md — Tron Set-based collision optimization
+- [x] 03-05-PLAN.md — GameController and integration tests
 
 ### Phase 4: Commands
 **Goal**: Create a registry-based command system that is unit testable without UI
@@ -130,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-01-22 |
 | 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
-| 3. Games | 0/5 | Not started | - |
+| 3. Games | 5/5 | Complete | 2026-01-22 |
 | 4. Commands | 0/? | Not started | - |
 | 5. UI Components | 0/? | Not started | - |
 | 6. Cleanup | 0/? | Not started | - |
