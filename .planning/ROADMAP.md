@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Types, VFS context, Vitest setup, characterization tests
 - [x] **Phase 2: Core Hooks** - Extract state management into reusable hooks
 - [x] **Phase 3: Games** - Extract 6 game modules with proper state isolation
-- [ ] **Phase 4: Commands** - CommandRegistry and CommandExecutor architecture
+- [x] **Phase 4: Commands** - CommandRegistry and CommandExecutor architecture
 - [ ] **Phase 5: UI Components** - Display components with memoization
 - [ ] **Phase 6: Cleanup** - Remove dead code, verify final architecture
 
@@ -89,13 +89,13 @@ Plans:
 **Plans:** 7 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Command types, registry, and executor foundation
-- [ ] 04-02-PLAN.md — Navigation commands (ls, cd, pwd, cat, view)
-- [ ] 04-03-PLAN.md — Filesystem commands (mkdir, touch, rm)
-- [ ] 04-04-PLAN.md — Collection commands (search, genre, format, type)
-- [ ] 04-05-PLAN.md — Info and style commands (about, contact, projects, theme, font, neofetch)
-- [ ] 04-06-PLAN.md — System commands and man pages (help, man, clear, echo, exit, sudo)
-- [ ] 04-07-PLAN.md — Game command, tab completion, and barrel exports
+- [x] 04-01-PLAN.md — Command types, registry, and executor foundation
+- [x] 04-02-PLAN.md — Navigation commands (ls, cd, pwd, cat, view)
+- [x] 04-03-PLAN.md — Filesystem commands (mkdir, touch, rm)
+- [x] 04-04-PLAN.md — Collection commands (search, genre, format, type)
+- [x] 04-05-PLAN.md — Info and style commands (about, contact, projects, theme, font, neofetch)
+- [x] 04-06-PLAN.md — System commands and man pages (help, man, clear, echo, exit, sudo)
+- [x] 04-07-PLAN.md — Game command, tab completion, and barrel exports
 
 ### Phase 5: UI Components
 **Goal**: Extract display components with proper memoization for performance
@@ -137,6 +137,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 4/4 | Complete | 2026-01-22 |
 | 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
 | 3. Games | 5/5 | Complete | 2026-01-22 |
-| 4. Commands | 0/7 | Not started | - |
+| 4. Commands | 7/7 | Complete | 2026-01-23 |
 | 5. UI Components | 0/? | Not started | - |
 | 6. Cleanup | 0/? | Not started | - |
