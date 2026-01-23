@@ -35,7 +35,7 @@ export function TronGame({ onExit }: TronGameProps) {
     const playerTrailSet = useRef<Set<string>>(new Set())
     const cpuTrailSet = useRef<Set<string>>(new Set())
 
-    const gameLoopRef = useRef<number>()
+    const gameLoopRef = useRef<number | undefined>(undefined)
     const gridWidth = useRef(100) // Cells
     const gridHeight = useRef(60) // Cells
     const speedRef = useRef(INITIAL_SPEED)
