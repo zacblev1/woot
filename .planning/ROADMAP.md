@@ -12,7 +12,7 @@ This roadmap transforms a 2000-line monolithic terminal component into a modular
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Types, VFS context, Vitest setup, characterization tests
+- [x] **Phase 1: Foundation** - Types, VFS context, Vitest setup, characterization tests
 - [ ] **Phase 2: Core Hooks** - Extract state management into reusable hooks
 - [ ] **Phase 3: Games** - Extract 6 game modules with proper state isolation
 - [ ] **Phase 4: Commands** - CommandRegistry and CommandExecutor architecture
@@ -34,10 +34,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Vitest setup and configuration (REQ-03)
-- [ ] 01-02-PLAN.md — TypeScript types with discriminated unions (REQ-01)
-- [ ] 01-03-PLAN.md — VFSProvider context (REQ-02)
-- [ ] 01-04-PLAN.md — Characterization tests (REQ-20)
+- [x] 01-01-PLAN.md — Vitest setup and configuration (REQ-03)
+- [x] 01-02-PLAN.md — TypeScript types with discriminated unions (REQ-01)
+- [x] 01-03-PLAN.md — VFSProvider context (REQ-02)
+- [x] 01-04-PLAN.md — Characterization tests (REQ-20)
 
 ### Phase 2: Core Hooks
 **Goal**: Extract terminal state management into encapsulated, reusable hooks
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/4 | Planned | - |
+| 1. Foundation | 4/4 | ✓ Complete | 2026-01-22 |
 | 2. Core Hooks | 0/? | Not started | - |
 | 3. Games | 0/? | Not started | - |
 | 4. Commands | 0/? | Not started | - |
