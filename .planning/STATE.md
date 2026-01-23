@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** A maintainable, testable, performant terminal codebase that preserves all existing functionality while eliminating technical debt.
-**Current focus:** Phase 3 - Games
+**Current focus:** Phase 3 - Games (Complete)
 
 ## Current Position
 
-Phase: 3 of 6 (Games)
-Plan: 4 of 5 in current phase (03-01, 03-02, 03-03, 03-04 completed)
-Status: In progress
-Last activity: 2026-01-23 - Completed 03-03-PLAN.md (Trivia and Blackjack Games)
+Phase: 3 of 6 (Games) - COMPLETE
+Plan: 5 of 5 in current phase (03-01, 03-02, 03-03, 03-04, 03-05 completed)
+Status: Phase complete
+Last activity: 2026-01-23 - Completed 03-05-PLAN.md (GameController and Barrel Exports)
 
-Progress: [██████████████----] 80%
+Progress: [█████████████████-] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 3.3 min
-- Total execution time: 40 min
+- Total execution time: 43 min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████████████----] 80%
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
-| 03-games | 4 | 13 min | 3.3 min |
+| 03-games | 5 | 16 min | 3.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (2min), 03-01 (3min), 03-02 (4min), 03-03 (4min)
+- Last 5 plans: 03-05 (3min), 03-04 (2min), 03-03 (4min), 03-02 (4min), 03-01 (3min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - [03-03]: Trivia uses simple q/a format, not TriviaGameData from types
 - [03-03]: Blackjack Card has display string for terminal output
 - [03-03]: Ace reduction iterates while bust, matching original terminal.tsx
+- [03-05]: Use forwardRef + useImperativeHandle for imperative handleInput method
+- [03-05]: Namespace exports (numberGame, wordleGame) over individual function exports
+- [03-05]: Cast through unknown for Trivia/Blackjack data type mismatches
 
 ### Phase 1 Deliverables
 
@@ -93,7 +96,7 @@ Recent decisions affecting current work:
 - Hook testing patterns established (renderHook + act)
 - 128 tests passing across hooks and contexts
 
-### Phase 3 Deliverables (In Progress)
+### Phase 3 Deliverables (Complete)
 
 - GameResult interface for all game modules
 - Number game pure function module (handleInput, createInitialData, getStartMessage) - 38 tests
@@ -102,7 +105,10 @@ Recent decisions affecting current work:
 - Trivia game pure function module with questions data file - 19 tests
 - Blackjack game pure function module with ace reduction - 35 tests
 - Tron collision detection optimized to O(1) with Set.has() - 7 tests
-- 179 game tests passing
+- GameController component with forwardRef + useImperativeHandle - 11 tests
+- Barrel exports for clean API (import { GameController, numberGame } from '@/components/games')
+- Integration tests for full game flows - 35 tests
+- **225 game tests passing**
 
 ### Pending Todos
 
@@ -115,6 +121,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 03-03-PLAN.md (Trivia and Blackjack Games)
+Stopped at: Completed 03-05-PLAN.md (GameController and Barrel Exports)
 Resume file: None
-Next: 03-05-PLAN.md (GameController)
+Next: Phase 4 - UI Extraction (04-01-PLAN.md)
