@@ -36,6 +36,7 @@ export const VALID_COMMANDS = [
   'format',
   'type',
   'game',
+  'suggest',
   'theme',
   'font',
   'neofetch',

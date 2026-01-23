@@ -65,8 +65,13 @@ export function tokenizeInput(input: string, validCommands: string[] = [...VALID
     const wordMatch = remaining.match(/^(\S+)/)
     if (wordMatch) {
       if (isFirstToken) {
-        const isValid = validCommands.includes(wordMatch[1].toLowerCase())
-        tokens.push({ type: isValid ? 'command' : 'invalid', value: wordMatch[1] })
+        // If no valid commands provided, treat all input as plain text
+        if (validCommands.length === 0) {
+          tokens.push({ type: 'text', value: wordMatch[1] })
+        } else {
+          const isValid = validCommands.includes(wordMatch[1].toLowerCase())
+          tokens.push({ type: isValid ? 'command' : 'invalid', value: wordMatch[1] })
+        }
         isFirstToken = false
       } else {
         tokens.push({ type: 'argument', value: wordMatch[1] })

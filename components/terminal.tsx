@@ -16,7 +16,7 @@ const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod =
 
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -333,6 +333,27 @@ const manPages: Record<string, string[]> = {
     "EXAMPLES",
     "    game wordle",
     "    game tron",
+    "",
+  ],
+  suggest: [
+    "",
+    "NAME",
+    "    suggest - submit a game suggestion",
+    "",
+    "SYNOPSIS",
+    "    suggest",
+    "",
+    "DESCRIPTION",
+    "    Opens an interactive prompt to submit a game idea or",
+    "    suggestion. Your suggestion will be sent via email.",
+    "    Type 'cancel' to exit without submitting.",
+    "",
+    "EXAMPLES",
+    "    suggest",
+    "    > A multiplayer snake game",
+    "",
+    "SEE ALSO",
+    "    game",
     "",
   ],
   theme: [
@@ -1125,6 +1146,49 @@ export function Terminal() {
     ]
   }
 
+  const startSuggestCommand = () => {
+    setGameState({ active: true, type: "suggest" })
+    return [
+      "",
+      "GAME SUGGESTION BOX",
+      "",
+      "Type your game idea or suggestion, then press Enter.",
+      "Type 'cancel' to exit.",
+      "",
+    ]
+  }
+
+  const handleSuggestCommand = async (input: string): Promise<string | string[]> => {
+    if (input.toLowerCase() === "cancel") {
+      setGameState({ active: false, type: null })
+      return "Suggestion cancelled."
+    }
+
+    if (input.trim().length < 5) {
+      return "Please enter a longer suggestion (at least 5 characters)."
+    }
+
+    // Submit to Formspree
+    try {
+      const response = await fetch("https://formspree.io/f/xrepkped", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suggestion: input }),
+      })
+
+      setGameState({ active: false, type: null })
+
+      if (response.ok) {
+        return ["", "Thanks! Your suggestion has been sent.", ""]
+      } else {
+        return "Oops, something went wrong. Try again later."
+      }
+    } catch {
+      setGameState({ active: false, type: null })
+      return "Network error. Try again later."
+    }
+  }
+
   const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string }> = {
     help: () => {
       return [
@@ -1136,7 +1200,7 @@ export function Terminal() {
         "  Navigation     ls, cd, pwd, cat, view",
         "  Collections    search, genre, format, type",
         "  Files          mkdir, touch, rm",
-        "  Games          game <type>",
+        "  Games          game <type>, suggest",
         "  Style          theme, font, neofetch",
         "  Info           about, contact, projects, whoami, date",
         "  Other          clear, echo, exit",
@@ -1170,6 +1234,57 @@ export function Terminal() {
       const result = vfs.ls(path)
 
       if (result.length === 0) return ""
+
+      // Check if in collection directory - show detailed info
+      const pwd = vfs.getPwd()
+
+      if (!path && pwd === '/home/zachary/books') {
+        const lines: (string | { type: string; content: string })[] = [""]
+        result.forEach(filename => {
+          const node = vfs.resolve(filename)
+          if (node && node.type === 'file' && node.content) {
+            const c = node.content as { title?: string; author?: string }
+            lines.push({ type: 'success', content: c.title || filename })
+            if (c.author) lines.push({ type: 'output', content: '    by ' + c.author })
+          } else {
+            lines.push(filename)
+          }
+        })
+        lines.push("")
+        return lines
+      }
+
+      if (!path && pwd === '/home/zachary/vinyl') {
+        const lines: (string | { type: string; content: string })[] = [""]
+        result.forEach(filename => {
+          const node = vfs.resolve(filename)
+          if (node && node.type === 'file' && node.content) {
+            const c = node.content as { title?: string; artist?: string }
+            lines.push({ type: 'success', content: c.title || filename })
+            if (c.artist) lines.push({ type: 'output', content: '    by ' + c.artist })
+          } else {
+            lines.push(filename)
+          }
+        })
+        lines.push("")
+        return lines
+      }
+
+      if (!path && pwd === '/home/zachary/hardware') {
+        const lines: (string | { type: string; content: string })[] = [""]
+        result.forEach(filename => {
+          const node = vfs.resolve(filename)
+          if (node && node.type === 'file' && node.content) {
+            const c = node.content as { name?: string; type?: string; status?: string }
+            lines.push({ type: 'success', content: c.name || filename })
+            if (c.type) lines.push({ type: 'output', content: '    ' + c.type + (c.status ? ' • ' + c.status : '') })
+          } else {
+            lines.push(filename)
+          }
+        })
+        lines.push("")
+        return lines
+      }
 
       return ["", ...result, ""]
     },
@@ -1509,6 +1624,7 @@ export function Terminal() {
     },
     sudo: () => "Permission denied",
     exit: () => "Use Cmd+W or Ctrl+W to close",
+    suggest: () => startSuggestCommand(),
   }
 
   const handleCommand = (cmd: string) => {
@@ -1518,6 +1634,18 @@ export function Terminal() {
     setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${trimmedCmd}` }])
 
     if (gameState.active) {
+      // Handle async suggest command separately
+      if (gameState.type === "suggest") {
+        handleSuggestCommand(trimmedCmd).then(result => {
+          const lines = Array.isArray(result) ? result : [result]
+          lines.forEach(line => {
+            setHistory(prev => [...prev, { type: "output", content: line }])
+          })
+        })
+        setInput("")
+        return
+      }
+
       let result: string | (string | { wordle: string })[]
       if (gameState.type === "number") {
         result = handleNumberGame(trimmedCmd)
@@ -1560,6 +1688,12 @@ export function Terminal() {
             setHistory((prev) => [
               ...prev,
               { type: "link", content: item.text, href: item.href },
+            ])
+          } else if (typeof item === "object" && "type" in item && "content" in item) {
+            // Handle TerminalLine objects from commands
+            setHistory((prev) => [
+              ...prev,
+              { type: item.type, content: item.content },
             ])
           } else {
             const line = typeof item === "string" ? item : String(item)
@@ -1659,7 +1793,7 @@ export function Terminal() {
             onClear={handleClear}
             onInterrupt={handleInterrupt}
             prompt={prompt}
-            validCommands={[...VALID_COMMANDS]}
+            validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
           />
         </>
       )}
