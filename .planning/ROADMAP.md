@@ -67,10 +67,14 @@ Plans:
   3. Games return results via callback, do not mutate parent state directly
   4. Tron collision detection uses Set for O(1) lookup (verified by test)
   5. Integration tests verify full game flows: start game, make moves, end game
-**Plans**: TBD
+**Plans:** 5 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Game types, Number game, RPS game extraction
+- [ ] 03-02-PLAN.md — Wordle game extraction with word list
+- [ ] 03-03-PLAN.md — Trivia and Blackjack game extraction
+- [ ] 03-04-PLAN.md — Tron Set-based collision optimization
+- [ ] 03-05-PLAN.md — GameController and integration tests
 
 ### Phase 4: Commands
 **Goal**: Create a registry-based command system that is unit testable without UI
@@ -126,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-01-22 |
 | 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
-| 3. Games | 0/? | Not started | - |
+| 3. Games | 0/5 | Not started | - |
 | 4. Commands | 0/? | Not started | - |
 | 5. UI Components | 0/? | Not started | - |
 | 6. Cleanup | 0/? | Not started | - |
