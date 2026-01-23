@@ -19,20 +19,20 @@ Progress: [████--------------] 29%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 4.2 min
-- Total execution time: 21 min
+- Total plans completed: 6
+- Average duration: 3.8 min
+- Total execution time: 23 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 18 min | 4.5 min |
-| 02-core-hooks | 1 | 3 min | 3.0 min |
+| 02-core-hooks | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5min), 01-03 (3min), 01-04 (5min), 02-01 (3min)
-- Trend: Stable/Improving
+- Last 5 plans: 01-03 (3min), 01-04 (5min), 02-01 (3min), 02-03 (2min)
+- Trend: Improving
 
 *Updated after each plan completion*
 
@@ -58,6 +58,7 @@ Recent decisions affecting current work:
 - [02-01]: historyIndex -1 means "not navigating" (at present)
 - [02-01]: navigateUp starts at most recent (length-1) not oldest
 - [02-01]: Skip empty/whitespace commands in add()
+- [02-03]: applyTheme/applyFont called in both mount useEffect and setters
 
 ### Phase 1 Deliverables
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 ### Phase 2 Deliverables (In Progress)
 
 - useTerminalHistory hook with 100% coverage (lib/hooks/)
+- useTheme hook with 100% coverage (lib/hooks/)
+- useFont hook with 100% coverage (lib/hooks/)
+- Theme/font data extracted to lib/data/
 - Hook testing patterns established (renderHook + act)
 
 ### Pending Todos
@@ -83,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-22
-Stopped at: Completed 02-01-PLAN.md (useTerminalHistory)
+Stopped at: Completed 02-03-PLAN.md (useTheme/useFont)
 Resume file: None
