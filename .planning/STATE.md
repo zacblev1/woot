@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 2 of 6 (Core Hooks)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-22 - Completed Phase 1: Foundation
+Plan: 3 of 5 in current phase
+Status: In progress
+Last activity: 2026-01-22 - Completed 02-03-PLAN.md (useTheme/useFont)
 
-Progress: [██----------------] 17%
+Progress: [████--------------] 29%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 4.5 min
-- Total execution time: 18 min
+- Total plans completed: 5
+- Average duration: 4.2 min
+- Total execution time: 21 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 18 min | 4.5 min |
+| 02-core-hooks | 1 | 3 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5min), 01-02 (5min), 01-03 (3min), 01-04 (5min)
-- Trend: Stable
+- Last 5 plans: 01-02 (5min), 01-03 (3min), 01-04 (5min), 02-01 (3min)
+- Trend: Stable/Improving
 
 *Updated after each plan completion*
 
@@ -54,6 +55,9 @@ Recent decisions affecting current work:
 - [01-03]: Persist to localStorage only on mutations (mkdir, touch, rm)
 - [01-04]: Characterization tests document actual behavior, not expected
 - [01-04]: mkdir requires parent to exist (nested path creation is manual)
+- [02-01]: historyIndex -1 means "not navigating" (at present)
+- [02-01]: navigateUp starts at most recent (length-1) not oldest
+- [02-01]: Skip empty/whitespace commands in add()
 
 ### Phase 1 Deliverables
 
@@ -62,6 +66,11 @@ Recent decisions affecting current work:
 - VFSProvider context (lib/context/)
 - 110 characterization tests passing
 - VFS: 91.6% coverage
+
+### Phase 2 Deliverables (In Progress)
+
+- useTerminalHistory hook with 100% coverage (lib/hooks/)
+- Hook testing patterns established (renderHook + act)
 
 ### Pending Todos
 
@@ -74,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-22
-Stopped at: Completed Phase 1: Foundation
+Stopped at: Completed 02-01-PLAN.md (useTerminalHistory)
 Resume file: None
