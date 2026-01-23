@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 2 of 6 (Core Hooks)
-Plan: 3 of 5 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-22 - Completed 02-03-PLAN.md (useTheme/useFont)
+Last activity: 2026-01-22 - Completed 02-02-PLAN.md (useGameState)
 
-Progress: [████--------------] 29%
+Progress: [█████-------------] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3.8 min
-- Total execution time: 23 min
+- Total plans completed: 7
+- Average duration: 3.6 min
+- Total execution time: 25 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 18 min | 4.5 min |
-| 02-core-hooks | 2 | 5 min | 2.5 min |
+| 02-core-hooks | 3 | 7 min | 2.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (3min), 01-04 (5min), 02-01 (3min), 02-03 (2min)
+- Last 5 plans: 01-04 (5min), 02-01 (3min), 02-03 (2min), 02-02 (2min)
 - Trend: Improving
 
 *Updated after each plan completion*
@@ -58,6 +58,7 @@ Recent decisions affecting current work:
 - [02-01]: historyIndex -1 means "not navigating" (at present)
 - [02-01]: navigateUp starts at most recent (length-1) not oldest
 - [02-01]: Skip empty/whitespace commands in add()
+- [02-02]: useState with discriminated union over useReducer for game state
 - [02-03]: applyTheme/applyFont called in both mount useEffect and setters
 
 ### Phase 1 Deliverables
@@ -71,6 +72,7 @@ Recent decisions affecting current work:
 ### Phase 2 Deliverables (In Progress)
 
 - useTerminalHistory hook with 100% coverage (lib/hooks/)
+- useGameState hook with 100% coverage (lib/hooks/)
 - useTheme hook with 100% coverage (lib/hooks/)
 - useFont hook with 100% coverage (lib/hooks/)
 - Theme/font data extracted to lib/data/
@@ -87,5 +89,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-22
-Stopped at: Completed 02-03-PLAN.md (useTheme/useFont)
+Stopped at: Completed 02-02-PLAN.md (useGameState)
 Resume file: None
