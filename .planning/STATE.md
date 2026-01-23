@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 5 of 6 (UI Components)
-Plan: 2 of 4 in current phase (05-02 completed)
+Plan: 3 of 4 in current phase (05-03 completed)
 Status: In progress
-Last activity: 2026-01-23 - Completed 05-02-PLAN.md (HistoryDisplay)
+Last activity: 2026-01-23 - Completed 05-03-PLAN.md (InputLine)
 
-Progress: [██████████████████░░] 88% (22/25 plans)
+Progress: [██████████████████░░] 92% (23/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 2.9 min
-- Total execution time: 65 min
+- Total execution time: 68 min
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [██████████████████░░] 88% (22
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
 | 04-commands | 7 | 18 min | 2.6 min |
-| 05-ui-components | 2 | 6 min | 3.0 min |
+| 05-ui-components | 3 | 9 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (2min), 05-01 (4min), 04-07 (3min), 04-04 (4min), 04-06 (3min)
+- Last 5 plans: 05-03 (3min), 05-02 (2min), 05-01 (4min), 04-07 (3min), 04-04 (4min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -97,6 +97,7 @@ Recent decisions affecting current work:
 - [05-01]: Extract VALID_COMMANDS and HEADER_KEYWORDS as const arrays for reuse
 - [05-02]: Use index as key for history lines (acceptable: history is append-only)
 - [05-02]: Memoize entire component to avoid re-renders when input state changes
+- [05-03]: InputLine NOT memoized because value changes on every keystroke
 
 ### Phase 1 Deliverables
 
@@ -157,7 +158,9 @@ Recent decisions affecting current work:
 - SyntaxHighlighter pure functions (components/terminal/SyntaxHighlighter.tsx)
 - Token types and constants (components/terminal/types.ts)
 - HistoryDisplay memoized component (components/terminal/HistoryDisplay.tsx) - 17 tests
+- InputLine component with forwardRef/useImperativeHandle (components/terminal/InputLine.tsx) - 29 tests
 - Barrel exports at components/terminal/index.ts
+- **93 terminal component tests passing**
 
 ### Pending Todos
 
@@ -170,6 +173,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 05-02-PLAN.md (HistoryDisplay)
+Stopped at: Completed 05-03-PLAN.md (InputLine)
 Resume file: None
-Next: 05-03-PLAN.md (InputLine)
+Next: 05-04-PLAN.md (Terminal orchestrator)
