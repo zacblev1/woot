@@ -86,10 +86,16 @@ Plans:
   3. Commands are unit testable by providing mock context
   4. All 20+ terminal commands pass unit tests with expected output
   5. Tab completion works for both commands and paths
-**Plans**: TBD
+**Plans:** 7 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Command types, registry, and executor foundation
+- [ ] 04-02-PLAN.md — Navigation commands (ls, cd, pwd, cat, view)
+- [ ] 04-03-PLAN.md — Filesystem commands (mkdir, touch, rm)
+- [ ] 04-04-PLAN.md — Collection commands (search, genre, format, type)
+- [ ] 04-05-PLAN.md — Info and style commands (about, contact, projects, theme, font, neofetch)
+- [ ] 04-06-PLAN.md — System commands and man pages (help, man, clear, echo, exit, sudo)
+- [ ] 04-07-PLAN.md — Game command, tab completion, and barrel exports
 
 ### Phase 5: UI Components
 **Goal**: Extract display components with proper memoization for performance
@@ -131,6 +137,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 4/4 | Complete | 2026-01-22 |
 | 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
 | 3. Games | 5/5 | Complete | 2026-01-22 |
-| 4. Commands | 0/? | Not started | - |
+| 4. Commands | 0/7 | Not started | - |
 | 5. UI Components | 0/? | Not started | - |
 | 6. Cleanup | 0/? | Not started | - |
