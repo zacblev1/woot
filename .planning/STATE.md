@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 4 of 6 (Commands)
-Plan: 4 of 5 in current phase (04-05 completed)
+Plan: 5 of 7 in current phase (04-06 completed)
 Status: In progress
-Last activity: 2026-01-23 - Completed 04-05-PLAN.md (Info & Style Commands)
+Last activity: 2026-01-23 - Completed 04-06-PLAN.md (System Commands)
 
-Progress: [███████████████████] 96%
+Progress: [███████████████████] 97%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 2.9 min
-- Total execution time: 49 min
+- Total execution time: 52 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████] 96%
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
-| 04-commands | 4 | 8 min | 2.0 min |
+| 04-commands | 5 | 11 min | 2.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-05 (2min), 04-03 (2min), 04-01 (2min), 03-05 (3min), 03-04 (2min)
+- Last 5 plans: 04-06 (3min), 04-05 (2min), 04-03 (2min), 04-02 (2min), 04-01 (2min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -87,6 +87,9 @@ Recent decisions affecting current work:
 - [04-05]: projectsCommand uses context.openUrl to open URLs in new tab
 - [04-05]: theme/font commands use context methods (list, config, set) instead of direct imports
 - [04-05]: neofetchCommand uses context.collections for collection counts
+- [04-06]: man pages extracted as static data, not generated
+- [04-06]: clear adds welcome message after clearing history
+- [04-06]: exit shows keyboard shortcut rather than closing
 
 ### Phase 1 Deliverables
 
@@ -132,7 +135,9 @@ Recent decisions affecting current work:
 - mkdirCommand, touchCommand, rmCommand filesystem commands
 - Info commands: about, contact, projects, whoami, date (lib/commands/commands/info.ts)
 - Style commands: theme, font, neofetch (lib/commands/commands/style.ts)
-- 119 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23)
+- System commands: help, man, clear, echo, exit, sudo (lib/commands/commands/system.ts)
+- Man pages data for 24 commands (lib/commands/man-pages.ts)
+- 140 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23, system: 21)
 
 ### Pending Todos
 
@@ -145,6 +150,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-05-PLAN.md (Info & Style Commands)
+Stopped at: Completed 04-06-PLAN.md (System Commands)
 Resume file: None
-Next: Phase 4 - Commands (04-02-PLAN.md or 04-04-PLAN.md remaining)
+Next: Phase 4 - Commands (04-04-PLAN.md or 04-07-PLAN.md remaining)
