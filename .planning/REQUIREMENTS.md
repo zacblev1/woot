@@ -110,11 +110,11 @@ REQ-16-19 (UI) → REQ-25
 | REQ-01 | Phase 1: Foundation | Complete |
 | REQ-02 | Phase 1: Foundation | Complete |
 | REQ-03 | Phase 1: Foundation | Complete |
-| REQ-04 | Phase 2: Core Hooks | Pending |
-| REQ-05 | Phase 2: Core Hooks | Pending |
-| REQ-06 | Phase 2: Core Hooks | Pending |
-| REQ-07 | Phase 2: Core Hooks | Pending |
-| REQ-08 | Phase 2: Core Hooks | Pending |
+| REQ-04 | Phase 2: Core Hooks | Complete |
+| REQ-05 | Phase 2: Core Hooks | Complete |
+| REQ-06 | Phase 2: Core Hooks | Complete |
+| REQ-07 | Phase 2: Core Hooks | Complete |
+| REQ-08 | Phase 2: Core Hooks | Complete |
 | REQ-09 | Phase 3: Games | Pending |
 | REQ-10 | Phase 3: Games | Pending |
 | REQ-11 | Phase 3: Games | Pending |
@@ -127,7 +127,7 @@ REQ-16-19 (UI) → REQ-25
 | REQ-18 | Phase 5: UI Components | Pending |
 | REQ-19 | Phase 5: UI Components | Pending |
 | REQ-20 | Phase 1: Foundation | Complete |
-| REQ-21 | Phase 2: Core Hooks | Pending |
+| REQ-21 | Phase 2: Core Hooks | Complete |
 | REQ-22 | Phase 4: Commands | Pending |
 | REQ-23 | Phase 3: Games | Pending |
 | REQ-24 | Phase 6: Cleanup | Pending |

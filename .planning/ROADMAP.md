@@ -13,7 +13,7 @@ This roadmap transforms a 2000-line monolithic terminal component into a modular
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Types, VFS context, Vitest setup, characterization tests
-- [ ] **Phase 2: Core Hooks** - Extract state management into reusable hooks
+- [x] **Phase 2: Core Hooks** - Extract state management into reusable hooks
 - [ ] **Phase 3: Games** - Extract 6 game modules with proper state isolation
 - [ ] **Phase 4: Commands** - CommandRegistry and CommandExecutor architecture
 - [ ] **Phase 5: UI Components** - Display components with memoization
@@ -52,10 +52,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — useTerminalHistory hook with navigation (REQ-04)
-- [ ] 02-02-PLAN.md — useGameState hook with state machine (REQ-05)
-- [ ] 02-03-PLAN.md — useTheme and useFont hooks with localStorage (REQ-06, REQ-07)
-- [ ] 02-04-PLAN.md — TerminalProvider context composition (REQ-08)
+- [x] 02-01-PLAN.md — useTerminalHistory hook with navigation (REQ-04)
+- [x] 02-02-PLAN.md — useGameState hook with state machine (REQ-05)
+- [x] 02-03-PLAN.md — useTheme and useFont hooks with localStorage (REQ-06, REQ-07)
+- [x] 02-04-PLAN.md — TerminalProvider context composition (REQ-08)
 
 ### Phase 3: Games
 **Goal**: Extract all 6 games into isolated modules with pure state management
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-01-22 |
-| 2. Core Hooks | 0/4 | Planned | - |
+| 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
 | 3. Games | 0/? | Not started | - |
 | 4. Commands | 0/? | Not started | - |
 | 5. UI Components | 0/? | Not started | - |
