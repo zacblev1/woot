@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 4 of 6 (Commands)
-Plan: 3 of 5 in current phase (04-03 completed)
+Plan: 4 of 5 in current phase (04-05 completed)
 Status: In progress
-Last activity: 2026-01-23 - Completed 04-03-PLAN.md (Filesystem Commands)
+Last activity: 2026-01-23 - Completed 04-05-PLAN.md (Info & Style Commands)
 
-Progress: [███████████████████] 95%
+Progress: [███████████████████] 96%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 2.9 min
-- Total execution time: 47 min
+- Total execution time: 49 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████] 95%
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
-| 04-commands | 3 | 6 min | 2.0 min |
+| 04-commands | 4 | 8 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (2min), 04-01 (2min), 03-05 (3min), 03-04 (2min), 03-03 (4min)
+- Last 5 plans: 04-05 (2min), 04-03 (2min), 04-01 (2min), 03-05 (3min), 03-04 (2min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -83,6 +83,10 @@ Recent decisions affecting current work:
 - [04-02]: ls returns array with blank line padding for non-empty directories
 - [04-02]: cd with no args defaults to ~ (home directory)
 - [04-02]: view formats content based on pwd path matching /books, /vinyl, /hardware
+- [04-05]: contactCommand returns TerminalLine[] with type: 'link' and href for clickable links
+- [04-05]: projectsCommand uses context.openUrl to open URLs in new tab
+- [04-05]: theme/font commands use context methods (list, config, set) instead of direct imports
+- [04-05]: neofetchCommand uses context.collections for collection counts
 
 ### Phase 1 Deliverables
 
@@ -126,7 +130,9 @@ Recent decisions affecting current work:
 - success() and error() helper functions
 - Navigation commands: ls, cd, pwd, cat, view (lib/commands/commands/navigation.ts)
 - mkdirCommand, touchCommand, rmCommand filesystem commands
-- 80 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15)
+- Info commands: about, contact, projects, whoami, date (lib/commands/commands/info.ts)
+- Style commands: theme, font, neofetch (lib/commands/commands/style.ts)
+- 119 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23)
 
 ### Pending Todos
 
@@ -139,6 +145,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-03-PLAN.md (Filesystem Commands)
+Stopped at: Completed 04-05-PLAN.md (Info & Style Commands)
 Resume file: None
-Next: Phase 4 - Commands (04-04-PLAN.md or 04-05-PLAN.md)
+Next: Phase 4 - Commands (04-02-PLAN.md or 04-04-PLAN.md remaining)
