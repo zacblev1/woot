@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** A maintainable, testable, performant terminal codebase that preserves all existing functionality while eliminating technical debt.
-**Current focus:** Phase 3 - Games (Complete)
+**Current focus:** Phase 4 - Commands (In progress)
 
 ## Current Position
 
-Phase: 3 of 6 (Games) - COMPLETE
-Plan: 5 of 5 in current phase (03-01, 03-02, 03-03, 03-04, 03-05 completed)
-Status: Phase complete
-Last activity: 2026-01-23 - Completed 03-05-PLAN.md (GameController and Barrel Exports)
+Phase: 4 of 6 (Commands)
+Plan: 1 of 5 in current phase (04-01 completed)
+Status: In progress
+Last activity: 2026-01-23 - Completed 04-01-PLAN.md (Command Foundation)
 
-Progress: [█████████████████-] 87%
+Progress: [██████████████████-] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 3.3 min
-- Total execution time: 43 min
+- Total plans completed: 14
+- Average duration: 3.2 min
+- Total execution time: 45 min
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [█████████████████-] 87%
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
+| 04-commands | 1 | 2 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-05 (3min), 03-04 (2min), 03-03 (4min), 03-02 (4min), 03-01 (3min)
+- Last 5 plans: 04-01 (2min), 03-05 (3min), 03-04 (2min), 03-03 (4min), 03-02 (4min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [03-05]: Use forwardRef + useImperativeHandle for imperative handleInput method
 - [03-05]: Namespace exports (numberGame, wordleGame) over individual function exports
 - [03-05]: Cast through unknown for Trivia/Blackjack data type mismatches
+- [04-01]: ExecuteContext extends CommandContext with game.isActive(), theme/font.list() and .config()
+- [04-01]: Collections included in context for search/genre/format/type commands
+- [04-01]: success() and error() helpers for consistent result creation
 
 ### Phase 1 Deliverables
 
@@ -110,6 +114,15 @@ Recent decisions affecting current work:
 - Integration tests for full game flows - 35 tests
 - **225 game tests passing**
 
+### Phase 4 Deliverables (In Progress)
+
+- ExecuteContext interface for command dependencies
+- CommandDefinition interface for command structure
+- CommandRegistry class with register/get/has/list/getAll
+- executeCommand function for parsing and delegation
+- success() and error() helper functions
+- 32 tests passing for registry and executor
+
 ### Pending Todos
 
 None yet.
@@ -121,6 +134,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 03-05-PLAN.md (GameController and Barrel Exports)
+Stopped at: Completed 04-01-PLAN.md (Command Foundation)
 Resume file: None
-Next: Phase 4 - UI Extraction (04-01-PLAN.md)
+Next: Phase 4 - Commands (04-02-PLAN.md - Navigation Commands)
