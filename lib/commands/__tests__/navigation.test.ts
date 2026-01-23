@@ -121,6 +121,195 @@ describe('lsCommand', () => {
       output: ['', 'a', 'b', 'c', 'd', 'e', ''],
     })
   })
+
+  it('returns ls error message directly', () => {
+    const context = createMockContext({
+      vfs: {
+        ...createMockContext().vfs,
+        ls: () => ['ls: /nonexistent: No such file or directory'],
+      },
+    })
+
+    const result = lsCommand.execute(['/nonexistent'], context)
+
+    expect(result).toEqual({
+      success: true,
+      output: 'ls: /nonexistent: No such file or directory',
+    })
+  })
+
+  describe('collection directory display names', () => {
+    it('shows book titles instead of slugs in ~/books', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary/books',
+          ls: () => ['dune', 'the-pragmatic-programmer'],
+          resolve: (path: string) => {
+            if (path === 'dune') {
+              return { type: 'file', name: 'dune', content: { title: 'Dune', author: 'Frank Herbert' } }
+            }
+            if (path === 'the-pragmatic-programmer') {
+              return { type: 'file', name: 'the-pragmatic-programmer', content: { title: 'The Pragmatic Programmer', author: 'David Thomas' } }
+            }
+            return { type: 'directory', name: 'books', children: {} }
+          },
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'Dune', 'The Pragmatic Programmer', ''],
+      })
+    })
+
+    it('shows vinyl titles instead of slugs in ~/vinyl', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary/vinyl',
+          ls: () => ['abbey-road', 'dark-side-of-the-moon'],
+          resolve: (path: string) => {
+            if (path === 'abbey-road') {
+              return { type: 'file', name: 'abbey-road', content: { title: 'Abbey Road', artist: 'The Beatles' } }
+            }
+            if (path === 'dark-side-of-the-moon') {
+              return { type: 'file', name: 'dark-side-of-the-moon', content: { title: 'The Dark Side of the Moon', artist: 'Pink Floyd' } }
+            }
+            return { type: 'directory', name: 'vinyl', children: {} }
+          },
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'Abbey Road', 'The Dark Side of the Moon', ''],
+      })
+    })
+
+    it('shows hardware names instead of slugs in ~/hardware', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary/hardware',
+          ls: () => ['macbook-pro', 'raspberry-pi-4'],
+          resolve: (path: string) => {
+            if (path === 'macbook-pro') {
+              return { type: 'file', name: 'macbook-pro', content: { name: 'MacBook Pro 14"', type: 'Laptop' } }
+            }
+            if (path === 'raspberry-pi-4') {
+              return { type: 'file', name: 'raspberry-pi-4', content: { name: 'Raspberry Pi 4', type: 'SBC' } }
+            }
+            return { type: 'directory', name: 'hardware', children: {} }
+          },
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'MacBook Pro 14"', 'Raspberry Pi 4', ''],
+      })
+    })
+
+    it('falls back to filename when content has no title/name', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary/books',
+          ls: () => ['unknown-file'],
+          resolve: (path: string) => {
+            if (path === 'unknown-file') {
+              return { type: 'file', name: 'unknown-file', content: {} }
+            }
+            return { type: 'directory', name: 'books', children: {} }
+          },
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'unknown-file', ''],
+      })
+    })
+
+    it('falls back to filename when resolve returns null', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary/books',
+          ls: () => ['orphan-file'],
+          resolve: () => null,
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'orphan-file', ''],
+      })
+    })
+
+    it('does not show display names for non-collection directories', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary',
+          ls: () => ['books', 'vinyl', 'hardware'],
+          resolve: () => ({ type: 'directory', name: 'dir', children: {} }),
+        },
+      })
+
+      const result = lsCommand.execute([], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'books', 'vinyl', 'hardware', ''],
+      })
+    })
+
+    it('shows display names when ls path argument is a collection directory', () => {
+      const context = createMockContext({
+        vfs: {
+          ...createMockContext().vfs,
+          pwd: () => '/home/zachary',
+          ls: (path?: string) => {
+            if (path === 'books') {
+              return ['dune', 'neuromancer']
+            }
+            return ['books', 'vinyl', 'hardware']
+          },
+          resolve: (path: string) => {
+            if (path === 'books') {
+              return { type: 'directory', name: 'books', children: {} }
+            }
+            if (path === 'dune') {
+              return { type: 'file', name: 'dune', content: { title: 'Dune' } }
+            }
+            if (path === 'neuromancer') {
+              return { type: 'file', name: 'neuromancer', content: { title: 'Neuromancer' } }
+            }
+            return null
+          },
+        },
+      })
+
+      const result = lsCommand.execute(['books'], context)
+
+      expect(result).toEqual({
+        success: true,
+        output: ['', 'Dune', 'Neuromancer', ''],
+      })
+    })
+  })
 })
 
 describe('cdCommand', () => {

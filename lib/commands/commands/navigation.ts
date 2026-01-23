@@ -1,6 +1,52 @@
 import type { CommandDefinition, ExecuteContext } from '../types'
 import { success, error } from '../types'
 
+/**
+ * Get the display name for a file in a collection directory.
+ * Returns the title/name from the file content, or falls back to the filename.
+ */
+function getDisplayName(filename: string, context: ExecuteContext): string {
+  const node = context.vfs.resolve(filename)
+  if (!node || node.type !== 'file' || !node.content) {
+    return filename
+  }
+
+  const content = node.content as { title?: string; name?: string }
+  // Books and vinyl have 'title', hardware has 'name'
+  return content.title || content.name || filename
+}
+
+/**
+ * Check if the current or target path is a collection directory.
+ */
+function isCollectionDirectory(path: string | undefined, context: ExecuteContext): boolean {
+  // Determine the effective path to check
+  let targetPath: string
+  if (path) {
+    // If a path argument is given, resolve it relative to pwd
+    const node = context.vfs.resolve(path)
+    if (!node) return false
+
+    // Build the absolute path
+    if (path.startsWith('/')) {
+      targetPath = path
+    } else if (path.startsWith('~')) {
+      targetPath = '/home/zachary' + path.slice(1)
+    } else {
+      // Relative path - combine with pwd
+      const pwd = context.vfs.pwd()
+      targetPath = pwd === '/' ? '/' + path : pwd + '/' + path
+    }
+  } else {
+    targetPath = context.vfs.pwd()
+  }
+
+  // Check if it's one of the collection directories
+  return targetPath === '/home/zachary/books' ||
+         targetPath === '/home/zachary/vinyl' ||
+         targetPath === '/home/zachary/hardware'
+}
+
 export const lsCommand: CommandDefinition = {
   name: 'ls',
   description: 'List directory contents',
@@ -10,6 +56,18 @@ export const lsCommand: CommandDefinition = {
     const result = context.vfs.ls(path)
 
     if (result.length === 0) return success('')
+
+    // Check for error messages from ls (e.g., "ls: path: No such file or directory")
+    if (result.length === 1 && result[0].startsWith('ls:')) {
+      return success(result[0])
+    }
+
+    // If we're in a collection directory, show display names instead of slugs
+    if (isCollectionDirectory(path, context)) {
+      const displayNames = result.map(filename => getDisplayName(filename, context))
+      return success(['', ...displayNames, ''])
+    }
+
     return success(['', ...result, ''])
   }
 }
