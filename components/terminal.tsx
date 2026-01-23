@@ -6,120 +6,18 @@ import vinylData from "@/data/vinyl.json"
 import hardwareData from "@/data/hardware.json"
 import { VirtualFileSystem } from "@/lib/vfs"
 import dynamic from "next/dynamic"
+import { useState, useRef, useEffect } from "react"
+import type { TerminalLine } from "@/lib/types/terminal"
+import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
 })
 
-
-import { useState, useRef, useEffect, type ReactNode } from "react"
-
-// Highlight input lines (prompt + command)
-function highlightInput(text: string): ReactNode {
-  // Input format: "~/path $ command args"
-  const match = text.match(/^(.*?\$\s*)(\S+)?(\s.*)?$/)
-  if (!match) return text
-
-  const [, prompt, command, args] = match
-  const validCommands = [
-    "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
-    "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
-    "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
-  ]
-
-  const isValid = command ? validCommands.includes(command.toLowerCase()) : false
-
-  return (
-    <>
-      <span className="text-muted-foreground">{prompt}</span>
-      {command && (
-        <span className={isValid ? "text-accent font-semibold" : "text-destructive"}>
-          {command}
-        </span>
-      )}
-      {args && <span className="text-foreground">{args}</span>}
-    </>
-  )
-}
-
-// Syntax highlighting for terminal output
-function highlightLine(text: string): ReactNode {
-  if (!text || text.trim() === "") return text
-
-  // Check for section headers (entire line is a header keyword)
-  const headerKeywords = ["NAME", "SYNOPSIS", "DESCRIPTION", "EXAMPLES", "EXAMPLE", "SEE ALSO", "COMMANDS", "GAMES", "THEMES", "FONTS", "NAVIGATION", "COLLECTIONS", "FILES", "INFO", "OTHER", "STYLE"]
-  const trimmed = text.trim()
-  if (headerKeywords.includes(trimmed)) {
-    return <span className="text-accent font-bold">{text}</span>
-  }
-
-  // Check for label lines (indented "Label:  value" format, like in view output)
-  // Must start with spaces, then a capitalized word, then colon, then spaces, then value
-  const labelMatch = text.match(/^(\s{2,})([\w]+)(:)(\s{2,})(.+)$/)
-  if (labelMatch) {
-    const [, indent, label, colon, space, value] = labelMatch
-    return (
-      <>
-        {indent}
-        <span className="text-accent">{label}{colon}</span>
-        {space}<span className="text-foreground">{value}</span>
-      </>
-    )
-  }
-
-  // Build highlighted parts for inline patterns
-  const parts: ReactNode[] = []
-  let key = 0
-
-  // Match paths, arguments in brackets, and standalone numbers
-  const inlineRegex = /(~\/[\w\-\/]*|\/home\/[\w\-\/]+|<[\w\s\-\.]+>|\[[\w\-\.]+\])/g
-  let lastIdx = 0
-  let match
-
-  while ((match = inlineRegex.exec(text)) !== null) {
-    // Text before match
-    if (match.index > lastIdx) {
-      parts.push(text.slice(lastIdx, match.index))
-    }
-
-    const matched = match[0]
-    if (matched.startsWith("~/") || matched.startsWith("/home/")) {
-      parts.push(<span key={key++} className="text-primary">{matched}</span>)
-    } else if (matched.startsWith("<")) {
-      parts.push(<span key={key++} className="text-muted-foreground">{matched}</span>)
-    } else if (matched.startsWith("[")) {
-      parts.push(<span key={key++} className="text-muted-foreground">{matched}</span>)
-    } else {
-      parts.push(matched)
-    }
-
-    lastIdx = inlineRegex.lastIndex
-  }
-
-  // Remaining text
-  if (lastIdx < text.length) {
-    parts.push(text.slice(lastIdx))
-  }
-
-  // If no matches were found, return original text
-  if (parts.length === 0 || (parts.length === 1 && typeof parts[0] === "string")) {
-    return text
-  }
-
-  return <>{parts}</>
-}
-
-interface TerminalLine {
-  type: "input" | "output" | "error" | "success" | "link" | "wordle"
-  content: string
-  href?: string
-}
-
 interface GameState {
   active: boolean
   type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | null
-  data?: any
-
+  data?: Record<string, unknown>
 }
 
 const themes = {
@@ -657,27 +555,28 @@ const manPages: Record<string, string[]> = {
   ],
 }
 
+const initialHistory: TerminalLine[] = [
+  { type: "output", content: "" },
+  { type: "success", content: "zachary@home" },
+  { type: "output", content: "" },
+  { type: "output", content: "Type 'help' for available commands." },
+  { type: "output", content: "" },
+]
+
 export function Terminal() {
-  const [history, setHistory] = useState<TerminalLine[]>([
-    { type: "output", content: "" },
-    { type: "success", content: "zachary@home" },
-    { type: "output", content: "" },
-    { type: "output", content: "Type 'help' for available commands." },
-    { type: "output", content: "" },
-  ])
+  const [history, setHistory] = useState<TerminalLine[]>(initialHistory)
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [gameState, setGameState] = useState<GameState>({ active: false, type: null })
+
   /* VFS Initialization */
   const [vfs] = useState(() => {
     const fs = new VirtualFileSystem()
 
-    // Populate defaults initially (SSR safe)
-
     // Populate books
     const booksDir = fs.createDir("/home/zachary/books")
-    booksData.forEach((book, i) => {
+    booksData.forEach((book) => {
       const filename = book.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
       if (booksDir.children) {
         booksDir.children[filename] = {
@@ -736,7 +635,7 @@ export function Terminal() {
     return fs
   })
 
-  // Force update mapping for React reactivity on deep VFS changes
+  // Force update for React reactivity on deep VFS changes
   const [, forceUpdate] = useState(0)
 
   // Load from localStorage on mount (Client-side only)
@@ -756,18 +655,18 @@ export function Terminal() {
   // Sync currentDirectory string for display
   const [currentDirectory, setCurrentDirectory] = useState("~")
 
-  // Update display path whenever vfs changes (wrapper mostly)
+  // Update display path whenever vfs changes
   useEffect(() => {
     let path = vfs.getPwd()
     if (path.startsWith("/home/zachary")) {
       path = "~" + path.slice("/home/zachary".length)
     }
     setCurrentDirectory(path)
-  }, [history, vfs]) // Update when history changes (often triggers after command)
+  }, [history, vfs])
+
   const [currentTheme, setCurrentTheme] = useState<ThemeName>("lumon")
   const [currentFont, setCurrentFont] = useState<FontName>("jetbrains")
-  const inputRef = useRef<HTMLInputElement>(null)
-  const terminalRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<InputLineHandle>(null)
 
   // Load theme and font from localStorage on mount
   useEffect(() => {
@@ -814,52 +713,8 @@ export function Terminal() {
     localStorage.setItem("terminal-font", fontName)
   }
 
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
-    }
-  }, [history])
-
-  // Scroll input into view when focused (for mobile keyboard)
-  useEffect(() => {
-    const input = inputRef.current
-    if (!input) return
-
-    const handleFocus = () => {
-      setTimeout(() => {
-        input.scrollIntoView({ behavior: "smooth", block: "end" })
-      }, 300)
-    }
-
-    input.addEventListener("focus", handleFocus)
-    return () => input.removeEventListener("focus", handleFocus)
-  }, [])
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
-        if (gameState.active) {
-          e.preventDefault()
-          setHistory((prev) => [...prev, { type: "output", content: "^C" }])
-          setHistory((prev) => [...prev, { type: "output", content: "Game interrupted." }])
-          setGameState({ active: false, type: null })
-          setInput("")
-        }
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [gameState.active])
-
-  // All available commands
-  const allCommands = [
-    "help", "man", "ls", "cd", "pwd", "about", "contact", "projects", "clear",
-    "whoami", "date", "echo", "game", "neofetch", "theme", "font", "view", "search",
-    "genre", "format", "type", "cat", "sudo", "exit", "mkdir", "touch", "rm"
-  ]
-
-  const directories = ["books", "vinyl", "hardware", "games", "style"]
+  // All available commands for tab completion
+  const allCommands = [...VALID_COMMANDS]
 
   const getCompletions = (partial: string): string[] => {
     const parts = partial.split(" ")
@@ -875,14 +730,11 @@ export function Terminal() {
 
     // Dynamic completion for cd, cat, view, ls
     if (["cd", "cat", "view", "ls", "rm", "game"].includes(cmd)) {
-      // vfs.ls returns filenames in current dir
-      // Basic completion: just match files in current dir
-      // TODO: Support path completion like "cd bo" -> "books"
       const files = vfs.ls()
-      return files.filter(f => f.startsWith(arg))
+      return files.filter(f => f.toLowerCase().startsWith(arg))
     }
 
-    // Fallback static maps if needed
+    // Static maps for theme/font
     if (cmd === "theme") {
       return Object.keys(themes).filter(t => t.startsWith(arg))
     }
@@ -894,6 +746,7 @@ export function Terminal() {
     return []
   }
 
+  // Game handlers
   const startNumberGame = () => {
     const target = Math.floor(Math.random() * 100) + 1
     setGameState({ active: true, type: "number", data: { target, attempts: 0 } })
@@ -917,8 +770,9 @@ export function Terminal() {
       return "Please enter a valid number."
     }
 
-    const attempts = gameState.data.attempts + 1
-    const target = gameState.data.target
+    const data = gameState.data as { target: number; attempts: number }
+    const attempts = data.attempts + 1
+    const target = data.target
 
     if (num === target) {
       setGameState({ active: false, type: null })
@@ -928,10 +782,10 @@ export function Terminal() {
         "",
       ]
     } else if (num < target) {
-      setGameState({ ...gameState, data: { ...gameState.data, attempts } })
+      setGameState({ ...gameState, data: { ...data, attempts } })
       return `Too low. (Attempt ${attempts})`
     } else {
-      setGameState({ ...gameState, data: { ...gameState.data, attempts } })
+      setGameState({ ...gameState, data: { ...data, attempts } })
       return `Too high. (Attempt ${attempts})`
     }
   }
@@ -965,7 +819,8 @@ export function Terminal() {
   const handleWordleGame = (guess: string) => {
     if (guess.toLowerCase() === "quit") {
       setGameState({ active: false, type: null })
-      return `The word was: ${gameState.data.word.toUpperCase()}`
+      const data = gameState.data as { word: string }
+      return `The word was: ${data.word.toUpperCase()}`
     }
 
     const normalizedGuess = guess.toLowerCase().trim()
@@ -973,12 +828,12 @@ export function Terminal() {
       return "Enter a 5-letter word."
     }
 
-    const word = gameState.data.word
-    const attempts = gameState.data.attempts + 1
-    const guesses = [...gameState.data.guesses]
+    const data = gameState.data as { word: string; attempts: number; maxAttempts: number; guesses: string[] }
+    const word = data.word
+    const attempts = data.attempts + 1
+    const guesses = [...data.guesses]
 
     // Build result
-    let result = ""
     const wordArr = word.split("")
     const guessArr = normalizedGuess.split("")
     const used = new Array(5).fill(false)
@@ -1006,7 +861,7 @@ export function Terminal() {
     }
 
     // Build colored result: format is "X:A ?:B  :C" etc (mark:letter pairs)
-    result = guessArr.map((c, i) => `${marks[i]}:${c.toUpperCase()}`).join(",")
+    const result = guessArr.map((c, i) => `${marks[i]}:${c.toUpperCase()}`).join(",")
     guesses.push(result)
 
     const wordleResult = { wordle: result }
@@ -1016,12 +871,12 @@ export function Terminal() {
       return [
         wordleResult,
         "",
-        `You got it in ${attempts}/${gameState.data.maxAttempts}!`,
+        `You got it in ${attempts}/${data.maxAttempts}!`,
         "",
       ]
     }
 
-    if (attempts >= gameState.data.maxAttempts) {
+    if (attempts >= data.maxAttempts) {
       setGameState({ active: false, type: null })
       return [
         wordleResult,
@@ -1031,8 +886,8 @@ export function Terminal() {
       ]
     }
 
-    setGameState({ ...gameState, data: { ...gameState.data, attempts, guesses } })
-    return [wordleResult, `(${gameState.data.maxAttempts - attempts} guesses left)`]
+    setGameState({ ...gameState, data: { ...data, attempts, guesses } })
+    return [wordleResult, `(${data.maxAttempts - attempts} guesses left)`]
   }
 
   // Trivia questions
@@ -1072,7 +927,8 @@ export function Terminal() {
       return "Trivia ended."
     }
 
-    const { questions, current, score } = gameState.data
+    const data = gameState.data as { questions: { q: string; a: string }[]; current: number; score: number }
+    const { questions, current, score } = data
     const correct = answer.toLowerCase().trim() === questions[current].a.toLowerCase()
     const newScore = correct ? score + 1 : score
     const next = current + 1
@@ -1097,7 +953,7 @@ export function Terminal() {
 
   // Blackjack
   const createDeck = () => {
-    const suits = ["♠", "♥", "♦", "♣"]
+    const suits = ["S", "H", "D", "C"]
     const values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     const deck: string[] = []
     for (const suit of suits) {
@@ -1147,7 +1003,8 @@ export function Terminal() {
 
   const handleBlackjackGame = (action: string) => {
     const cmd = action.toLowerCase().trim()
-    const { deck, playerHand, dealerHand, phase } = gameState.data
+    const data = gameState.data as { deck: string[]; playerHand: string[]; dealerHand: string[]; phase: string }
+    const { deck, playerHand, dealerHand, phase } = data
 
     if (cmd === "quit") {
       setGameState({ active: false, type: null })
@@ -1171,7 +1028,7 @@ export function Terminal() {
           ]
         }
 
-        setGameState({ ...gameState, data: { ...gameState.data, playerHand: newHand, deck } })
+        setGameState({ ...gameState, data: { ...data, playerHand: newHand, deck } })
         return [
           `You draw: ${newCard}`,
           `You: ${newHand.join(" ")} (${total})`,
@@ -1180,8 +1037,8 @@ export function Terminal() {
 
       if (cmd === "stand") {
         // Dealer's turn
-        let dHand = [...dealerHand]
-        let dDeck = [...deck]
+        const dHand = [...dealerHand]
+        const dDeck = [...deck]
 
         while (handValue(dHand) < 17) {
           dHand.push(dDeck.pop()!)
@@ -1229,7 +1086,8 @@ export function Terminal() {
     const normalized = choice.toLowerCase().trim()
 
     if (normalized === "quit") {
-      const score = gameState.data.score
+      const data = gameState.data as { score: { player: number; computer: number } }
+      const score = data.score
       setGameState({ active: false, type: null })
       return [`Final Score: You ${score.player} - ${score.computer} Computer`, ""]
     }
@@ -1242,7 +1100,8 @@ export function Terminal() {
     const computerChoice = choices[Math.floor(Math.random() * 3)]
 
     let result = ""
-    const newScore = { ...gameState.data.score }
+    const data = gameState.data as { score: { player: number; computer: number } }
+    const newScore = { ...data.score }
 
     if (normalized === computerChoice) {
       result = "Tie."
@@ -1308,22 +1167,10 @@ export function Terminal() {
     },
     ls: (args) => {
       const path = args[0]
-      const result = vfs.ls(path) // This returns just names
-
-      // If we are in specific directories, we might want to retain the 'rich' view if ls is called without args
-      // Check current actual directory for potential override
-      // Actually, let's just stick to the requested "full ls" which usually means standard listing.
-      // But the user might miss the tables.
-      // Let's check if the result is just list of files, we can format them nicely.
+      const result = vfs.ls(path)
 
       if (result.length === 0) return ""
 
-      // Multi-column layout for basic ls? Or just list.
-      // Let's do simple grid-like logic or just lines. 
-      // Standard terminals just list them.
-
-      // Handling specific rich output for collections if desired:
-      // For now, let's return the file list.
       return ["", ...result, ""]
     },
     cd: (args) => {
@@ -1405,9 +1252,9 @@ export function Terminal() {
 
       const pwd = vfs.getPwd()
 
-      // Determine type based on parent directory or checks
+      // Determine type based on parent directory
       if (pwd.includes("/books")) {
-        const book = node.content
+        const book = node.content as { title: string; author: string; genre: string; format: string; pages?: number }
         return [
           "",
           `  Title:   ${book.title}`,
@@ -1420,7 +1267,7 @@ export function Terminal() {
       }
 
       if (pwd.includes("/vinyl")) {
-        const record = node.content
+        const record = node.content as { title: string; artist: string; genre: string; format: string; label: string }
         return [
           "",
           `  Title:   ${record.title}`,
@@ -1433,7 +1280,7 @@ export function Terminal() {
       }
 
       if (pwd.includes("/hardware")) {
-        const device = node.content
+        const device = node.content as { name: string; type: string; status: string; processor: string; memory: string; storage: string; graphics?: string; operating_system?: string }
         return [
           "",
           `  Name:       ${device.name}`,
@@ -1462,7 +1309,7 @@ export function Terminal() {
         if (results.length === 0) return `No results for "${term}"`
         const list = results.map((r) => {
           const idx = vinylData.indexOf(r) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${r.title} — ${r.artist}`
+          return `  ${String(idx).padStart(3, " ")}  ${r.title} - ${r.artist}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1489,7 +1336,7 @@ export function Terminal() {
         if (results.length === 0) return `No results for "${term}"`
         const list = results.map((b) => {
           const idx = booksData.indexOf(b) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${b.title} — ${b.author}`
+          return `  ${String(idx).padStart(3, " ")}  ${b.title} - ${b.author}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1508,7 +1355,7 @@ export function Terminal() {
         if (results.length === 0) return `No records in genre "${genreName}"`
         const list = results.map((r) => {
           const idx = vinylData.indexOf(r) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${r.title} — ${r.artist}`
+          return `  ${String(idx).padStart(3, " ")}  ${r.title} - ${r.artist}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1522,7 +1369,7 @@ export function Terminal() {
         if (results.length === 0) return `No books in genre "${genreName}"`
         const list = results.map((b) => {
           const idx = booksData.indexOf(b) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${b.title} — ${b.author}`
+          return `  ${String(idx).padStart(3, " ")}  ${b.title} - ${b.author}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1541,7 +1388,7 @@ export function Terminal() {
         if (results.length === 0) return `No records in format "${formatType}"`
         const list = results.map((r) => {
           const idx = vinylData.indexOf(r) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${r.title} — ${r.artist}`
+          return `  ${String(idx).padStart(3, " ")}  ${r.title} - ${r.artist}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1555,7 +1402,7 @@ export function Terminal() {
         if (results.length === 0) return `No books in format "${formatType}"`
         const list = results.map((b) => {
           const idx = booksData.indexOf(b) + 1
-          return `  ${String(idx).padStart(3, " ")}  ${b.title} — ${b.author}`
+          return `  ${String(idx).padStart(3, " ")}  ${b.title} - ${b.author}`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1580,13 +1427,7 @@ export function Terminal() {
       return ["", `${results.length} results`, "", ...list, ""]
     },
     clear: () => {
-      setHistory([
-        { type: "output", content: "" },
-        { type: "success", content: "zachary@home" },
-        { type: "output", content: "" },
-        { type: "output", content: "Type 'help' for available commands." },
-        { type: "output", content: "" },
-      ])
+      setHistory(initialHistory)
       return ""
     },
     whoami: () => "zachary",
@@ -1615,7 +1456,6 @@ export function Terminal() {
         setGameState({ active: true, type: "tron" })
         return [] // No text output, UI takes over
       }
-
 
       return `Unknown game: ${gameType}`
     },
@@ -1716,13 +1556,13 @@ export function Terminal() {
       if (result) {
         const items = Array.isArray(result) ? result : [result]
         items.forEach((item) => {
-          if (typeof item === "object" && item.href) {
+          if (typeof item === "object" && "href" in item) {
             setHistory((prev) => [
               ...prev,
               { type: "link", content: item.text, href: item.href },
             ])
           } else {
-            const line = typeof item === "string" ? item : item.text
+            const line = typeof item === "string" ? item : String(item)
             setHistory((prev) => [
               ...prev,
               {
@@ -1743,57 +1583,58 @@ export function Terminal() {
     setInput("")
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleCommand(input)
-    } else if (e.key === "Tab") {
-      e.preventDefault()
-      const completions = getCompletions(input)
-      if (completions.length === 1) {
-        const parts = input.split(" ")
-        if (parts.length === 1) {
-          setInput(completions[0])
-        } else {
-          parts[parts.length - 1] = completions[0]
-          setInput(parts.join(" "))
-        }
-      } else if (completions.length > 1) {
-        setHistory((prev) => [
-          ...prev,
-          { type: "input", content: `${currentDirectory} $ ${input}` },
-          { type: "output", content: completions.join("  ") },
-        ])
+  // InputLine callback handlers
+  const handleTabComplete = (partial: string) => {
+    const completions = getCompletions(partial)
+    if (completions.length === 1) {
+      const parts = partial.split(" ")
+      if (parts.length === 1) {
+        setInput(completions[0])
+      } else {
+        parts[parts.length - 1] = completions[0]
+        setInput(parts.join(" "))
       }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault()
-      if (commandHistory.length > 0) {
-        const newIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1)
-        setHistoryIndex(newIndex)
-        setInput(commandHistory[newIndex])
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault()
-      if (historyIndex !== -1) {
-        const newIndex = historyIndex + 1
-        if (newIndex >= commandHistory.length) {
-          setHistoryIndex(-1)
-          setInput("")
-        } else {
-          setHistoryIndex(newIndex)
-          setInput(commandHistory[newIndex])
-        }
-      }
-    } else if (e.key === "l" && e.ctrlKey) {
-      e.preventDefault()
-      setHistory([
-        { type: "output", content: "" },
-        { type: "success", content: "zachary@home" },
-        { type: "output", content: "" },
-        { type: "output", content: "Type 'help' for available commands." },
-        { type: "output", content: "" },
+    } else if (completions.length > 1) {
+      setHistory(prev => [
+        ...prev,
+        { type: "input", content: `${currentDirectory} $ ${partial}` },
+        { type: "output", content: completions.join("  ") },
       ])
     }
   }
+
+  const handleHistoryUp = (): string | null => {
+    if (commandHistory.length === 0) return null
+    const newIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1)
+    setHistoryIndex(newIndex)
+    return commandHistory[newIndex]
+  }
+
+  const handleHistoryDown = (): string | null => {
+    if (historyIndex === -1) return null
+    const newIndex = historyIndex + 1
+    if (newIndex >= commandHistory.length) {
+      setHistoryIndex(-1)
+      return null
+    }
+    setHistoryIndex(newIndex)
+    return commandHistory[newIndex]
+  }
+
+  const handleClear = () => {
+    setHistory(initialHistory)
+  }
+
+  const handleInterrupt = () => {
+    if (gameState.active) {
+      setHistory(prev => [...prev, { type: "output", content: "^C" }])
+      setHistory(prev => [...prev, { type: "output", content: "Game interrupted." }])
+      setGameState({ active: false, type: null })
+      setInput("")
+    }
+  }
+
+  const prompt = gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`
 
   return (
     <div
@@ -1806,178 +1647,22 @@ export function Terminal() {
         </div>
       ) : (
         <>
-
-          <div ref={terminalRef} className="flex-1 overflow-y-auto">
-            {history.map((line, i) => (
-              <div
-                key={i}
-                className={`whitespace-pre-wrap break-words break-all ${line.type === "input"
-                  ? "text-primary"
-                  : line.type === "error"
-                    ? "text-destructive"
-                    : line.type === "success"
-                      ? "text-accent"
-                      : line.type === "link"
-                        ? "text-foreground"
-                        : "text-foreground"
-                  }`}
-              >
-                {line.type === "input" ? (
-                  highlightInput(line.content)
-                ) : line.type === "link" && line.href ? (
-                  <a
-                    href={line.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary hover:underline transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {line.content}
-                  </a>
-                ) : line.type === "wordle" ? (
-                  <span className="font-mono tracking-widest">
-                    {line.content.split(",").map((pair, idx) => {
-                      const [mark, letter] = pair.split(":")
-                      const colorClass = mark === "X"
-                        ? "text-green-400"
-                        : mark === "?"
-                          ? "text-yellow-400"
-                          : "text-muted-foreground"
-                      return (
-                        <span key={idx} className={`${colorClass} font-bold`}>
-                          {letter}
-                        </span>
-                      )
-                    })}
-                  </span>
-                ) : (
-                  highlightLine(line.content)
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-primary">{gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`}</span>
-            <div className="flex-1 relative">
-              {/* Highlighted overlay */}
-              <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
-                {(() => {
-                  if (!input) return null
-
-                  const validCommands = [
-                    "ls", "cd", "pwd", "cat", "view", "man", "help", "search", "genre", "format",
-                    "type", "game", "theme", "font", "neofetch", "mkdir", "touch", "rm", "about",
-                    "contact", "projects", "clear", "whoami", "date", "echo", "exit", "sudo"
-                  ]
-
-                  // Tokenize the input
-                  const tokens: { type: string; value: string }[] = []
-                  let remaining = input
-                  let isFirstToken = true
-
-                  while (remaining.length > 0) {
-                    // Match leading whitespace
-                    const wsMatch = remaining.match(/^(\s+)/)
-                    if (wsMatch) {
-                      tokens.push({ type: "space", value: wsMatch[1] })
-                      remaining = remaining.slice(wsMatch[1].length)
-                      continue
-                    }
-
-                    // Match quoted strings
-                    const quoteMatch = remaining.match(/^(["'])([^"']*)(["'])?/)
-                    if (quoteMatch) {
-                      tokens.push({ type: "string", value: quoteMatch[0] })
-                      remaining = remaining.slice(quoteMatch[0].length)
-                      isFirstToken = false
-                      continue
-                    }
-
-                    // Match flags (--flag or -f)
-                    const flagMatch = remaining.match(/^(--?\w+)/)
-                    if (flagMatch && !isFirstToken) {
-                      tokens.push({ type: "flag", value: flagMatch[1] })
-                      remaining = remaining.slice(flagMatch[1].length)
-                      continue
-                    }
-
-                    // Match numbers
-                    const numMatch = remaining.match(/^(\d+)(?=\s|$)/)
-                    if (numMatch && !isFirstToken) {
-                      tokens.push({ type: "number", value: numMatch[1] })
-                      remaining = remaining.slice(numMatch[1].length)
-                      continue
-                    }
-
-                    // Match paths (contains / or starts with ~ or .)
-                    const pathMatch = remaining.match(/^([~.]?[\w\-./]+)/)
-                    if (pathMatch && !isFirstToken && (pathMatch[1].includes("/") || pathMatch[1].startsWith("~") || pathMatch[1].startsWith("."))) {
-                      tokens.push({ type: "path", value: pathMatch[1] })
-                      remaining = remaining.slice(pathMatch[1].length)
-                      continue
-                    }
-
-                    // Match word (command or argument)
-                    const wordMatch = remaining.match(/^(\S+)/)
-                    if (wordMatch) {
-                      if (isFirstToken) {
-                        const isValid = validCommands.includes(wordMatch[1].toLowerCase())
-                        tokens.push({ type: isValid ? "command" : "invalid", value: wordMatch[1] })
-                        isFirstToken = false
-                      } else {
-                        tokens.push({ type: "argument", value: wordMatch[1] })
-                      }
-                      remaining = remaining.slice(wordMatch[1].length)
-                      continue
-                    }
-
-                    // Fallback: single character
-                    tokens.push({ type: "text", value: remaining[0] })
-                    remaining = remaining.slice(1)
-                  }
-
-                  return tokens.map((token, i) => {
-                    switch (token.type) {
-                      case "command":
-                        return <span key={i} className="text-accent font-semibold">{token.value}</span>
-                      case "invalid":
-                        return <span key={i} className="text-destructive">{token.value}</span>
-                      case "path":
-                        return <span key={i} className="text-primary">{token.value}</span>
-                      case "string":
-                        return <span key={i} className="text-yellow-400">{token.value}</span>
-                      case "flag":
-                        return <span key={i} className="text-purple-400">{token.value}</span>
-                      case "number":
-                        return <span key={i} className="text-orange-400">{token.value}</span>
-                      case "argument":
-                        return <span key={i} className="text-muted-foreground">{token.value}</span>
-                      default:
-                        return <span key={i}>{token.value}</span>
-                    }
-                  })
-                })()}
-              </div>
-              {/* Actual input (transparent text) */}
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full bg-transparent outline-none text-transparent caret-foreground text-base md:text-sm relative z-10"
-                autoFocus
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
-            </div>
-          </div>
+          <HistoryDisplay history={history} />
+          <InputLine
+            ref={inputRef}
+            value={input}
+            onChange={setInput}
+            onSubmit={handleCommand}
+            onTabComplete={handleTabComplete}
+            onHistoryUp={handleHistoryUp}
+            onHistoryDown={handleHistoryDown}
+            onClear={handleClear}
+            onInterrupt={handleInterrupt}
+            prompt={prompt}
+            validCommands={[...VALID_COMMANDS]}
+          />
         </>
       )}
     </div>
   )
 }
-
