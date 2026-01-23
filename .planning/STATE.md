@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** A maintainable, testable, performant terminal codebase that preserves all existing functionality while eliminating technical debt.
-**Current focus:** Phase 4 - Commands (In progress)
+**Current focus:** Phase 4 - Commands (Complete)
 
 ## Current Position
 
 Phase: 4 of 6 (Commands)
-Plan: 6 of 7 in current phase (04-04 completed)
-Status: In progress
-Last activity: 2026-01-23 - Completed 04-04-PLAN.md (Collection Commands)
+Plan: 7 of 7 in current phase (04-07 completed)
+Status: Phase complete
+Last activity: 2026-01-23 - Completed 04-07-PLAN.md (Game & Completion)
 
-Progress: [███████████████████] 98%
+Progress: [████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 2.9 min
-- Total execution time: 56 min
+- Total execution time: 59 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████] 98%
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
-| 04-commands | 6 | 15 min | 2.5 min |
+| 04-commands | 7 | 18 min | 2.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-04 (4min), 04-06 (3min), 04-05 (2min), 04-03 (2min), 04-02 (2min)
+- Last 5 plans: 04-07 (3min), 04-04 (4min), 04-06 (3min), 04-05 (2min), 04-03 (2min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - [04-06]: man pages extracted as static data, not generated
 - [04-06]: clear adds welcome message after clearing history
 - [04-06]: exit shows keyboard shortcut rather than closing
+- [04-07]: Game command returns empty for tron (UI takes over), empty string for others
+- [04-07]: Tab completion filters case-insensitively for better UX
+- [04-07]: createDefaultRegistry() registers all 27 commands
 
 ### Phase 1 Deliverables
 
@@ -124,7 +127,7 @@ Recent decisions affecting current work:
 - Integration tests for full game flows - 35 tests
 - **225 game tests passing**
 
-### Phase 4 Deliverables (In Progress)
+### Phase 4 Deliverables (Complete)
 
 - ExecuteContext interface for command dependencies
 - CommandDefinition interface for command structure
@@ -132,25 +135,29 @@ Recent decisions affecting current work:
 - executeCommand function for parsing and delegation
 - success() and error() helper functions
 - Navigation commands: ls, cd, pwd, cat, view (lib/commands/commands/navigation.ts)
-- mkdirCommand, touchCommand, rmCommand filesystem commands
+- Filesystem commands: mkdir, touch, rm (lib/commands/commands/filesystem.ts)
+- Collection commands: search, genre, format, type (lib/commands/commands/collection.ts)
 - Info commands: about, contact, projects, whoami, date (lib/commands/commands/info.ts)
 - Style commands: theme, font, neofetch (lib/commands/commands/style.ts)
 - System commands: help, man, clear, echo, exit, sudo (lib/commands/commands/system.ts)
+- Game command: game (lib/commands/commands/game.ts)
 - Man pages data for 24 commands (lib/commands/man-pages.ts)
-- Collection commands: search, genre, format, type (lib/commands/commands/collection.ts)
-- 184 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23, system: 21, collection: 44)
+- Tab completion via getCompletions() (lib/commands/completion.ts)
+- Barrel exports at commands/index.ts for all 27 commands
+- Public API at lib/commands/index.ts with createDefaultRegistry()
+- **227 command tests passing**
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-04-PLAN.md (Collection Commands)
+Stopped at: Completed 04-07-PLAN.md (Game & Completion)
 Resume file: None
-Next: Phase 4 - Commands (04-07-PLAN.md - Command Registry Integration)
+Next: Phase 5 - Terminal (integration of command system)
