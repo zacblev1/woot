@@ -31,6 +31,10 @@ export function TronGame({ onExit }: TronGameProps) {
     const cpuDir = useRef<Direction>("LEFT")
     const cpuTrail = useRef<Point[]>([])
 
+    // Set-based trail tracking for O(1) collision detection
+    const playerTrailSet = useRef<Set<string>>(new Set())
+    const cpuTrailSet = useRef<Set<string>>(new Set())
+
     const gameLoopRef = useRef<number>()
     const gridWidth = useRef(100) // Cells
     const gridHeight = useRef(60) // Cells
@@ -54,6 +58,10 @@ export function TronGame({ onExit }: TronGameProps) {
         cpuPos.current = { x: Math.floor(width * 0.8), y: Math.floor(height / 2) }
         cpuDir.current = "LEFT"
         cpuTrail.current = []
+
+        // Clear trail Sets for O(1) collision detection
+        playerTrailSet.current.clear()
+        cpuTrailSet.current.clear()
 
         if (nextLevel) {
             setLevel(l => l + 1)
@@ -365,6 +373,7 @@ export function TronGame({ onExit }: TronGameProps) {
 
                 // Move Player
                 playerTrail.current.push({ ...playerPos.current })
+                playerTrailSet.current.add(`${playerPos.current.x},${playerPos.current.y}`)
                 if (playerDir.current === "UP") playerPos.current.y--
                 if (playerDir.current === "DOWN") playerPos.current.y++
                 if (playerDir.current === "LEFT") playerPos.current.x--
@@ -372,6 +381,7 @@ export function TronGame({ onExit }: TronGameProps) {
 
                 // Move CPU
                 cpuTrail.current.push({ ...cpuPos.current })
+                cpuTrailSet.current.add(`${cpuPos.current.x},${cpuPos.current.y}`)
                 if (cpuDir.current === "UP") cpuPos.current.y--
                 if (cpuDir.current === "DOWN") cpuPos.current.y++
                 if (cpuDir.current === "LEFT") cpuPos.current.x--
@@ -387,15 +397,17 @@ export function TronGame({ onExit }: TronGameProps) {
                     cpuPos.current.x < 0 || cpuPos.current.x >= gridWidth.current ||
                     cpuPos.current.y < 0 || cpuPos.current.y >= gridHeight.current
 
-                // 2. Trail Collisions
-                // Note: Check against ALL trails including just added ones
-                // Self hit
-                if (playerTrail.current.some(p => p.x === playerPos.current.x && p.y === playerPos.current.y)) playerCrash = true
-                if (cpuTrail.current.some(p => p.x === cpuPos.current.x && p.y === cpuPos.current.y)) cpuCrash = true
+                // 2. Trail Collisions (O(1) with Set.has())
+                const playerKey = `${playerPos.current.x},${playerPos.current.y}`
+                const cpuKey = `${cpuPos.current.x},${cpuPos.current.y}`
 
-                // Cross hit
-                if (cpuTrail.current.some(p => p.x === playerPos.current.x && p.y === playerPos.current.y)) playerCrash = true
-                if (playerTrail.current.some(p => p.x === cpuPos.current.x && p.y === cpuPos.current.y)) cpuCrash = true
+                // Self collision
+                if (playerTrailSet.current.has(playerKey)) playerCrash = true
+                if (cpuTrailSet.current.has(cpuKey)) cpuCrash = true
+
+                // Cross collision
+                if (cpuTrailSet.current.has(playerKey)) playerCrash = true
+                if (playerTrailSet.current.has(cpuKey)) cpuCrash = true
 
                 // Head to Head
                 if (playerPos.current.x === cpuPos.current.x && playerPos.current.y === cpuPos.current.y) {
