@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 5 of 6 (UI Components)
-Plan: 1 of 4 in current phase (05-01 completed)
+Plan: 2 of 4 in current phase (05-02 completed)
 Status: In progress
-Last activity: 2026-01-23 - Completed 05-01-PLAN.md (TerminalLine & SyntaxHighlighter)
+Last activity: 2026-01-23 - Completed 05-02-PLAN.md (HistoryDisplay)
 
-Progress: [█████████████████░░░] 84% (21/25 plans)
+Progress: [██████████████████░░] 88% (22/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 2.9 min
-- Total execution time: 63 min
+- Total execution time: 65 min
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [█████████████████░░░] 84% (21
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
 | 04-commands | 7 | 18 min | 2.6 min |
-| 05-ui-components | 1 | 4 min | 4.0 min |
+| 05-ui-components | 2 | 6 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (4min), 04-07 (3min), 04-04 (4min), 04-06 (3min), 04-05 (2min)
+- Last 5 plans: 05-02 (2min), 05-01 (4min), 04-07 (3min), 04-04 (4min), 04-06 (3min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -95,6 +95,8 @@ Recent decisions affecting current work:
 - [04-07]: Tab completion filters case-insensitively for better UX
 - [04-07]: createDefaultRegistry() registers all 27 commands
 - [05-01]: Extract VALID_COMMANDS and HEADER_KEYWORDS as const arrays for reuse
+- [05-02]: Use index as key for history lines (acceptable: history is append-only)
+- [05-02]: Memoize entire component to avoid re-renders when input state changes
 
 ### Phase 1 Deliverables
 
@@ -154,6 +156,7 @@ Recent decisions affecting current work:
 - TerminalLine memoized component (components/terminal/TerminalLine.tsx) - 47 tests
 - SyntaxHighlighter pure functions (components/terminal/SyntaxHighlighter.tsx)
 - Token types and constants (components/terminal/types.ts)
+- HistoryDisplay memoized component (components/terminal/HistoryDisplay.tsx) - 17 tests
 - Barrel exports at components/terminal/index.ts
 
 ### Pending Todos
@@ -167,6 +170,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 05-01-PLAN.md (TerminalLine & SyntaxHighlighter)
+Stopped at: Completed 05-02-PLAN.md (HistoryDisplay)
 Resume file: None
-Next: 05-02-PLAN.md (HistoryDisplay)
+Next: 05-03-PLAN.md (InputLine)
