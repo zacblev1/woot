@@ -31,10 +31,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. VFSProvider context allows components to access VFS without prop drilling
   4. Characterization tests capture current behavior for: VFS navigation, all 6 games starting, theme/font persistence
   5. All 11 validated requirements (VAL-01 through VAL-11) pass manual verification
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Vitest setup and configuration (REQ-03)
+- [ ] 01-02-PLAN.md — TypeScript types with discriminated unions (REQ-01)
+- [ ] 01-03-PLAN.md — VFSProvider context (REQ-02)
+- [ ] 01-04-PLAN.md — Characterization tests (REQ-20)
 
 ### Phase 2: Core Hooks
 **Goal**: Extract terminal state management into encapsulated, reusable hooks
@@ -118,7 +121,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/4 | Planned | - |
 | 2. Core Hooks | 0/? | Not started | - |
 | 3. Games | 0/? | Not started | - |
 | 4. Commands | 0/? | Not started | - |
