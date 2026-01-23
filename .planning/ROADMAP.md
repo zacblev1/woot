@@ -107,10 +107,13 @@ Plans:
   3. TerminalLine component renders single lines with syntax highlighting
   4. React DevTools shows no unnecessary re-renders during typing (memoization working)
   5. Mobile keyboard and touch input continue to work
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — TerminalLine + SyntaxHighlighter foundation components
+- [ ] 05-02-PLAN.md — HistoryDisplay memoized list container
+- [ ] 05-03-PLAN.md — InputLine with keyboard handling and focus management
+- [ ] 05-04-PLAN.md — Terminal integration and verification checkpoint
 
 ### Phase 6: Cleanup
 **Goal**: Remove unused dependencies and verify final architecture meets all requirements
@@ -138,5 +141,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Core Hooks | 4/4 | Complete | 2026-01-22 |
 | 3. Games | 5/5 | Complete | 2026-01-22 |
 | 4. Commands | 7/7 | Complete | 2026-01-23 |
-| 5. UI Components | 0/? | Not started | - |
+| 5. UI Components | 0/4 | Not started | - |
 | 6. Cleanup | 0/? | Not started | - |
