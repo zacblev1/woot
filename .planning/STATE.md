@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 4 of 6 (Commands)
-Plan: 5 of 7 in current phase (04-06 completed)
+Plan: 6 of 7 in current phase (04-04 completed)
 Status: In progress
-Last activity: 2026-01-23 - Completed 04-06-PLAN.md (System Commands)
+Last activity: 2026-01-23 - Completed 04-04-PLAN.md (Collection Commands)
 
-Progress: [███████████████████] 97%
+Progress: [███████████████████] 98%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 2.9 min
-- Total execution time: 52 min
+- Total execution time: 56 min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████████████████] 97%
 | 01-foundation | 4 | 18 min | 4.5 min |
 | 02-core-hooks | 4 | 9 min | 2.3 min |
 | 03-games | 5 | 16 min | 3.2 min |
-| 04-commands | 5 | 11 min | 2.2 min |
+| 04-commands | 6 | 15 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-06 (3min), 04-05 (2min), 04-03 (2min), 04-02 (2min), 04-01 (2min)
+- Last 5 plans: 04-04 (4min), 04-06 (3min), 04-05 (2min), 04-03 (2min), 04-02 (2min)
 - Trend: Stable (fast execution)
 
 *Updated after each plan completion*
@@ -137,7 +137,8 @@ Recent decisions affecting current work:
 - Style commands: theme, font, neofetch (lib/commands/commands/style.ts)
 - System commands: help, man, clear, echo, exit, sudo (lib/commands/commands/system.ts)
 - Man pages data for 24 commands (lib/commands/man-pages.ts)
-- 140 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23, system: 21)
+- Collection commands: search, genre, format, type (lib/commands/commands/collection.ts)
+- 184 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15, info: 16, style: 23, system: 21, collection: 44)
 
 ### Pending Todos
 
@@ -150,6 +151,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-06-PLAN.md (System Commands)
+Stopped at: Completed 04-04-PLAN.md (Collection Commands)
 Resume file: None
-Next: Phase 4 - Commands (04-04-PLAN.md or 04-07-PLAN.md remaining)
+Next: Phase 4 - Commands (04-07-PLAN.md - Command Registry Integration)
