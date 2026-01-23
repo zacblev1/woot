@@ -80,6 +80,9 @@ Recent decisions affecting current work:
 - [04-01]: ExecuteContext extends CommandContext with game.isActive(), theme/font.list() and .config()
 - [04-01]: Collections included in context for search/genre/format/type commands
 - [04-01]: success() and error() helpers for consistent result creation
+- [04-02]: ls returns array with blank line padding for non-empty directories
+- [04-02]: cd with no args defaults to ~ (home directory)
+- [04-02]: view formats content based on pwd path matching /books, /vinyl, /hardware
 
 ### Phase 1 Deliverables
 
@@ -121,8 +124,9 @@ Recent decisions affecting current work:
 - CommandRegistry class with register/get/has/list/getAll
 - executeCommand function for parsing and delegation
 - success() and error() helper functions
+- Navigation commands: ls, cd, pwd, cat, view (lib/commands/commands/navigation.ts)
 - mkdirCommand, touchCommand, rmCommand filesystem commands
-- 47 tests passing for commands (registry: 18, executor: 14, filesystem: 15)
+- 80 tests passing for commands (registry: 17, executor: 15, navigation: 33, filesystem: 15)
 
 ### Pending Todos
 
