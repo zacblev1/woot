@@ -70,6 +70,7 @@ describe('gameCommand', () => {
       expect(output.some(line => line.includes('game blackjack'))).toBe(true)
       expect(output.some(line => line.includes('game rps'))).toBe(true)
       expect(output.some(line => line.includes('game tron'))).toBe(true)
+      expect(output.some(line => line.includes('game pacman'))).toBe(true)
     }
   })
 
@@ -128,6 +129,13 @@ describe('gameCommand', () => {
     expect(context.game.start).toHaveBeenCalledWith('tron')
   })
 
+  it('starts pacman game via context.game.start()', () => {
+    const context = createMockContext()
+    gameCommand.execute(['pacman'], context)
+
+    expect(context.game.start).toHaveBeenCalledWith('pacman')
+  })
+
   it('returns error for unknown game type', () => {
     const context = createMockContext()
     const result = gameCommand.execute(['invalid'], context)
@@ -142,6 +150,16 @@ describe('gameCommand', () => {
   it('returns empty array for tron (UI takes over)', () => {
     const context = createMockContext()
     const result = gameCommand.execute(['tron'], context)
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.output).toEqual([])
+    }
+  })
+
+  it('returns empty array for pacman (UI takes over)', () => {
+    const context = createMockContext()
+    const result = gameCommand.execute(['pacman'], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -174,6 +192,6 @@ describe('gameCommand', () => {
   })
 
   it('exports VALID_GAMES array', () => {
-    expect(VALID_GAMES).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron'])
+    expect(VALID_GAMES).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman'])
   })
 })

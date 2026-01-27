@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Monitor, RefreshCw, X } from "lucide-react"
+import { Monitor, RefreshCw, X, Trophy } from "lucide-react"
+import { useHighScores, type HighScore } from "@/lib/hooks/useHighScores"
 
 interface TronGameProps {
     onExit: () => void
@@ -16,10 +17,15 @@ const SPEED_INCREMENT = 5
 
 export function TronGame({ onExit }: TronGameProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [gameState, setGameState] = useState<"menu" | "playing" | "gameover">("menu")
+    const [gameState, setGameState] = useState<"menu" | "playing" | "gameover" | "initials">("menu")
     const [winner, setWinner] = useState<"player" | "cpu" | null>(null)
     const [score, setScore] = useState({ player: 0, cpu: 0 })
     const [level, setLevel] = useState(1)
+
+    // High score state
+    const { scores: highScores, isLoading: scoresLoading, submitScore, isHighScore } = useHighScores('tron')
+    const [playerInitials, setPlayerInitials] = useState("")
+    const [finalScore, setFinalScore] = useState(0)
 
     // Game state refs (mutable for performance in loop)
     const playerPos = useRef<Point>({ x: 10, y: 30 })
@@ -76,8 +82,30 @@ export function TronGame({ onExit }: TronGameProps) {
         setWinner(null)
     }, [])
 
+    // Handle initials submission
+    const handleInitialsSubmit = useCallback(async () => {
+        if (playerInitials.length > 0) {
+            await submitScore(playerInitials, finalScore, level)
+            setPlayerInitials("")
+            setGameState("gameover")
+        }
+    }, [playerInitials, finalScore, level, submitScore])
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Handle initials input
+            if (gameState === "initials") {
+                e.preventDefault()
+                if (e.key === "Backspace") {
+                    setPlayerInitials(prev => prev.slice(0, -1))
+                } else if (e.key === "Enter" && playerInitials.length > 0) {
+                    handleInitialsSubmit()
+                } else if (/^[a-zA-Z0-9]$/.test(e.key) && playerInitials.length < 3) {
+                    setPlayerInitials(prev => (prev + e.key).toUpperCase())
+                }
+                return
+            }
+
             // Menu/Game Over: Enter or Space to start/restart
             if (e.key === "Enter" || e.key === " ") {
                 if (gameState === "menu") {
@@ -125,7 +153,7 @@ export function TronGame({ onExit }: TronGameProps) {
         }
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [gameState, winner, startGame, onExit])
+    }, [gameState, winner, playerInitials, startGame, onExit, handleInitialsSubmit])
 
     // AI Logic - Flood Fill Heuristic
     const countReachable = (startPos: Point, trails: Set<string>, w: number, h: number, maxDepth: number = 50): number => {
@@ -416,15 +444,27 @@ export function TronGame({ onExit }: TronGameProps) {
                 }
 
                 if (playerCrash || cpuCrash) {
-                    setGameState("gameover")
                     if (playerCrash && cpuCrash) {
                         setWinner(null) // Tie
+                        setGameState("gameover")
                     } else if (playerCrash) {
                         setWinner("cpu")
-                        setScore(s => ({ ...s, cpu: s.cpu + 1 }))
+                        setScore(s => {
+                            // Calculate final score: (wins * 100) + (level * 500)
+                            const newFinalScore = (s.player * 100) + (level * 500)
+                            setFinalScore(newFinalScore)
+                            // Check if qualifies for high score
+                            if (isHighScore(newFinalScore) && newFinalScore > 0) {
+                                setGameState("initials")
+                            } else {
+                                setGameState("gameover")
+                            }
+                            return { ...s, cpu: s.cpu + 1 }
+                        })
                     } else {
                         setWinner("player")
                         setScore(s => ({ ...s, player: s.player + 1 }))
+                        setGameState("gameover")
                     }
                     return // Stop loop
                 }
@@ -535,9 +575,73 @@ export function TronGame({ onExit }: TronGameProps) {
                             <Monitor className="w-5 h-5" />
                             START GAME
                         </button>
+
+                        {/* High Scores */}
+                        {!scoresLoading && highScores.length > 0 && (
+                            <div className="flex flex-col items-center gap-2 pt-4 border-t border-cyan-500/20">
+                                <div className="flex items-center gap-2 text-yellow-400 text-sm font-bold">
+                                    <Trophy className="w-4 h-4" />
+                                    HIGH SCORES
+                                </div>
+                                <div className="flex flex-col gap-1 font-mono text-xs">
+                                    {highScores.slice(0, 5).map((hs, i) => (
+                                        <div key={hs.id} className="flex gap-4 text-slate-400">
+                                            <span className="text-yellow-400/70 w-4">{i + 1}.</span>
+                                            <span className="text-cyan-400 w-10">{hs.initials}</span>
+                                            <span className="text-white w-16 text-right">{hs.score.toLocaleString()}</span>
+                                            <span className="text-slate-500">LVL {hs.level}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex gap-4 text-slate-600 text-xs font-mono">
                             <span>[ENTER] Start</span>
                             <span>[ESC] Exit</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Initials Input Overlay */}
+            {gameState === "initials" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-20">
+                    <div className="flex flex-col items-center gap-6 p-8 border border-yellow-500/30 rounded-xl bg-black/90 shadow-[0_0_50px_rgba(255,215,0,0.1)]">
+                        <div className="flex items-center gap-2 text-yellow-400 text-2xl font-bold">
+                            <Trophy className="w-6 h-6" />
+                            NEW HIGH SCORE!
+                        </div>
+                        <p className="text-4xl font-bold text-white">{finalScore.toLocaleString()}</p>
+                        <div className="flex flex-col items-center gap-4">
+                            <p className="text-slate-400 font-mono text-sm">ENTER YOUR INITIALS</p>
+                            <div className="flex gap-2">
+                                {[0, 1, 2].map(i => (
+                                    <div
+                                        key={i}
+                                        className={`w-12 h-14 border-2 rounded flex items-center justify-center text-3xl font-bold ${
+                                            i < playerInitials.length
+                                                ? 'border-cyan-400 text-cyan-400 bg-cyan-400/10'
+                                                : i === playerInitials.length
+                                                ? 'border-white/50 text-white animate-pulse'
+                                                : 'border-slate-600 text-slate-600'
+                                        }`}
+                                    >
+                                        {playerInitials[i] || '_'}
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleInitialsSubmit}
+                                disabled={playerInitials.length === 0}
+                                className="mt-4 px-8 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/50 rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                SUBMIT
+                            </button>
+                        </div>
+                        <div className="flex gap-4 text-slate-600 text-xs font-mono">
+                            <span>TYPE INITIALS</span>
+                            <span>[ENTER] Submit</span>
                         </div>
                     </div>
                 </div>

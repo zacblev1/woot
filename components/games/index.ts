@@ -30,5 +30,6 @@ export * as triviaGame from './trivia-game'
 export * as blackjackGame from './blackjack-game'
 export * as rpsGame from './rps-game'
 
-// Tron is a standalone component (not a pure function module)
+// Canvas-based games are standalone components (not pure function modules)
 export { TronGame } from './tron-game'
+export { PacmanGame } from './pacman-game'

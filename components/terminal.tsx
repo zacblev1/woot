@@ -14,9 +14,13 @@ const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod =
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
 })
 
+const PacmanGame = dynamic(() => import("@/components/games/pacman-game").then(mod => mod.PacmanGame), {
+  loading: () => <div className="p-4 text-yellow-400 font-mono">Loading Pac-Man...</div>
+})
+
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -329,10 +333,11 @@ const manPages: Record<string, string[]> = {
     "    blackjack   Play 21 against the dealer",
     "    rps         Rock Paper Scissors",
     "    tron        Light Cycle Arcade Game",
+    "    pacman      Classic Maze Chase",
     "",
     "EXAMPLES",
     "    game wordle",
-    "    game tron",
+    "    game pacman",
     "",
   ],
   suggest: [
@@ -1558,6 +1563,8 @@ export function Terminal() {
           "  game trivia      Answer trivia questions",
           "  game blackjack   Play 21 against dealer",
           "  game rps         Rock Paper Scissors",
+          "  game tron        Light Cycle Arcade Game",
+          "  game pacman      Classic Maze Chase",
           "",
         ]
       }
@@ -1569,6 +1576,10 @@ export function Terminal() {
       if (gameType === "rps") return startRPSGame()
       if (gameType === "tron") {
         setGameState({ active: true, type: "tron" })
+        return [] // No text output, UI takes over
+      }
+      if (gameType === "pacman") {
+        setGameState({ active: true, type: "pacman" })
         return [] // No text output, UI takes over
       }
 
@@ -1778,6 +1789,10 @@ export function Terminal() {
       {gameState.type === "tron" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <TronGame onExit={() => setGameState({ active: false, type: null })} />
+        </div>
+      ) : gameState.type === "pacman" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <PacmanGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>

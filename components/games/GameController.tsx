@@ -9,6 +9,7 @@ import { handleInput as handleTriviaInput } from './trivia-game'
 import { handleInput as handleBlackjackInput } from './blackjack-game'
 import { handleInput as handleRPSInput } from './rps-game'
 import { TronGame } from './tron-game'
+import { PacmanGame } from './pacman-game'
 
 export interface GameControllerHandle {
   handleInput: (input: string) => GameResult | null
@@ -78,6 +79,9 @@ export const GameController = forwardRef<GameControllerHandle, GameControllerPro
         case 'tron':
           // Tron handles its own input via keyboard events
           return null
+        case 'pacman':
+          // Pacman handles its own input via keyboard events
+          return null
         default:
           return null
       }
@@ -95,9 +99,13 @@ export const GameController = forwardRef<GameControllerHandle, GameControllerPro
       handleInput: processInput
     }), [processInput])
 
-    // Only Tron renders a visual component
+    // Canvas-based games render their own visual component
     if (gameState.active && gameState.type === 'tron') {
       return <TronGame onExit={onGameEnd} />
+    }
+
+    if (gameState.active && gameState.type === 'pacman') {
+      return <PacmanGame onExit={onGameEnd} />
     }
 
     // Text-based games are "headless" - terminal handles rendering

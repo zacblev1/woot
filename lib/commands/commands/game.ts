@@ -1,7 +1,7 @@
 import type { CommandDefinition, GameType } from '../types'
 import { success, error } from '../types'
 
-const VALID_GAMES: GameType[] = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron']
+const VALID_GAMES: GameType[] = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman']
 
 export const gameCommand: CommandDefinition = {
   name: 'game',
@@ -19,6 +19,7 @@ export const gameCommand: CommandDefinition = {
         '  game blackjack   Play 21 against dealer',
         '  game rps         Rock Paper Scissors',
         '  game tron        Light Cycle Arcade Game',
+        '  game pacman      Classic Maze Chase',
         '',
       ])
     }
@@ -30,8 +31,8 @@ export const gameCommand: CommandDefinition = {
     // Start the game via context
     context.game.start(gameType)
 
-    // Tron returns empty (UI takes over), others return empty success - GameController handles the start message
-    if (gameType === 'tron') {
+    // Canvas games return empty (UI takes over), others return empty success - GameController handles the start message
+    if (gameType === 'tron' || gameType === 'pacman') {
       return success([])
     }
 

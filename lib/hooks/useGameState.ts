@@ -8,6 +8,7 @@ import {
   BlackjackGameData,
   RPSGameData,
   TronGameData,
+  PacmanGameData,
   createInactiveGameState,
 } from '@/lib/types/games'
 
@@ -19,6 +20,7 @@ export type GameDataForType<T extends GameType> =
   T extends 'blackjack' ? BlackjackGameData :
   T extends 'rps' ? RPSGameData :
   T extends 'tron' ? TronGameData :
+  T extends 'pacman' ? PacmanGameData :
   never
 
 export interface UseGameStateReturn {

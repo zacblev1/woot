@@ -1,5 +1,5 @@
 // Game type discriminator
-export type GameType = 'number' | 'wordle' | 'trivia' | 'blackjack' | 'rps' | 'tron'
+export type GameType = 'number' | 'wordle' | 'trivia' | 'blackjack' | 'rps' | 'tron' | 'pacman'
 
 // Individual game data types
 export interface NumberGameData {
@@ -59,6 +59,11 @@ export interface TronGameData {
   difficulty: 'easy' | 'medium' | 'hard'
 }
 
+export interface PacmanGameData {
+  // Pacman uses its own component state, minimal data here
+  difficulty: 'easy' | 'medium' | 'hard'
+}
+
 // Discriminated union for GameState
 export type GameState =
   | { active: false; type: null; data: null }
@@ -68,6 +73,7 @@ export type GameState =
   | { active: true; type: 'blackjack'; data: BlackjackGameData }
   | { active: true; type: 'rps'; data: RPSGameData }
   | { active: true; type: 'tron'; data: TronGameData }
+  | { active: true; type: 'pacman'; data: PacmanGameData }
 
 // Type guard helpers
 export function isActiveGame(state: GameState): state is GameState & { active: true } {
