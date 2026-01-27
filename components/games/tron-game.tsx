@@ -655,6 +655,26 @@ export function TronGame({ onExit }: TronGameProps) {
                             {winner === "player" ? <span className="text-cyan-400">VICTORY</span> : winner === "cpu" ? <span className="text-fuchsia-400">DEREEZED</span> : "DRAW"}
                         </h2>
 
+                        {/* High Scores */}
+                        {!scoresLoading && highScores.length > 0 && (
+                            <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/10">
+                                <div className="flex items-center gap-2 text-yellow-400 text-sm font-bold">
+                                    <Trophy className="w-4 h-4" />
+                                    HIGH SCORES
+                                </div>
+                                <div className="flex flex-col gap-1 font-mono text-xs">
+                                    {highScores.slice(0, 5).map((hs, i) => (
+                                        <div key={hs.id} className="flex gap-4 text-slate-400">
+                                            <span className="text-yellow-400/70 w-4">{i + 1}.</span>
+                                            <span className="text-cyan-400 w-10">{hs.initials}</span>
+                                            <span className="text-white w-16 text-right">{hs.score.toLocaleString()}</span>
+                                            <span className="text-slate-500">LVL {hs.level}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {winner === "player" ? (
                             <div className="flex flex-col items-center gap-4">
                                 <p className="text-emerald-400 font-mono animate-pulse">LEVEL COMPLETED</p>

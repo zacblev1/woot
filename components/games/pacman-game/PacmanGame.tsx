@@ -620,6 +620,27 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
             </h2>
             <p className="text-2xl text-white">Final Score: {score.toLocaleString()}</p>
             <p className="text-lg text-slate-400">Level: {level}</p>
+
+            {/* High Scores */}
+            {!scoresLoading && highScores.length > 0 && (
+              <div className="flex flex-col items-center gap-2 pt-4 border-t border-red-500/20">
+                <div className="flex items-center gap-2 text-yellow-400 text-sm font-bold">
+                  <Trophy className="w-4 h-4" />
+                  HIGH SCORES
+                </div>
+                <div className="flex flex-col gap-1 font-mono text-xs">
+                  {highScores.slice(0, 5).map((hs, i) => (
+                    <div key={hs.id} className="flex gap-4 text-slate-400">
+                      <span className="text-yellow-400/70 w-4">{i + 1}.</span>
+                      <span className="text-yellow-400 w-10">{hs.initials}</span>
+                      <span className="text-white w-16 text-right">{hs.score.toLocaleString()}</span>
+                      <span className="text-slate-500">LVL {hs.level}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-4">
               <button
                 onClick={() => startGame(false)}
