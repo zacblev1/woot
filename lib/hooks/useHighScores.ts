@@ -18,7 +18,7 @@ interface UseHighScoresReturn {
   isHighScore: (score: number) => boolean
 }
 
-export function useHighScores(gameType: 'tron' | 'pacman'): UseHighScoresReturn {
+export function useHighScores(gameType: 'tron' | 'pacman' | 'basketball'): UseHighScoresReturn {
   const [scores, setScores] = useState<HighScore[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

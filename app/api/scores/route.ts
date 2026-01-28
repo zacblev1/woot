@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate game type
-    if (!['tron', 'pacman'].includes(gameType)) {
+    if (!['tron', 'pacman', 'basketball'].includes(gameType)) {
       return NextResponse.json(
-        { error: 'Invalid game type. Must be "tron" or "pacman"' },
+        { error: 'Invalid game type. Must be "tron", "pacman", or "basketball"' },
         { status: 400 }
       )
     }

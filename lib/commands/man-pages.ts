@@ -193,6 +193,8 @@ export const manPages: Record<string, string[]> = {
     '    blackjack   Play 21 against the dealer',
     '    rps         Rock Paper Scissors',
     '    tron        Light Cycle Arcade Game',
+    '    pacman      Classic Maze Chase',
+    '    basketball  Arcade Hoops',
     '',
     'EXAMPLES',
     '    game wordle',

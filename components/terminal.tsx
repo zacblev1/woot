@@ -18,9 +18,13 @@ const PacmanGame = dynamic(() => import("@/components/games/pacman-game").then(m
   loading: () => <div className="p-4 text-yellow-400 font-mono">Loading Pac-Man...</div>
 })
 
+const BasketballGame = dynamic(() => import("@/components/games/basketball-game").then(mod => mod.BasketballGame), {
+  loading: () => <div className="p-4 text-orange-400 font-mono">Loading Arcade Hoops...</div>
+})
+
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -334,6 +338,7 @@ const manPages: Record<string, string[]> = {
     "    rps         Rock Paper Scissors",
     "    tron        Light Cycle Arcade Game",
     "    pacman      Classic Maze Chase",
+    "    basketball  Arcade Hoops",
     "",
     "EXAMPLES",
     "    game wordle",
@@ -1565,6 +1570,7 @@ export function Terminal() {
           "  game rps         Rock Paper Scissors",
           "  game tron        Light Cycle Arcade Game",
           "  game pacman      Classic Maze Chase",
+          "  game basketball  Arcade Hoops",
           "",
         ]
       }
@@ -1580,6 +1586,10 @@ export function Terminal() {
       }
       if (gameType === "pacman") {
         setGameState({ active: true, type: "pacman" })
+        return [] // No text output, UI takes over
+      }
+      if (gameType === "basketball") {
+        setGameState({ active: true, type: "basketball" })
         return [] // No text output, UI takes over
       }
 
@@ -1793,6 +1803,10 @@ export function Terminal() {
       ) : gameState.type === "pacman" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <PacmanGame onExit={() => setGameState({ active: false, type: null })} />
+        </div>
+      ) : gameState.type === "basketball" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <BasketballGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>

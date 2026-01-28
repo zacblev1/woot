@@ -33,3 +33,4 @@ export * as rpsGame from './rps-game'
 // Canvas-based games are standalone components (not pure function modules)
 export { TronGame } from './tron-game'
 export { PacmanGame } from './pacman-game'
+export { BasketballGame } from './basketball-game'

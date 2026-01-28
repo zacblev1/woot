@@ -10,6 +10,7 @@ import { handleInput as handleBlackjackInput } from './blackjack-game'
 import { handleInput as handleRPSInput } from './rps-game'
 import { TronGame } from './tron-game'
 import { PacmanGame } from './pacman-game'
+import { BasketballGame } from './basketball-game'
 
 export interface GameControllerHandle {
   handleInput: (input: string) => GameResult | null
@@ -82,6 +83,9 @@ export const GameController = forwardRef<GameControllerHandle, GameControllerPro
         case 'pacman':
           // Pacman handles its own input via keyboard events
           return null
+        case 'basketball':
+          // Basketball handles its own input via mouse/touch events
+          return null
         default:
           return null
       }
@@ -106,6 +110,10 @@ export const GameController = forwardRef<GameControllerHandle, GameControllerPro
 
     if (gameState.active && gameState.type === 'pacman') {
       return <PacmanGame onExit={onGameEnd} />
+    }
+
+    if (gameState.active && gameState.type === 'basketball') {
+      return <BasketballGame onExit={onGameEnd} />
     }
 
     // Text-based games are "headless" - terminal handles rendering
