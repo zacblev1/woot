@@ -334,56 +334,133 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
     ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - 20)
     ctx.stroke()
 
-    // Backboard (vertical, white/cyan)
+    // Check if ball is passing through the hoop (for render order)
+    const ballInHoop = ballPos.current.x > RIM_LEFT_X &&
+                       ballPos.current.x < RIM_RIGHT_X &&
+                       ballPos.current.y > RIM_Y - BALL_RADIUS &&
+                       ballPos.current.y < RIM_Y + NET_DEPTH + BALL_RADIUS
+
+    // Backboard (vertical, white/cyan) - always behind
     ctx.shadowBlur = 10
     ctx.shadowColor = "#00ffff"
     ctx.fillStyle = "rgba(200, 255, 255, 0.9)"
     ctx.fillRect(BACKBOARD_X, BACKBOARD_TOP, 8, BACKBOARD_BOTTOM - BACKBOARD_TOP)
     ctx.shadowBlur = 0
-
-    // Backboard outline
     ctx.strokeStyle = "#00ffff"
     ctx.lineWidth = 2
     ctx.strokeRect(BACKBOARD_X, BACKBOARD_TOP, 8, BACKBOARD_BOTTOM - BACKBOARD_TOP)
 
-    // Net (simple hanging lines)
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)"
-    ctx.lineWidth = 1
-    for (let i = 0; i <= 6; i++) {
-      const t = i / 6
-      const topX = RIM_LEFT_X + t * RIM_INNER_WIDTH
-      const bottomX = HOOP_CENTER_X + (topX - HOOP_CENTER_X) * 0.4
-      ctx.beginPath()
-      ctx.moveTo(topX, RIM_Y + 3)
-      ctx.quadraticCurveTo(topX, RIM_Y + NET_DEPTH * 0.6, bottomX, RIM_Y + NET_DEPTH)
-      ctx.stroke()
-    }
-
-    // Rim (orange ring)
+    // Rim connector to backboard - always behind
     ctx.shadowBlur = 15
     ctx.shadowColor = "#ff6600"
     ctx.strokeStyle = "#ff6600"
     ctx.lineWidth = RIM_THICKNESS
     ctx.beginPath()
-    ctx.moveTo(RIM_LEFT_X, RIM_Y)
-    ctx.lineTo(RIM_RIGHT_X, RIM_Y)
-    ctx.stroke()
-
-    // Rim ends (circles)
-    ctx.fillStyle = "#ff6600"
-    ctx.beginPath()
-    ctx.arc(RIM_LEFT_X, RIM_Y, RIM_THICKNESS / 2, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(RIM_RIGHT_X, RIM_Y, RIM_THICKNESS / 2, 0, Math.PI * 2)
-    ctx.fill()
-
-    // Rim connector to backboard
-    ctx.beginPath()
     ctx.moveTo(RIM_RIGHT_X, RIM_Y)
     ctx.lineTo(BACKBOARD_X, RIM_Y)
     ctx.stroke()
     ctx.shadowBlur = 0
+
+    // Helper function to draw ball
+    const drawBall = () => {
+      // Ball trail
+      if (ballInFlight.current) {
+        ballTrail.current.forEach((point, i) => {
+          const alpha = (i / ballTrail.current.length) * 0.4
+          const size = (i / ballTrail.current.length) * BALL_RADIUS * 0.7
+          ctx.fillStyle = `rgba(255, 120, 0, ${alpha})`
+          ctx.beginPath()
+          ctx.arc(point.x, point.y, size, 0, Math.PI * 2)
+          ctx.fill()
+        })
+      }
+
+      // Ball
+      ctx.shadowBlur = 12
+      ctx.shadowColor = "#ff6600"
+
+      const ballGradient = ctx.createRadialGradient(
+        ballPos.current.x - 4, ballPos.current.y - 4, 0,
+        ballPos.current.x, ballPos.current.y, BALL_RADIUS
+      )
+      ballGradient.addColorStop(0, "#ff9944")
+      ballGradient.addColorStop(1, "#cc4400")
+      ctx.fillStyle = ballGradient
+      ctx.beginPath()
+      ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Ball lines
+      ctx.shadowBlur = 0
+      ctx.strokeStyle = "#442200"
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(ballPos.current.x - BALL_RADIUS, ballPos.current.y)
+      ctx.lineTo(ballPos.current.x + BALL_RADIUS, ballPos.current.y)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS * 0.65, -Math.PI / 2, Math.PI / 2)
+      ctx.stroke()
+    }
+
+    // Helper function to draw rim and net
+    const drawRimAndNet = () => {
+      // Net (hanging lines)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"
+      ctx.lineWidth = 1.5
+      for (let i = 0; i <= 8; i++) {
+        const t = i / 8
+        const topX = RIM_LEFT_X + t * RIM_INNER_WIDTH
+        const bottomX = HOOP_CENTER_X + (topX - HOOP_CENTER_X) * 0.3
+        ctx.beginPath()
+        ctx.moveTo(topX, RIM_Y + 3)
+        ctx.quadraticCurveTo(topX, RIM_Y + NET_DEPTH * 0.5, bottomX, RIM_Y + NET_DEPTH)
+        ctx.stroke()
+      }
+      // Horizontal net lines
+      for (let j = 1; j <= 3; j++) {
+        const y = RIM_Y + 5 + (NET_DEPTH - 5) * (j / 4)
+        const shrink = j / 4 * 0.3
+        ctx.beginPath()
+        ctx.moveTo(RIM_LEFT_X + RIM_INNER_WIDTH * shrink, y)
+        ctx.lineTo(RIM_RIGHT_X - RIM_INNER_WIDTH * shrink, y)
+        ctx.stroke()
+      }
+
+      // Rim (orange ring)
+      ctx.shadowBlur = 15
+      ctx.shadowColor = "#ff6600"
+      ctx.strokeStyle = "#ff6600"
+      ctx.lineWidth = RIM_THICKNESS
+      ctx.beginPath()
+      ctx.moveTo(RIM_LEFT_X, RIM_Y)
+      ctx.lineTo(RIM_RIGHT_X, RIM_Y)
+      ctx.stroke()
+
+      // Rim ends (circles)
+      ctx.fillStyle = "#ff6600"
+      ctx.beginPath()
+      ctx.arc(RIM_LEFT_X, RIM_Y, RIM_THICKNESS / 2 + 1, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(RIM_RIGHT_X, RIM_Y, RIM_THICKNESS / 2 + 1, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.shadowBlur = 0
+    }
+
+    // Draw in correct order based on ball position
+    if (ballInHoop) {
+      // Ball is passing through - draw ball first, then rim/net on top
+      drawBall()
+      drawRimAndNet()
+    } else {
+      // Ball is not in hoop - draw rim/net first, then ball on top
+      drawRimAndNet()
+      drawBall()
+    }
 
     // Trajectory preview
     if (!ballInFlight.current && (isCharging.current || power.current > 0)) {
@@ -446,48 +523,6 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
         ctx.stroke()
       }
     }
-
-    // Ball trail
-    if (ballInFlight.current) {
-      ballTrail.current.forEach((point, i) => {
-        const alpha = (i / ballTrail.current.length) * 0.4
-        const size = (i / ballTrail.current.length) * BALL_RADIUS * 0.7
-        ctx.fillStyle = `rgba(255, 120, 0, ${alpha})`
-        ctx.beginPath()
-        ctx.arc(point.x, point.y, size, 0, Math.PI * 2)
-        ctx.fill()
-      })
-    }
-
-    // Ball
-    ctx.shadowBlur = 12
-    ctx.shadowColor = "#ff6600"
-
-    const gradient = ctx.createRadialGradient(
-      ballPos.current.x - 4, ballPos.current.y - 4, 0,
-      ballPos.current.x, ballPos.current.y, BALL_RADIUS
-    )
-    gradient.addColorStop(0, "#ff9944")
-    gradient.addColorStop(1, "#cc4400")
-    ctx.fillStyle = gradient
-    ctx.beginPath()
-    ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS, 0, Math.PI * 2)
-    ctx.fill()
-
-    // Ball lines
-    ctx.shadowBlur = 0
-    ctx.strokeStyle = "#442200"
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.moveTo(ballPos.current.x - BALL_RADIUS, ballPos.current.y)
-    ctx.lineTo(ballPos.current.x + BALL_RADIUS, ballPos.current.y)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.arc(ballPos.current.x, ballPos.current.y, BALL_RADIUS * 0.65, -Math.PI / 2, Math.PI / 2)
-    ctx.stroke()
 
     // Shot result text
     if (lastShotResult) {
