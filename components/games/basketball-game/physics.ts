@@ -71,25 +71,40 @@ export function checkRimCollision(
   return { collided: false }
 }
 
+export interface BackboardCollisionResult extends CollisionResult {
+  newPosition?: Point
+}
+
 export function checkBackboardCollision(
   ballPos: Point,
   ballVelocity: Point,
   backboardX: number,
   backboardTop: number,
   backboardBottom: number
-): CollisionResult {
+): BackboardCollisionResult {
   // Backboard is a vertical rectangle on the right side
+  // Only collide if ball is moving toward the backboard (positive x velocity)
   if (
     ballPos.x + BALL_RADIUS > backboardX &&
     ballPos.x < backboardX + 10 &&
     ballPos.y > backboardTop &&
-    ballPos.y < backboardBottom
+    ballPos.y < backboardBottom &&
+    ballVelocity.x > 0 // Only if moving toward backboard
   ) {
+    // Ensure minimum bounce velocity so ball doesn't get stuck
+    const minBounceVelocity = 80
+    const bounceX = Math.max(Math.abs(ballVelocity.x) * RESTITUTION, minBounceVelocity)
+
     return {
       collided: true,
       newVelocity: {
-        x: -Math.abs(ballVelocity.x) * RESTITUTION,
+        x: -bounceX,
         y: ballVelocity.y * RESTITUTION
+      },
+      // Push ball out of collision zone
+      newPosition: {
+        x: backboardX - BALL_RADIUS - 1,
+        y: ballPos.y
       }
     }
   }

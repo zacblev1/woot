@@ -296,6 +296,10 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
         )
         if (backboardCollision.collided && backboardCollision.newVelocity) {
           ballVelocity.current = backboardCollision.newVelocity
+          // Push ball out of backboard to prevent sticking
+          if (backboardCollision.newPosition) {
+            ballPos.current = backboardCollision.newPosition
+          }
           hitRim.current = true
         }
 
