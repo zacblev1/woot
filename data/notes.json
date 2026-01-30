@@ -1,13 +1,13 @@
 [
   {
     "id": 1,
-    "title": "Welcome, Young Explorers!",
+    "title": "Welcome, Zach's classmates!",
     "date": "2026-01-30",
-    "author": "Zach's Dad",
+    "author": "Zach's Dad whose also named Zach",
     "content": [
-      "Hey Zach and classmates! 👋",
+      "Hey Zach and all your amazing classmates! 👋",
       "",
-      "First off, thank you SO much for visiting my website and playing the games! When I built this terminal-style site, I never imagined it would become popular at your elementary school. Knowing that you all are enjoying Tron, Pac-Man, and Arcade Hoops brings me so much joy!",
+      "First off, thank you SO much for visiting my website and playing the games! When I built this site, I never imagined it would become popular at your elementary school. Knowing that you all are enjoying Tron, Pac-Man, and Arcade Hoops brings me so much joy!",
       "",
       "I want to take a moment to tell you how awesome it is that you're interested in computers and programming. You know what? Every app on your phone, every video game you play, every website you visit - they were all created by people who started out just like you, curious and excited to learn.",
       "",
@@ -25,7 +25,7 @@
       "",
       "=== EXPLORE AND HAVE FUN! ===",
       "",
-      "This terminal has lots of hidden features. Try these commands:",
+      "This site has lots of hidden features. Try these commands:",
       "- 'help' - See all available commands",
       "- 'theme dracula' - Change the colors (try different themes!)",
       "- 'cd books' or 'cd vinyl' - Explore my collections",
@@ -44,7 +44,8 @@
       "",
       "Keep playing, keep learning, and keep being awesome!",
       "",
-      "- Mr. Blevins (Zach's Dad)"
+      "- Mr. Blevins (Zach's Dad)",
+      ""
     ]
   }
 ]
