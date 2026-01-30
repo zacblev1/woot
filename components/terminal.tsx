@@ -4,6 +4,7 @@ import type React from "react"
 import booksData from "@/data/books.json"
 import vinylData from "@/data/vinyl.json"
 import hardwareData from "@/data/hardware.json"
+import notesData from "@/data/notes.json"
 import { VirtualFileSystem } from "@/lib/vfs"
 import dynamic from "next/dynamic"
 import { useState, useRef, useEffect } from "react"
@@ -225,11 +226,14 @@ const manPages: Record<string, string[]> = {
     "",
     "DESCRIPTION",
     "    Display file contents with nice formatting. Works best",
-    "    with collection items in ~/books, ~/vinyl, ~/hardware.",
+    "    with collection items in ~/books, ~/vinyl, ~/hardware,",
+    "    and blog posts in ~/notes.",
     "",
     "EXAMPLES",
     "    cd books",
     "    view dune",
+    "    cd ~/notes",
+    "    view welcome-young-explorers-",
     "",
     "SEE ALSO",
     "    cat, ls",
@@ -246,11 +250,13 @@ const manPages: Record<string, string[]> = {
     "DESCRIPTION",
     "    Search the current collection for items matching the",
     "    given term. Searches titles and authors/artists.",
-    "    Must be in ~/books, ~/vinyl, or ~/hardware.",
+    "    Must be in ~/books, ~/vinyl, ~/hardware, or ~/notes.",
     "",
     "EXAMPLES",
     "    cd vinyl",
     "    search daft punk",
+    "    cd ~/notes",
+    "    search welcome",
     "",
     "SEE ALSO",
     "    genre, format, type",
@@ -643,6 +649,20 @@ export function Terminal() {
           type: "file",
           parent: hwDir,
           content: device
+        }
+      }
+    })
+
+    // Populate notes
+    const notesDir = fs.createDir("/home/zachary/notes")
+    notesData.forEach((note) => {
+      const filename = note.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      if (notesDir.children) {
+        notesDir.children[filename] = {
+          name: filename,
+          type: "file",
+          parent: notesDir,
+          content: note
         }
       }
     })
@@ -1296,6 +1316,22 @@ export function Terminal() {
         return lines
       }
 
+      if (!path && pwd === '/home/zachary/notes') {
+        const lines: (string | { type: string; content: string })[] = [""]
+        result.forEach(filename => {
+          const node = vfs.resolve(filename)
+          if (node && node.type === 'file' && node.content) {
+            const c = node.content as { title?: string; date?: string; author?: string }
+            lines.push({ type: 'success', content: c.title || filename })
+            if (c.date) lines.push({ type: 'output', content: '    ' + c.date + (c.author ? ' by ' + c.author : '') })
+          } else {
+            lines.push(filename)
+          }
+        })
+        lines.push("")
+        return lines
+      }
+
       return ["", ...result, ""]
     },
     cd: (args) => {
@@ -1420,6 +1456,22 @@ export function Terminal() {
         ].filter(Boolean) as string[]
       }
 
+      if (pwd.includes("/notes")) {
+        const note = node.content as { title: string; date: string; author: string; content: string[] }
+        return [
+          "",
+          "=".repeat(60),
+          note.title,
+          "=".repeat(60),
+          `Date: ${note.date} | Author: ${note.author}`,
+          "",
+          ...note.content,
+          "",
+          "=".repeat(60),
+          "",
+        ]
+      }
+
       if (typeof node.content === "string") return node.content
       return JSON.stringify(node.content, null, 2)
     },
@@ -1462,6 +1514,18 @@ export function Terminal() {
         const list = results.map((b) => {
           const idx = booksData.indexOf(b) + 1
           return `  ${String(idx).padStart(3, " ")}  ${b.title} - ${b.author}`
+        })
+        return ["", `${results.length} results`, "", ...list, ""]
+      }
+
+      if (currentDirectory === "~/notes") {
+        const results = notesData.filter(
+          (n) => n.title.toLowerCase().includes(term) || n.content.join(" ").toLowerCase().includes(term),
+        )
+        if (results.length === 0) return `No results for "${term}"`
+        const list = results.map((n) => {
+          const idx = notesData.indexOf(n) + 1
+          return `  ${String(idx).padStart(3, " ")}  ${n.title} (${n.date})`
         })
         return ["", `${results.length} results`, "", ...list, ""]
       }
@@ -1630,6 +1694,7 @@ export function Terminal() {
       `  Books: ${booksData.length}`,
       `  Vinyl: ${vinylData.length}`,
       `  Hardware: ${hardwareData.length}`,
+      `  Notes: ${notesData.length}`,
       "",
     ],
     cat: (args) => {
