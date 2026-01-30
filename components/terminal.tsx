@@ -351,6 +351,27 @@ const manPages: Record<string, string[]> = {
     "    game pacman",
     "",
   ],
+  notes: [
+    "",
+    "NAME",
+    "    notes - read blog posts and updates",
+    "",
+    "SYNOPSIS",
+    "    notes [number]",
+    "",
+    "DESCRIPTION",
+    "    View blog posts and site updates. Without arguments,",
+    "    displays a numbered list of available notes. With a",
+    "    number, displays that note.",
+    "",
+    "EXAMPLES",
+    "    notes        List all notes",
+    "    notes 1      Read the first note",
+    "",
+    "SEE ALSO",
+    "    view, cat",
+    "",
+  ],
   suggest: [
     "",
     "NAME",
@@ -656,7 +677,7 @@ export function Terminal() {
     // Populate notes
     const notesDir = fs.createDir("/home/zachary/notes")
     notesData.forEach((note) => {
-      const filename = note.title.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      const filename = note.title.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+$/, "").replace(/^-+/, "")
       if (notesDir.children) {
         notesDir.children[filename] = {
           name: filename,
@@ -1231,6 +1252,7 @@ export function Terminal() {
         "  Collections    search, genre, format, type",
         "  Files          mkdir, touch, rm",
         "  Games          game <type>, suggest",
+        "  Blog           notes",
         "  Style          theme, font, neofetch",
         "  Info           about, contact, projects, whoami, date",
         "  Other          clear, echo, exit",
@@ -1707,6 +1729,41 @@ export function Terminal() {
 
       if (typeof node.content === "string") return node.content
       return JSON.stringify(node.content, null, 2)
+    },
+    notes: (args) => {
+      const noteNum = args[0]
+
+      if (!noteNum) {
+        // List all notes
+        const lines: string[] = ["", "BLOG & UPDATES", ""]
+        notesData.forEach((note, idx) => {
+          lines.push(`  ${idx + 1}. ${note.title}`)
+          lines.push(`     ${note.date} by ${note.author}`)
+          lines.push("")
+        })
+        lines.push("Type 'notes <number>' to read a note")
+        lines.push("")
+        return lines
+      }
+
+      const index = parseInt(noteNum) - 1
+      if (isNaN(index) || index < 0 || index >= notesData.length) {
+        return `Invalid note number. Use 'notes' to see available notes.`
+      }
+
+      const note = notesData[index]
+      return [
+        "",
+        "=".repeat(60),
+        note.title,
+        "=".repeat(60),
+        `Date: ${note.date} | Author: ${note.author}`,
+        "",
+        ...note.content,
+        "",
+        "=".repeat(60),
+        "",
+      ]
     },
     sudo: () => "Permission denied",
     exit: () => "Use Cmd+W or Ctrl+W to close",

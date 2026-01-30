@@ -37,6 +37,7 @@ export const VALID_COMMANDS = [
   'type',
   'game',
   'suggest',
+  'notes',
   'theme',
   'font',
   'neofetch',
@@ -72,4 +73,6 @@ export const HEADER_KEYWORDS = [
   'INFO',
   'OTHER',
   'STYLE',
+  'BLOG',
+  'UPDATES',
 ] as const
