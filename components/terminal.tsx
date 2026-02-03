@@ -23,13 +23,9 @@ const BasketballGame = dynamic(() => import("@/components/games/basketball-game"
   loading: () => <div className="p-4 text-orange-400 font-mono">Loading Arcade Hoops...</div>
 })
 
-const MarioGame = dynamic(() => import("@/components/games/mario").then(mod => mod.MarioGame), {
-  loading: () => <div className="p-4 text-red-500 font-mono">Loading Super Mario...</div>
-})
-
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "mario" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -349,7 +345,6 @@ const manPages: Record<string, string[]> = {
     "    tron        Light Cycle Arcade Game",
     "    pacman      Classic Maze Chase",
     "    basketball  Arcade Hoops",
-    "    mario       Super Mario Platformer",
     "",
     "EXAMPLES",
     "    game wordle",
@@ -695,7 +690,7 @@ export function Terminal() {
 
     // Populate games
     const gamesDir = fs.createDir("/home/zachary/games")
-    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron", "mario"]
+    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron"]
     games.forEach(g => {
       if (gamesDir.children) {
         gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
@@ -1662,7 +1657,6 @@ export function Terminal() {
           "  game tron        Light Cycle Arcade Game",
           "  game pacman      Classic Maze Chase",
           "  game basketball  Arcade Hoops",
-          "  game mario       Super Mario Platformer",
           "",
         ]
       }
@@ -1682,10 +1676,6 @@ export function Terminal() {
       }
       if (gameType === "basketball") {
         setGameState({ active: true, type: "basketball" })
-        return [] // No text output, UI takes over
-      }
-      if (gameType === "mario") {
-        setGameState({ active: true, type: "mario" })
         return [] // No text output, UI takes over
       }
 
@@ -1939,10 +1929,6 @@ export function Terminal() {
       ) : gameState.type === "basketball" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <BasketballGame onExit={() => setGameState({ active: false, type: null })} />
-        </div>
-      ) : gameState.type === "mario" && gameState.active ? (
-        <div className="absolute inset-0 z-50 bg-background">
-          <MarioGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>
