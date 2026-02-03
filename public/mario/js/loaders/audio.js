@@ -21,7 +21,9 @@ export function loadAudioBoard(name, audioContext) {
 
 export function createAudioLoader(context) {
     return function loadAudio(url) {
-        return fetch(url)
+        // Prepend /mario if needed
+        const fullUrl = url.startsWith('/mario') || url.startsWith('http') ? url : `/mario${url}`;
+        return fetch(fullUrl)
            .then(response => {
                 return response.arrayBuffer();
             })

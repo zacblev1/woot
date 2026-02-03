@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base href="/mario/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Super Mario</title>
@@ -38,6 +37,13 @@
       pointer-events: none;
       text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
     }
+
+    .error {
+      color: #f00;
+      font-family: monospace;
+      text-align: center;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
@@ -45,9 +51,19 @@
   <div class="overlay">
     Controls: Arrow Keys = Move | Space = Jump | ESC = Exit
   </div>
-  <script type="module" src="js/main.js"></script>
+  <script type="module">
+    // Handle errors
+    window.addEventListener('error', (e) => {
+      console.error('Game error:', e);
+      document.body.innerHTML = `<div class="error">Error loading game: ${e.message}<br>Check console for details</div>`;
+    });
 
-  <script>
+    // Import and start the game
+    import('./js/main.js').catch(err => {
+      console.error('Failed to load game module:', err);
+      document.body.innerHTML = `<div class="error">Failed to load game<br>${err.message}</div>`;
+    });
+
     // Handle ESC key to notify parent window
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -56,9 +72,12 @@
       }
     });
 
-    // Auto-focus for immediate input
+    // Auto-start after page loads
     window.addEventListener('load', () => {
-      document.body.focus();
+      setTimeout(() => {
+        document.body.click();
+        document.body.focus();
+      }, 500);
     });
   </script>
 </body>
