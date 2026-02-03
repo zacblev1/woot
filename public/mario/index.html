@@ -15,8 +15,9 @@
       background: #000;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-center;
       min-height: 100vh;
+      cursor: pointer;
     }
 
     #screen {
@@ -38,31 +39,43 @@
       text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
     }
 
-    .error {
-      color: #f00;
+    .click-prompt {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #0f0;
       font-family: monospace;
+      font-size: 24px;
       text-align: center;
-      padding: 20px;
+      animation: pulse 2s infinite;
+      pointer-events: none;
     }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hidden { display: none; }
   </style>
 </head>
-<body>
+<body onclick="startGame()">
   <canvas id="screen" width="512" height="480"></canvas>
+  <div id="clickPrompt" class="click-prompt">CLICK TO START</div>
   <div class="overlay">
     Controls: Arrow Keys = Move | Space = Jump | ESC = Exit
   </div>
-  <script type="module">
-    // Handle errors
-    window.addEventListener('error', (e) => {
-      console.error('Game error:', e);
-      document.body.innerHTML = `<div class="error">Error loading game: ${e.message}<br>Check console for details</div>`;
-    });
 
-    // Import and start the game
-    import('./js/main.js').catch(err => {
-      console.error('Failed to load game module:', err);
-      document.body.innerHTML = `<div class="error">Failed to load game<br>${err.message}</div>`;
-    });
+  <script type="module">
+    // Load the game module
+    await import('./js/main.js');
+
+    // Hide the prompt and let the user click
+    window.startGame = function() {
+      document.getElementById('clickPrompt').classList.add('hidden');
+      // The click will trigger the game's own click listener
+    };
 
     // Handle ESC key to notify parent window
     window.addEventListener('keydown', (e) => {
@@ -70,14 +83,6 @@
         e.preventDefault();
         window.parent.postMessage({ type: 'mario-exit' }, '*');
       }
-    });
-
-    // Auto-start after page loads
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.body.click();
-        document.body.focus();
-      }, 500);
     });
   </script>
 </body>
