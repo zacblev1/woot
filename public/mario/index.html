@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="/mario/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Mario</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    #screen {
+      border: 4px solid #0f0;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #0f0;
+      font-family: monospace;
+      font-size: 14px;
+      text-align: center;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="screen" width="512" height="480"></canvas>
+  <div class="overlay">
+    Controls: Arrow Keys = Move | Space = Jump | ESC = Exit
+  </div>
+  <script type="module" src="js/main.js"></script>
+
+  <script>
+    // Handle ESC key to notify parent window
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        window.parent.postMessage({ type: 'mario-exit' }, '*');
+      }
+    });
+
+    // Auto-focus for immediate input
+    window.addEventListener('load', () => {
+      document.body.focus();
+    });
+  </script>
+</body>
+</html>
