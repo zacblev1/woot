@@ -124,6 +124,15 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
           {/* Highlighted overlay */}
           <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
             {renderTokens(tokens)}
+            <span
+              className="inline-block bg-primary"
+              style={{
+                width: '1ch',
+                height: '1.2em',
+                verticalAlign: 'text-bottom',
+                animation: 'cursor-blink 1s step-end infinite',
+              }}
+            />
           </div>
           {/* Actual input (transparent text) */}
           <input
@@ -132,7 +141,7 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent outline-none text-transparent caret-foreground text-base md:text-sm relative z-10"
+            className="w-full bg-transparent outline-none text-transparent caret-transparent text-base md:text-sm relative z-10"
             autoFocus
             spellCheck={false}
             autoComplete="off"
