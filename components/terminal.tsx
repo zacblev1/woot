@@ -9,7 +9,7 @@ import { VirtualFileSystem } from "@/lib/vfs"
 import dynamic from "next/dynamic"
 import { useState, useRef, useEffect } from "react"
 import type { TerminalLine } from "@/lib/types/terminal"
-import { themes, fonts, type ThemeName, type FontName } from "@/lib/terminal-config"
+import { themes, fonts, GAME_NAMES, type ThemeName, type FontName } from "@/lib/terminal-config"
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
 import { useTerminalContext } from '@/lib/terminal-context'
 
@@ -534,6 +534,7 @@ export function Terminal() {
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [gameState, setGameState] = useState<GameState>({ active: false, type: null })
+  const mountTime = useRef(Date.now())
 
   /* VFS Initialization */
   const [vfs] = useState(() => {
@@ -1632,20 +1633,40 @@ export function Terminal() {
       saveFileSystem()
       return ""
     },
-    neofetch: () => [
-      "",
-      "  zachary@home",
-      "  ------------",
-      `  Theme: ${themes[currentTheme].name}`,
-      `  Font: ${fonts[currentFont].name}`,
-      "  Shell: web/1.0",
-      "  Terminal: browser",
-      `  Books: ${booksData.length}`,
-      `  Vinyl: ${vinylData.length}`,
-      `  Hardware: ${hardwareData.length}`,
-      `  Notes: ${notesData.length}`,
-      "",
-    ],
+    neofetch: () => {
+      const uptimeMs = Date.now() - mountTime.current
+      const uptimeMin = Math.floor(uptimeMs / 60000)
+      const uptimeSec = Math.floor((uptimeMs % 60000) / 1000)
+      const uptime = uptimeMin > 0 ? `${uptimeMin}m ${uptimeSec}s` : `${uptimeSec}s`
+
+      const art = [
+        '  ┌──────────┐',
+        '  │  ██████  │',
+        '  │  █    █  │',
+        '  │  █    █  │',
+        '  │  ██████  │',
+        '  │  ██  ██  │',
+        '  │          │',
+        '  └──────────┘',
+      ]
+      const info = [
+        '   zachary@home',
+        '   ──────────────',
+        `   OS: CYBER_PORTFOLIO v1.0`,
+        `   Shell: zach-sh`,
+        `   Theme: ${themes[currentTheme].name}`,
+        `   Font: ${fonts[currentFont].name}`,
+        `   Collections: ${booksData.length} books, ${vinylData.length} vinyl, ${hardwareData.length} hardware`,
+        `   Games: ${GAME_NAMES.length} available`,
+      ]
+      const lines = ['']
+      for (let i = 0; i < Math.max(art.length, info.length); i++) {
+        lines.push((art[i] || '                ') + (info[i] || ''))
+      }
+      lines.push(`                 Uptime: ${uptime}`)
+      lines.push('')
+      return lines
+    },
     cat: (args) => {
       const path = args[0]
       if (!path) return "Usage: cat <file>"
