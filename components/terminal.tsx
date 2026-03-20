@@ -13,6 +13,8 @@ import { themes, fonts, GAME_NAMES, type ThemeName, type FontName } from "@/lib/
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
 import { useTerminalContext } from '@/lib/terminal-context'
 import { useSound } from '@/lib/hooks/useSound'
+import { useIdleTimer } from '@/lib/hooks/useIdleTimer'
+import { Screensaver } from '@/components/screensaver'
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
@@ -672,6 +674,13 @@ export function Terminal() {
   // Sync state to TerminalContext so TerminalChrome can read it
   const terminalCtx = useTerminalContext()
   const soundState = useSound()
+
+  const isIdle = useIdleTimer(90000, !gameState.active)
+
+  const handleDismissScreensaver = () => {
+    // The idle timer resets on any input — just need to refocus
+    inputRef.current?.focus()
+  }
 
   useEffect(() => {
     terminalCtx.setCurrentDirectory(currentDirectory)
@@ -1946,6 +1955,9 @@ export function Terminal() {
             validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
           />
         </>
+      )}
+      {isIdle && !gameState.active && (
+        <Screensaver onDismiss={handleDismissScreensaver} />
       )}
     </div>
   )
