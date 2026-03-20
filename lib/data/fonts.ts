@@ -1,4 +1,4 @@
-import type { FontName, FontConfig } from '@/lib/types/terminal'
+import type { FontName, FontConfig } from '@/lib/terminal-config'
 
 export const FONTS: Record<FontName, FontConfig> = {
   jetbrains: {

@@ -40,6 +40,7 @@ export const VALID_COMMANDS = [
   'notes',
   'theme',
   'font',
+  'sound',
   'neofetch',
   'mkdir',
   'touch',

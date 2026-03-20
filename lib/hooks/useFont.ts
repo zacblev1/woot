@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { FontName, FontConfig } from '@/lib/types/terminal'
+import type { FontName, FontConfig } from '@/lib/terminal-config'
 import { FONTS, DEFAULT_FONT, isValidFont, applyFont } from '@/lib/data/fonts'
 
 const STORAGE_KEY = 'terminal-font'
