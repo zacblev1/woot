@@ -11,6 +11,7 @@ import { useState, useRef, useEffect } from "react"
 import type { TerminalLine } from "@/lib/types/terminal"
 import { themes, fonts, type ThemeName, type FontName } from "@/lib/terminal-config"
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
+import { useTerminalContext } from '@/lib/terminal-context'
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
@@ -640,6 +641,26 @@ export function Terminal() {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>("lumon")
   const [currentFont, setCurrentFont] = useState<FontName>("jetbrains")
   const inputRef = useRef<InputLineHandle>(null)
+
+  // Sync state to TerminalContext so TerminalChrome can read it
+  const terminalCtx = useTerminalContext()
+
+  useEffect(() => {
+    terminalCtx.setCurrentDirectory(currentDirectory)
+  }, [currentDirectory, terminalCtx.setCurrentDirectory]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    terminalCtx.setCurrentTheme(currentTheme)
+  }, [currentTheme, terminalCtx.setCurrentTheme]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    terminalCtx.setCurrentFont(currentFont)
+  }, [currentFont, terminalCtx.setCurrentFont]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
+  useEffect(() => {
+    terminalCtx.registerCommandHandler(handleCommand)
+  })
 
   // Load theme and font from localStorage on mount
   useEffect(() => {

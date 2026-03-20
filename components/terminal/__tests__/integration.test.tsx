@@ -2,6 +2,15 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Terminal } from '../../terminal'
+import { TerminalContextProvider } from '@/lib/terminal-context'
+
+function WrappedTerminal() {
+  return (
+    <TerminalContextProvider>
+      <Terminal />
+    </TerminalContextProvider>
+  )
+}
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -43,27 +52,27 @@ describe('Terminal Integration Tests', () => {
 
   describe('Basic Terminal Rendering', () => {
     it('displays initial welcome message', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       expect(screen.getByText('zachary@home')).toBeInTheDocument()
       expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
     })
 
     it('shows prompt with home directory', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       expect(screen.getByText('~ $')).toBeInTheDocument()
     })
 
     it('has input field present', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       expect(input).toBeInTheDocument()
     })
 
     it('input is autofocused', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       expect(input).toHaveFocus()
@@ -73,7 +82,7 @@ describe('Terminal Integration Tests', () => {
   describe('Command Execution Flow', () => {
     it('executes ls command and shows output', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -86,7 +95,7 @@ describe('Terminal Integration Tests', () => {
 
     it('executes help command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'help{Enter}')
@@ -97,7 +106,7 @@ describe('Terminal Integration Tests', () => {
 
     it('handles cd command and updates prompt', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'cd books{Enter}')
@@ -108,7 +117,7 @@ describe('Terminal Integration Tests', () => {
 
     it('shows error for invalid command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'invalidcmd{Enter}')
@@ -118,7 +127,7 @@ describe('Terminal Integration Tests', () => {
 
     it('clears input after command execution', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -130,7 +139,7 @@ describe('Terminal Integration Tests', () => {
   describe('Tab Completion', () => {
     it('completes command on Tab', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'the')
@@ -141,7 +150,7 @@ describe('Terminal Integration Tests', () => {
 
     it('completes partial command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'hel')
@@ -152,7 +161,7 @@ describe('Terminal Integration Tests', () => {
 
     it('shows multiple completions when ambiguous', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       // Type something that has multiple matches
@@ -167,7 +176,7 @@ describe('Terminal Integration Tests', () => {
   describe('History Navigation', () => {
     it('navigates command history with ArrowUp', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -183,7 +192,7 @@ describe('Terminal Integration Tests', () => {
 
     it('navigates command history with ArrowDown', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -201,7 +210,7 @@ describe('Terminal Integration Tests', () => {
 
     it('clears input when navigating past most recent', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -218,7 +227,7 @@ describe('Terminal Integration Tests', () => {
   describe('Keyboard Shortcuts', () => {
     it('clears terminal on Ctrl+L', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -238,7 +247,7 @@ describe('Terminal Integration Tests', () => {
   describe('Theme Command', () => {
     it('changes theme with theme command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'theme dracula{Enter}')
@@ -248,7 +257,7 @@ describe('Terminal Integration Tests', () => {
 
     it('lists themes without argument', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'theme{Enter}')
@@ -262,7 +271,7 @@ describe('Terminal Integration Tests', () => {
   describe('Font Command', () => {
     it('changes font with font command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'font fira{Enter}')
@@ -274,15 +283,16 @@ describe('Terminal Integration Tests', () => {
   describe('Click to Focus', () => {
     it('focuses input when clicking terminal container', async () => {
       const user = userEvent.setup()
-      const { container } = render(<Terminal />)
+      const { container } = render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       input.blur()
       expect(document.activeElement).not.toBe(input)
 
-      // Click the terminal container
-      const terminal = container.firstChild as HTMLElement
-      await user.click(terminal)
+      // Click the terminal container (WrappedTerminal renders TerminalContextProvider > Terminal)
+      // We need to find the actual terminal div, not the provider wrapper
+      const terminalDiv = container.querySelector('[class*="bg-background"]') as HTMLElement
+      await user.click(terminalDiv)
 
       expect(document.activeElement).toBe(input)
     })
@@ -291,7 +301,7 @@ describe('Terminal Integration Tests', () => {
   describe('Whoami and Date Commands', () => {
     it('executes whoami command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'whoami{Enter}')
@@ -301,7 +311,7 @@ describe('Terminal Integration Tests', () => {
 
     it('executes date command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'date{Enter}')
@@ -315,7 +325,7 @@ describe('Terminal Integration Tests', () => {
   describe('Echo Command', () => {
     it('echoes text', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'echo test message{Enter}')
@@ -329,7 +339,7 @@ describe('Terminal Integration Tests', () => {
   describe('Clear Command', () => {
     it('clears history with clear command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')
@@ -345,7 +355,7 @@ describe('Terminal Integration Tests', () => {
   describe('Navigation Commands', () => {
     it('executes pwd command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -355,7 +365,7 @@ describe('Terminal Integration Tests', () => {
 
     it('handles cd to invalid directory', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'cd nonexistent{Enter}')
@@ -367,7 +377,7 @@ describe('Terminal Integration Tests', () => {
   describe('About and Contact Commands', () => {
     it('shows about information', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'about{Enter}')
@@ -378,7 +388,7 @@ describe('Terminal Integration Tests', () => {
 
     it('shows contact information with links', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'contact{Enter}')
