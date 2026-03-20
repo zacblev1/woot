@@ -151,7 +151,7 @@ Add `image` and `banner` to `TerminalLineType`. Add optional `src` and `centered
 
 ```typescript
 // At top of lib/types/terminal.ts, replace ThemeName/FontName/ThemeColors/FontConfig definitions:
-export { ThemeName, FontName } from './terminal-config'
+export { type ThemeName, type FontName } from '@/lib/terminal-config'
 // (remove the ThemeColors interface, ThemeName type, FontConfig interface, FontName type that are currently there)
 
 // Update TerminalLineType:
@@ -783,8 +783,8 @@ if (commands[cmd_lower]) {
   if (result === null || result === undefined) {
     // Command handled its own output (e.g., clear)
   } else if (Array.isArray(result) && result.length > 0 && typeof result[0] === 'object' && 'type' in result[0]) {
-    // TerminalLine[] — append directly with all properties
-    setHistory(prev => [...prev, ...(result as TerminalLine[])])
+    // TerminalLine[] — append directly, spreading to preserve all properties (src, centered, href)
+    setHistory(prev => [...prev, ...(result as TerminalLine[]).map(item => ({ ...item }))])
   } else {
     const items = Array.isArray(result) ? result : [result]
     items.forEach((item) => {
@@ -793,6 +793,9 @@ if (commands[cmd_lower]) {
           ...prev,
           { type: "link", content: (item as { text: string; href: string }).text, href: (item as { text: string; href: string }).href },
         ])
+      } else if (typeof item === "object" && "type" in item && "content" in item) {
+        // Single TerminalLine object — spread to preserve all properties
+        setHistory((prev) => [...prev, { ...(item as TerminalLine) }])
       } else {
         const line = typeof item === "string" ? item : String(item)
         setHistory((prev) => [
@@ -1171,7 +1174,6 @@ const soundState = useSound()
 
 // Sync sound state to context so status bar reflects it
 useEffect(() => {
-  // Keep context in sync with useSound hook's state
   if (soundState.enabled !== terminalCtx.soundEnabled) {
     if (soundState.enabled) {
       if (!terminalCtx.soundEnabled) terminalCtx.toggleSound()
@@ -1179,7 +1181,7 @@ useEffect(() => {
       if (terminalCtx.soundEnabled) terminalCtx.toggleSound()
     }
   }
-}, [soundState.enabled])
+}, [soundState.enabled, terminalCtx.soundEnabled, terminalCtx.toggleSound])
 ```
 
 - [ ] **Step 6: Run tests**
