@@ -1201,7 +1201,7 @@ export function Terminal() {
     }
   }
 
-  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string } | TerminalLine[] | null> = {
+  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | (string | TerminalLine)[] | string | { text: string; href: string } | TerminalLine[] | null> = {
     help: () => {
       return [
         "",
@@ -1252,7 +1252,7 @@ export function Terminal() {
       const pwd = vfs.getPwd()
 
       if (!path && pwd === '/home/zachary/books') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1268,7 +1268,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/vinyl') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1284,7 +1284,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/hardware') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1300,7 +1300,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/notes') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
