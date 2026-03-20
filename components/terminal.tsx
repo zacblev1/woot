@@ -12,6 +12,7 @@ import type { TerminalLine } from "@/lib/types/terminal"
 import { themes, fonts, GAME_NAMES, type ThemeName, type FontName } from "@/lib/terminal-config"
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
 import { useTerminalContext } from '@/lib/terminal-context'
+import { useSound } from '@/lib/hooks/useSound'
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
@@ -343,6 +344,26 @@ const manPages: Record<string, string[]> = {
     "    theme, neofetch",
     "",
   ],
+  sound: [
+    "",
+    "NAME",
+    "    sound - toggle sound effects",
+    "",
+    "SYNOPSIS",
+    "    sound [on|off]",
+    "",
+    "DESCRIPTION",
+    "    Enable or disable retro sound effects. When enabled, plays",
+    "    keyclick sounds on typing, beeps on errors, and chimes on",
+    "    success. Sound preference is saved to localStorage.",
+    "    Without arguments, displays current sound state.",
+    "",
+    "EXAMPLES",
+    "    sound on        Enable sound effects",
+    "    sound off       Disable sound effects",
+    "    sound           Show current state",
+    "",
+  ],
   neofetch: [
     "",
     "NAME",
@@ -650,6 +671,7 @@ export function Terminal() {
 
   // Sync state to TerminalContext so TerminalChrome can read it
   const terminalCtx = useTerminalContext()
+  const soundState = useSound()
 
   useEffect(() => {
     terminalCtx.setCurrentDirectory(currentDirectory)
@@ -662,6 +684,17 @@ export function Terminal() {
   useEffect(() => {
     terminalCtx.setCurrentFont(currentFont)
   }, [currentFont, terminalCtx.setCurrentFont]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync sound state to context so status bar reflects it
+  useEffect(() => {
+    if (soundState.enabled !== terminalCtx.soundEnabled) {
+      if (soundState.enabled) {
+        if (!terminalCtx.soundEnabled) terminalCtx.toggleSound()
+      } else {
+        if (terminalCtx.soundEnabled) terminalCtx.toggleSound()
+      }
+    }
+  }, [soundState.enabled, terminalCtx.soundEnabled, terminalCtx.toggleSound]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
   useEffect(() => {
@@ -1181,7 +1214,7 @@ export function Terminal() {
         "  Files          mkdir, touch, rm",
         "  Games          game <type>, suggest",
         "  Blog           notes",
-        "  Style          theme, font, neofetch",
+        "  Style          theme, font, sound, neofetch",
         "  Info           about, contact, projects, whoami, date",
         "  Other          clear, echo, exit",
         "",
@@ -1352,6 +1385,18 @@ export function Terminal() {
 
       setFont(fontName)
       return `Font set to ${fonts[fontName].name}`
+    },
+    sound: (args) => {
+      const sub = args[0]?.toLowerCase()
+      if (sub === 'on') {
+        if (!soundState.enabled) soundState.toggle()
+        return 'Sound effects enabled'
+      }
+      if (sub === 'off') {
+        if (soundState.enabled) soundState.toggle()
+        return 'Sound effects disabled'
+      }
+      return `Sound effects: ${soundState.enabled ? 'on' : 'off'}`
     },
     view: (args) => {
       const path = args[0]

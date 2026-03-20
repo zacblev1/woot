@@ -10,3 +10,5 @@ export type { UseThemeReturn } from './useTheme'
 
 export { useFont } from './useFont'
 export type { UseFontReturn } from './useFont'
+
+export { useSound } from './useSound'
