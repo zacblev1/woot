@@ -327,6 +327,31 @@ describe('TerminalLine component', () => {
     const container = screen.getByText('Test').closest('div')
     expect(container).toHaveClass('whitespace-pre-wrap', 'break-words', 'break-all')
   })
+
+  it('renders banner type with accent class (same as success)', () => {
+    render(<TerminalLine line={{ type: 'banner', content: 'Banner text' }} />)
+    const container = screen.getByText('Banner text').closest('div')
+    expect(container).toHaveClass('text-accent')
+  })
+
+  it('renders image type with img element', () => {
+    render(<TerminalLine line={{ type: 'image', content: 'Alt text', src: 'https://example.com/cover.jpg' }} />)
+    const img = screen.getByAltText('Alt text')
+    expect(img).toBeInTheDocument()
+    expect(img).toHaveAttribute('src', 'https://example.com/cover.jpg')
+  })
+
+  it('renders centered line with text-center wrapper', () => {
+    const { container } = render(<TerminalLine line={{ type: 'output', content: 'Centered', centered: true }} />)
+    const wrapper = container.firstChild as HTMLElement
+    expect(wrapper.className).toContain('text-center')
+  })
+
+  it('does not center non-centered lines', () => {
+    const { container } = render(<TerminalLine line={{ type: 'output', content: 'Normal' }} />)
+    const wrapper = container.firstChild as HTMLElement
+    expect(wrapper.className).not.toContain('text-center')
+  })
 })
 
 describe('constants', () => {

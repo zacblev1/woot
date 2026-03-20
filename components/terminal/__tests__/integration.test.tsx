@@ -54,8 +54,8 @@ describe('Terminal Integration Tests', () => {
     it('displays initial welcome message', () => {
       render(<WrappedTerminal />)
 
-      expect(screen.getByText('zachary@home')).toBeInTheDocument()
-      expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+      expect(screen.getByText(/developer.*collector.*gamer/)).toBeInTheDocument()
+      expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
     })
 
     it('shows prompt with home directory', () => {
@@ -240,7 +240,7 @@ describe('Terminal Integration Tests', () => {
       // History should be reset - directory listing should be gone
       expect(screen.queryByText('books')).not.toBeInTheDocument()
       // Welcome message should still be there
-      expect(screen.getByText('zachary@home')).toBeInTheDocument()
+      expect(screen.getByText(/developer.*collector.*gamer/)).toBeInTheDocument()
     })
   })
 
@@ -348,7 +348,7 @@ describe('Terminal Integration Tests', () => {
       // The ls command output should be gone
       expect(screen.queryByText(/~ \$ ls/)).not.toBeInTheDocument()
       // Welcome message should be back
-      expect(screen.getByText('zachary@home')).toBeInTheDocument()
+      expect(screen.getByText(/developer.*collector.*gamer/)).toBeInTheDocument()
     })
   })
 

@@ -71,13 +71,13 @@ describe('Terminal - Characterization Tests', () => {
   describe('Initial Render', () => {
     it('renders terminal container', () => {
       render(<WrappedTerminal />)
-      // The terminal has a specific structure - look for the text content
-      expect(screen.getByText("zachary@home")).toBeInTheDocument()
+      // The terminal shows the ASCII art banner tagline
+      expect(screen.getByText(/developer.*collector.*gamer/)).toBeInTheDocument()
     })
 
     it('shows welcome message', () => {
       render(<WrappedTerminal />)
-      expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+      expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
     })
 
     it('renders input prompt', () => {
@@ -176,7 +176,7 @@ describe('Terminal - Characterization Tests', () => {
 
       await waitFor(() => {
         // pwd output should be gone, welcome message back
-        expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+        expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
         // The pwd output line should no longer be present (only one /home/zachary from pwd output)
         const pwdOutputs = screen.queryAllByText('/home/zachary')
         // After clear, there should be no pwd output visible
@@ -506,7 +506,7 @@ describe('Terminal - Characterization Tests', () => {
 
       await waitFor(() => {
         // Should reset to welcome state
-        expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+        expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
         // pwd output should be gone
         expect(screen.queryByText('/home/zachary')).not.toBeInTheDocument()
       })

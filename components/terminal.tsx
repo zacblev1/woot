@@ -516,10 +516,15 @@ const manPages: Record<string, string[]> = {
 }
 
 const initialHistory: TerminalLine[] = [
+  { type: "banner", content: " ███████╗ █████╗  ██████╗██╗  ██╗ █████╗ ██████╗ ██╗   ██╗", centered: true },
+  { type: "banner", content: " ╚══███╔╝██╔══██╗██╔════╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝", centered: true },
+  { type: "banner", content: "   ███╔╝ ███████║██║     ███████║███████║██████╔╝ ╚████╔╝", centered: true },
+  { type: "banner", content: "  ███╔╝  ██╔══██║██║     ██╔══██║██╔══██║██╔══██╗  ╚██╔╝", centered: true },
+  { type: "banner", content: " ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██║  ██║   ██║", centered: true },
+  { type: "banner", content: " ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝", centered: true },
+  { type: "output", content: "developer  ·  collector  ·  gamer", centered: true },
   { type: "output", content: "" },
-  { type: "success", content: "zachary@home" },
-  { type: "output", content: "" },
-  { type: "output", content: "Type 'help' for available commands." },
+  { type: "output", content: "Type 'help' for available commands or Ctrl+K to search.", centered: true },
   { type: "output", content: "" },
 ]
 
@@ -1162,7 +1167,7 @@ export function Terminal() {
     }
   }
 
-  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string }> = {
+  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string } | TerminalLine[] | null> = {
     help: () => {
       return [
         "",
@@ -1561,7 +1566,7 @@ export function Terminal() {
     },
     clear: () => {
       setHistory(initialHistory)
-      return ""
+      return null
     },
     whoami: () => "zachary",
     date: () => new Date().toLocaleString(),
@@ -1746,20 +1751,22 @@ export function Terminal() {
 
     if (commands[cmd_lower]) {
       const result = commands[cmd_lower](args)
-      if (result) {
+      if (result === null || result === undefined) {
+        // Command handled its own output (e.g., clear)
+      } else if (Array.isArray(result) && result.length > 0 && typeof result[0] === 'object' && 'type' in result[0]) {
+        // TerminalLine[] — append directly, spreading to preserve all properties (src, centered, href)
+        setHistory(prev => [...prev, ...(result as TerminalLine[]).map(item => ({ ...item }))])
+      } else {
         const items = Array.isArray(result) ? result : [result]
         items.forEach((item) => {
           if (typeof item === "object" && "href" in item) {
             setHistory((prev) => [
               ...prev,
-              { type: "link", content: item.text, href: item.href },
+              { type: "link", content: (item as { text: string; href: string }).text, href: (item as { text: string; href: string }).href },
             ])
           } else if (typeof item === "object" && "type" in item && "content" in item) {
-            // Handle TerminalLine objects from commands
-            setHistory((prev) => [
-              ...prev,
-              { type: item.type, content: item.content },
-            ])
+            // Single TerminalLine object — spread to preserve all properties
+            setHistory((prev) => [...prev, { ...(item as TerminalLine) }])
           } else {
             const line = typeof item === "string" ? item : String(item)
             setHistory((prev) => [
