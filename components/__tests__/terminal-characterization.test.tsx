@@ -446,8 +446,8 @@ describe('Terminal - Characterization Tests', () => {
         expect(screen.getByText('NUMBER GUESSING GAME')).toBeInTheDocument()
       })
 
-      // Send Ctrl+C
-      fireEvent.keyDown(window, { key: 'c', ctrlKey: true })
+      // Send Ctrl+C on the input element (where InputLine handles keyboard events)
+      fireEvent.keyDown(input, { key: 'c', ctrlKey: true })
 
       await waitFor(() => {
         expect(screen.getByText('Game interrupted.')).toBeInTheDocument()
