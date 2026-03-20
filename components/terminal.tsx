@@ -1410,29 +1410,33 @@ export function Terminal() {
 
       // Determine type based on parent directory
       if (pwd.includes("/books")) {
-        const book = node.content as { title: string; author: string; genre: string; format: string; pages?: number }
-        return [
-          "",
-          `  Title:   ${book.title}`,
-          `  Author:  ${book.author}`,
-          `  Genre:   ${book.genre}`,
-          `  Format:  ${book.format}`,
-          book.pages ? `  Pages:   ${book.pages}` : "",
-          "",
-        ].filter(Boolean) as string[]
+        const book = node.content as { title: string; author: string; genre: string; format: string; pages?: number; cover?: string }
+        const lines: TerminalLine[] = [{ type: "output", content: "" }]
+        if (book.cover) {
+          lines.push({ type: "image", content: book.title, src: book.cover })
+        }
+        lines.push({ type: "output", content: `  Title:   ${book.title}` })
+        lines.push({ type: "output", content: `  Author:  ${book.author}` })
+        lines.push({ type: "output", content: `  Genre:   ${book.genre}` })
+        lines.push({ type: "output", content: `  Format:  ${book.format}` })
+        if (book.pages) lines.push({ type: "output", content: `  Pages:   ${book.pages}` })
+        lines.push({ type: "output", content: "" })
+        return lines
       }
 
       if (pwd.includes("/vinyl")) {
-        const record = node.content as { title: string; artist: string; genre: string; format: string; label: string }
-        return [
-          "",
-          `  Title:   ${record.title}`,
-          `  Artist:  ${record.artist}`,
-          `  Genre:   ${record.genre}`,
-          `  Format:  ${record.format}`,
-          `  Label:   ${record.label}`,
-          "",
-        ]
+        const record = node.content as { title: string; artist: string; genre: string; format: string; label: string; cover?: string }
+        const lines: TerminalLine[] = [{ type: "output", content: "" }]
+        if (record.cover) {
+          lines.push({ type: "image", content: record.title, src: record.cover })
+        }
+        lines.push({ type: "output", content: `  Title:   ${record.title}` })
+        lines.push({ type: "output", content: `  Artist:  ${record.artist}` })
+        lines.push({ type: "output", content: `  Genre:   ${record.genre}` })
+        lines.push({ type: "output", content: `  Format:  ${record.format}` })
+        lines.push({ type: "output", content: `  Label:   ${record.label}` })
+        lines.push({ type: "output", content: "" })
+        return lines
       }
 
       if (pwd.includes("/hardware")) {
