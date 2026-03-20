@@ -15,6 +15,7 @@ import { useTerminalContext } from '@/lib/terminal-context'
 import { useSound } from '@/lib/hooks/useSound'
 import { useIdleTimer } from '@/lib/hooks/useIdleTimer'
 import { Screensaver } from '@/components/screensaver'
+import { CommandPalette } from '@/components/command-palette'
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
@@ -680,6 +681,17 @@ export function Terminal() {
   const handleDismissScreensaver = () => {
     // The idle timer resets on any input — just need to refocus
     inputRef.current?.focus()
+  }
+
+  const [showPalette, setShowPalette] = useState(false)
+
+  const handleCommandPalette = () => setShowPalette(prev => !prev)
+
+  const handlePaletteExecute = (command: string) => {
+    const parts = command.split(' && ')
+    for (const part of parts) {
+      handleCommand(part.trim())
+    }
   }
 
   useEffect(() => {
@@ -1951,6 +1963,7 @@ export function Terminal() {
             onHistoryDown={handleHistoryDown}
             onClear={handleClear}
             onInterrupt={handleInterrupt}
+            onCommandPalette={handleCommandPalette}
             prompt={prompt}
             validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
           />
@@ -1958,6 +1971,12 @@ export function Terminal() {
       )}
       {isIdle && !gameState.active && (
         <Screensaver onDismiss={handleDismissScreensaver} />
+      )}
+      {showPalette && (
+        <CommandPalette
+          onClose={() => { setShowPalette(false); inputRef.current?.focus() }}
+          onExecute={handlePaletteExecute}
+        />
       )}
     </div>
   )

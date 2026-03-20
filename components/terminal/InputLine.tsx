@@ -24,6 +24,7 @@ export interface InputLineProps {
   onHistoryDown: () => string | null
   onClear: () => void
   onInterrupt: () => void
+  onCommandPalette?: () => void
   prompt: string
   disabled?: boolean
   validCommands?: string[]
@@ -55,6 +56,7 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
       onHistoryDown,
       onClear,
       onInterrupt,
+      onCommandPalette,
       prompt,
       disabled = false,
       validCommands = [...VALID_COMMANDS],
@@ -107,6 +109,9 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
       } else if (e.key === 'l' && e.ctrlKey) {
         e.preventDefault()
         onClear()
+      } else if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        onCommandPalette?.()
       } else if (e.key === 'c' && (e.ctrlKey || e.metaKey)) {
         // Let parent decide if interrupt should happen
         // (only intercept if game is active, which parent controls)
