@@ -1206,5 +1206,13 @@
     "format": "5xLP, Album",
     "genre": "Jazz",
     "cover": "https://www.thefrenchjockey.com/albums/kamasi-washington-heaven-and-earth.jpg"
+  },
+  {
+    "artist": "Geese",
+    "title": "Getting Killed",
+    "label": "Partisan Records",
+    "format": "3xLP, Album",
+    "genre": "Indie Rock",
+    "cover": "https://www.thefrenchjockey.com/albums/geese-getting-killed.jpg"
   }
 ]

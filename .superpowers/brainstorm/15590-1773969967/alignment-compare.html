@@ -1,0 +1,93 @@
+<h2>Welcome Alignment: Left vs Centered</h2>
+<p class="subtitle">Command input/output stays left-aligned in both. The question is just the welcome banner + tagline.</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">A — Left-aligned (traditional)</div>
+    <div class="mockup-body" style="padding:0; background:#0a1628; position:relative; overflow:hidden;">
+      <div style="position:absolute; inset:0; pointer-events:none; z-index:10; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);"></div>
+      <!-- Title Bar -->
+      <div style="display:flex; align-items:center; padding:5px 10px; background:#0d1e36; border-bottom:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:9px;">
+        <div style="display:flex; gap:4px; margin-right:8px;">
+          <div style="width:7px; height:7px; border-radius:50%; background:#f56565;"></div>
+          <div style="width:7px; height:7px; border-radius:50%; background:#ecc94b;"></div>
+          <div style="width:7px; height:7px; border-radius:50%; background:#48bb78;"></div>
+        </div>
+        <span style="color:#94a3b8;">zachary@home: ~</span>
+      </div>
+      <!-- Body -->
+      <div style="padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:7px; line-height:1.6;">
+        <div style="color:#4fd1c5; text-shadow: 0 0 4px rgba(79,209,197,0.3); white-space:pre; line-height:1.15; margin-bottom:3px;"> ███████╗ █████╗  ██████╗██╗  ██╗ █████╗ ██████╗ ██╗   ██╗
+ ╚══███╔╝██╔══██╗██╔════╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
+   ███╔╝ ███████║██║     ███████║███████║██████╔╝ ╚████╔╝
+  ███╔╝  ██╔══██║██║     ██╔══██║██╔══██║██╔══██╗  ╚██╔╝
+ ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██║  ██║   ██║
+ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝</div>
+        <div style="color:#94a3b8; margin-bottom:8px; font-size:7px;">  developer  ·  collector  ·  gamer</div>
+        <div style="color:#e8f4f8; margin-bottom:10px; font-size:8px;">Type <span style="color:#4fd1c5;">'help'</span> for commands or <span style="color:#4fd1c5;">Ctrl+K</span> to search.</div>
+        <div style="font-size:8px;">
+          <span style="color:#4fd1c5;">~ $</span>
+          <span style="display:inline-block; width:5px; height:10px; background:#4fd1c5; animation: blink 1s step-end infinite; vertical-align:text-bottom;"></span>
+        </div>
+      </div>
+      <!-- Status Bar -->
+      <div style="display:flex; justify-content:space-between; padding:3px 10px; background:#0d1e36; border-top:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:7px; color:#94a3b8;">
+        <span><span style="color:#4fd1c5;">▸</span> ~/</span>
+        <span>Ctrl+K</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">B — Centered welcome (recommended)</div>
+    <div class="mockup-body" style="padding:0; background:#0a1628; position:relative; overflow:hidden;">
+      <div style="position:absolute; inset:0; pointer-events:none; z-index:10; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);"></div>
+      <!-- Title Bar -->
+      <div style="display:flex; align-items:center; padding:5px 10px; background:#0d1e36; border-bottom:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:9px;">
+        <div style="display:flex; gap:4px; margin-right:8px;">
+          <div style="width:7px; height:7px; border-radius:50%; background:#f56565;"></div>
+          <div style="width:7px; height:7px; border-radius:50%; background:#ecc94b;"></div>
+          <div style="width:7px; height:7px; border-radius:50%; background:#48bb78;"></div>
+        </div>
+        <span style="color:#94a3b8;">zachary@home: ~</span>
+      </div>
+      <!-- Body -->
+      <div style="padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:7px; line-height:1.6; text-align:center;">
+        <div style="color:#4fd1c5; text-shadow: 0 0 4px rgba(79,209,197,0.3); white-space:pre; line-height:1.15; margin-bottom:3px; display:inline-block; text-align:left;"> ███████╗ █████╗  ██████╗██╗  ██╗ █████╗ ██████╗ ██╗   ██╗
+ ╚══███╔╝██╔══██╗██╔════╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
+   ███╔╝ ███████║██║     ███████║███████║██████╔╝ ╚████╔╝
+  ███╔╝  ██╔══██║██║     ██╔══██║██╔══██║██╔══██╗  ╚██╔╝
+ ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██║  ██║   ██║
+ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝</div>
+        <div style="color:#94a3b8; margin-bottom:8px; font-size:7px;">developer  ·  collector  ·  gamer</div>
+        <div style="color:#e8f4f8; margin-bottom:10px; font-size:8px;">Type <span style="color:#4fd1c5;">'help'</span> for commands or <span style="color:#4fd1c5;">Ctrl+K</span> to search.</div>
+        <div style="font-size:8px; text-align:left;">
+          <span style="color:#4fd1c5;">~ $</span>
+          <span style="display:inline-block; width:5px; height:10px; background:#4fd1c5; animation: blink 1s step-end infinite; vertical-align:text-bottom;"></span>
+        </div>
+      </div>
+      <!-- Status Bar -->
+      <div style="display:flex; justify-content:space-between; padding:3px 10px; background:#0d1e36; border-top:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:7px; color:#94a3b8;">
+        <span><span style="color:#4fd1c5;">▸</span> ~/</span>
+        <span>Ctrl+K</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+</style>
+
+<div style="margin-top:20px;">
+  <h3>The hybrid approach (B):</h3>
+  <ul style="color:#a0a0a0; font-size:14px; line-height:1.8;">
+    <li>ASCII banner + tagline + help text are <strong>centered</strong> (hero moment)</li>
+    <li>The prompt <code>~ $</code> and all command I/O stays <strong>left-aligned</strong> (terminal authenticity)</li>
+    <li>Once you start typing commands, the centered welcome scrolls up and everything is left-aligned from there</li>
+    <li>Centering only applies to the <code>initialHistory</code> lines — not regular output</li>
+  </ul>
+</div>

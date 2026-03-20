@@ -1,0 +1,76 @@
+<h2>Terminal Layout — Full Composition (v2)</h2>
+<p class="subtitle">Updated with full "ZACHARY" ASCII banner.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Final Terminal Layout</div>
+  <div class="mockup-body" style="padding:0; background:#0a1628; position:relative; overflow:hidden;">
+
+    <!-- CRT Vignette -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:10; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);"></div>
+
+    <!-- CRT Scan Lines -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:10; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px); mix-blend-mode: multiply;"></div>
+
+    <!-- Title Bar -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 12px; background:#0d1e36; border-bottom:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:11px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; gap:6px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#f56565;"></div>
+          <div style="width:10px; height:10px; border-radius:50%; background:#ecc94b;"></div>
+          <div style="width:10px; height:10px; border-radius:50%; background:#48bb78;"></div>
+        </div>
+        <span style="color:#94a3b8; margin-left:8px;">zachary@home: ~</span>
+      </div>
+      <div style="color:#94a3b8; font-size:10px;">
+        <span style="color:#2d4a6f;">▪</span> lumon
+      </div>
+    </div>
+
+    <!-- Terminal Body -->
+    <div style="padding:16px 20px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.7; min-height:300px;">
+      <div style="color:#4fd1c5; text-shadow: 0 0 4px rgba(79,209,197,0.3); white-space:pre; line-height:1.2; margin-bottom:4px; font-size:10px;"> ███████╗ █████╗  ██████╗██╗  ██╗ █████╗ ██████╗ ██╗   ██╗
+ ╚══███╔╝██╔══██╗██╔════╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
+   ███╔╝ ███████║██║     ███████║███████║██████╔╝ ╚████╔╝
+  ███╔╝  ██╔══██║██║     ██╔══██║██╔══██║██╔══██╗  ╚██╔╝
+ ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██║  ██║   ██║
+ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝</div>
+      <div style="color:#94a3b8; margin-bottom:12px; font-size:11px;">  developer  ·  collector  ·  gamer</div>
+      <div style="color:#e8f4f8; margin-bottom:2px;">Type <span style="color:#4fd1c5;">'help'</span> for available commands or <span style="color:#4fd1c5;">Ctrl+K</span> to search.</div>
+      <div style="color:#e8f4f8; margin-bottom:16px;"></div>
+      <div>
+        <span style="color:#4fd1c5; text-shadow: 0 0 4px rgba(79,209,197,0.3);">~ $</span>
+        <span style="color:#e8f4f8; text-shadow: 0 0 2px rgba(232,244,248,0.15);"> </span><span style="display:inline-block; width:8px; height:16px; background:#4fd1c5; animation: blink 1s step-end infinite; vertical-align:text-bottom;"></span>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 12px; background:#0d1e36; border-top:1px solid #2d4a6f; font-family:'JetBrains Mono',monospace; font-size:10px; color:#94a3b8;">
+      <div style="display:flex; gap:16px;">
+        <span><span style="color:#4fd1c5;">▸</span> ~/</span>
+        <span>29 commands</span>
+      </div>
+      <div style="display:flex; gap:16px;">
+        <span>🔇 sound off</span>
+        <span>Ctrl+K search</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+</style>
+
+<div style="margin-top:24px;">
+  <h3>Key details:</h3>
+  <ul style="color:#a0a0a0; font-size:14px; line-height:1.8;">
+    <li><strong>ASCII banner:</strong> Full "ZACHARY" in block letters, scaled down slightly to fit width</li>
+    <li><strong>Tagline:</strong> "developer · collector · gamer" in muted color below the banner</li>
+    <li><strong>Help hint:</strong> Now also mentions Ctrl+K as an alternative</li>
+    <li>All other elements unchanged from v1</li>
+  </ul>
+</div>
