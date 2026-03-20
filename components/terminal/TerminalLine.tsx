@@ -9,13 +9,13 @@ import type { TerminalLineProps } from './types'
 function getColorClass(type: LineType): string {
   switch (type) {
     case 'input':
-      return 'text-primary'
+      return 'text-primary crt-glow'
     case 'error':
       return 'text-destructive'
     case 'success':
-      return 'text-accent'
+      return 'text-accent crt-glow'
     case 'banner':
-      return 'text-accent'
+      return 'text-accent crt-glow'
     case 'link':
       return 'text-foreground'
     case 'wordle':

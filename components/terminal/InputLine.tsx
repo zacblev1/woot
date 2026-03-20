@@ -124,7 +124,7 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
 
     return (
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-primary">{prompt}</span>
+        <span className="text-primary crt-glow">{prompt}</span>
         <div className="flex-1 relative">
           {/* Highlighted overlay */}
           <div className="absolute inset-0 pointer-events-none whitespace-pre text-base md:text-sm">
