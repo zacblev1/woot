@@ -114,6 +114,10 @@
   }
 }
 
+.crt-glow {
+  text-shadow: 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
