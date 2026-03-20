@@ -1,12 +1,17 @@
 import type { GameType } from './games'
+import type { ThemeName, FontName } from '@/lib/terminal-config'
+
+export type { ThemeName, FontName }
 
 // Terminal line types
-export type TerminalLineType = 'input' | 'output' | 'error' | 'success' | 'link' | 'wordle'
+export type TerminalLineType = 'input' | 'output' | 'error' | 'success' | 'link' | 'wordle' | 'image' | 'banner'
 
 export interface TerminalLine {
   type: TerminalLineType
   content: string
   href?: string // Only for type: 'link'
+  src?: string
+  centered?: boolean
 }
 
 // Command execution result variants
@@ -23,29 +28,6 @@ export interface CommandError {
 }
 
 export type CommandResult = CommandSuccess | CommandError
-
-// Theme definitions
-export interface ThemeColors {
-  name: string
-  background: string
-  foreground: string
-  card: string
-  primary: string
-  muted: string
-  accent: string
-  destructive: string
-  border: string
-}
-
-export type ThemeName = 'lumon' | 'tokyonight' | 'dracula' | 'gruvbox' | 'nord' | 'monokai'
-
-// Font definitions
-export interface FontConfig {
-  name: string
-  value: string
-}
-
-export type FontName = 'jetbrains' | 'fira' | 'source' | 'ibm' | 'hack' | 'mono'
 
 // Command definition for registry
 export interface CommandDefinition {

@@ -192,6 +192,6 @@ describe('gameCommand', () => {
   })
 
   it('exports VALID_GAMES array', () => {
-    expect(VALID_GAMES).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman'])
+    expect(VALID_GAMES).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'])
   })
 })

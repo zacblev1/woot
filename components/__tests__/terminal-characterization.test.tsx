@@ -18,6 +18,15 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Terminal } from '../terminal'
+import { TerminalContextProvider } from '@/lib/terminal-context'
+
+function WrappedTerminal() {
+  return (
+    <TerminalContextProvider>
+      <Terminal />
+    </TerminalContextProvider>
+  )
+}
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -61,30 +70,30 @@ describe('Terminal - Characterization Tests', () => {
 
   describe('Initial Render', () => {
     it('renders terminal container', () => {
-      render(<Terminal />)
-      // The terminal has a specific structure - look for the text content
-      expect(screen.getByText("zachary@home")).toBeInTheDocument()
+      render(<WrappedTerminal />)
+      // The terminal shows the ASCII art banner tagline
+      expect(screen.getByText(/developer.*collector.*gamer/)).toBeInTheDocument()
     })
 
     it('shows welcome message', () => {
-      render(<Terminal />)
-      expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+      render(<WrappedTerminal />)
+      expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
     })
 
     it('renders input prompt', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
       // The prompt shows ~ $ for home directory
       expect(screen.getByText(/~\s*\$/)).toBeInTheDocument()
     })
 
     it('renders text input field', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
       const input = screen.getByRole('textbox')
       expect(input).toBeInTheDocument()
     })
 
     it('input is auto-focused', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
       const input = screen.getByRole('textbox')
       expect(input).toHaveFocus()
     })
@@ -93,7 +102,7 @@ describe('Terminal - Characterization Tests', () => {
   describe('Command Input', () => {
     it('accepts text input', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'help')
@@ -103,7 +112,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('clears input after Enter', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'help{Enter}')
@@ -113,7 +122,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('shows command in history after execution', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -129,7 +138,7 @@ describe('Terminal - Characterization Tests', () => {
   describe('Basic Commands', () => {
     it('pwd returns home directory', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -141,7 +150,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('help shows command list', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'help{Enter}')
@@ -153,7 +162,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('clear resets history to welcome state', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       // Execute a command first
@@ -167,7 +176,7 @@ describe('Terminal - Characterization Tests', () => {
 
       await waitFor(() => {
         // pwd output should be gone, welcome message back
-        expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+        expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
         // The pwd output line should no longer be present (only one /home/zachary from pwd output)
         const pwdOutputs = screen.queryAllByText('/home/zachary')
         // After clear, there should be no pwd output visible
@@ -177,7 +186,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('unknown command shows error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'invalidcmd{Enter}')
@@ -189,7 +198,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('whoami returns zachary', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'whoami{Enter}')
@@ -214,7 +223,7 @@ describe('Terminal - Characterization Tests', () => {
   describe('Game Commands - Start Without Crashing', () => {
     it('game number starts without error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game number{Enter}')
@@ -226,7 +235,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game wordle starts without error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game wordle{Enter}')
@@ -238,7 +247,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game trivia starts without error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game trivia{Enter}')
@@ -250,7 +259,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game blackjack starts without error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game blackjack{Enter}')
@@ -262,7 +271,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game rps starts without error', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game rps{Enter}')
@@ -274,7 +283,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game tron starts without error (sets game state)', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game tron{Enter}')
@@ -292,7 +301,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('game without argument shows game list', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'game{Enter}')
@@ -307,14 +316,14 @@ describe('Terminal - Characterization Tests', () => {
   describe('Theme Persistence', () => {
     it('loads theme from localStorage on mount', () => {
       mockLocalStorage.setItem('terminal-theme', 'dracula')
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('terminal-theme')
     })
 
     it('saves theme to localStorage when changed', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'theme dracula{Enter}')
@@ -326,7 +335,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('theme command without argument lists available themes', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'theme{Enter}')
@@ -342,14 +351,14 @@ describe('Terminal - Characterization Tests', () => {
   describe('Font Persistence', () => {
     it('loads font from localStorage on mount', () => {
       mockLocalStorage.setItem('terminal-font', 'fira')
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('terminal-font')
     })
 
     it('saves font to localStorage when changed', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'font fira{Enter}')
@@ -361,7 +370,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('font command without argument lists available fonts', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'font{Enter}')
@@ -376,14 +385,14 @@ describe('Terminal - Characterization Tests', () => {
 
   describe('VFS Persistence', () => {
     it('loads VFS state from localStorage on mount', () => {
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('vfs-state')
     })
 
     it('saves VFS state after mkdir', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'mkdir testdir{Enter}')
@@ -395,7 +404,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('saves VFS state after touch', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'touch testfile{Enter}')
@@ -407,7 +416,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('saves VFS state after rm', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       // First create, then remove
@@ -427,7 +436,7 @@ describe('Terminal - Characterization Tests', () => {
   describe('Keyboard Navigation', () => {
     it('Ctrl+C interrupts active game', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       // Start a game
@@ -437,8 +446,8 @@ describe('Terminal - Characterization Tests', () => {
         expect(screen.getByText('NUMBER GUESSING GAME')).toBeInTheDocument()
       })
 
-      // Send Ctrl+C
-      fireEvent.keyDown(window, { key: 'c', ctrlKey: true })
+      // Send Ctrl+C on the input element (where InputLine handles keyboard events)
+      fireEvent.keyDown(input, { key: 'c', ctrlKey: true })
 
       await waitFor(() => {
         expect(screen.getByText('Game interrupted.')).toBeInTheDocument()
@@ -447,7 +456,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('Arrow up recalls previous command', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -461,7 +470,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('Arrow up/down navigates command history', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'pwd{Enter}')
@@ -483,7 +492,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('Ctrl+L clears screen', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       // Execute a command
@@ -497,7 +506,7 @@ describe('Terminal - Characterization Tests', () => {
 
       await waitFor(() => {
         // Should reset to welcome state
-        expect(screen.getByText("Type 'help' for available commands.")).toBeInTheDocument()
+        expect(screen.getByText("Type 'help' for available commands or Ctrl+K to search.")).toBeInTheDocument()
         // pwd output should be gone
         expect(screen.queryByText('/home/zachary')).not.toBeInTheDocument()
       })
@@ -507,7 +516,7 @@ describe('Terminal - Characterization Tests', () => {
   describe('Collection Navigation', () => {
     it('can navigate to books directory', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'cd books{Enter}')
@@ -520,7 +529,7 @@ describe('Terminal - Characterization Tests', () => {
 
     it('ls shows collection directories from home', async () => {
       const user = userEvent.setup()
-      render(<Terminal />)
+      render(<WrappedTerminal />)
 
       const input = screen.getByRole('textbox')
       await user.type(input, 'ls{Enter}')

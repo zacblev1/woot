@@ -9,7 +9,13 @@ import { VirtualFileSystem } from "@/lib/vfs"
 import dynamic from "next/dynamic"
 import { useState, useRef, useEffect } from "react"
 import type { TerminalLine } from "@/lib/types/terminal"
+import { themes, fonts, GAME_NAMES, type ThemeName, type FontName } from "@/lib/terminal-config"
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
+import { useTerminalContext } from '@/lib/terminal-context'
+import { useSound } from '@/lib/hooks/useSound'
+import { useIdleTimer } from '@/lib/hooks/useIdleTimer'
+import { Screensaver } from '@/components/screensaver'
+import { CommandPalette } from '@/components/command-palette'
 
 const TronGame = dynamic(() => import("@/components/games/tron-game").then(mod => mod.TronGame), {
   loading: () => <div className="p-4 text-green-500 font-mono">Loading Tron...</div>
@@ -28,106 +34,6 @@ interface GameState {
   type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "suggest" | null
   data?: Record<string, unknown>
 }
-
-const themes = {
-  lumon: {
-    name: "Lumon",
-    background: "#0a1628",
-    foreground: "#e8f4f8",
-    card: "#0d1e36",
-    primary: "#4fd1c5",
-    muted: "#94a3b8",
-    accent: "#4fd1c5",
-    destructive: "#f56565",
-    border: "#2d4a6f",
-  },
-  tokyonight: {
-    name: "Tokyo Night",
-    background: "#1a1b26",
-    foreground: "#c0caf5",
-    card: "#1a1b26",
-    primary: "#7aa2f7",
-    muted: "#565f89",
-    accent: "#9ece6a",
-    destructive: "#f7768e",
-    border: "#3b4261",
-  },
-  dracula: {
-    name: "Dracula",
-    background: "#282a36",
-    foreground: "#f8f8f2",
-    card: "#282a36",
-    primary: "#bd93f9",
-    muted: "#6272a4",
-    accent: "#50fa7b",
-    destructive: "#ff5555",
-    border: "#44475a",
-  },
-  gruvbox: {
-    name: "Gruvbox",
-    background: "#282828",
-    foreground: "#ebdbb2",
-    card: "#282828",
-    primary: "#fabd2f",
-    muted: "#928374",
-    accent: "#b8bb26",
-    destructive: "#fb4934",
-    border: "#3c3836",
-  },
-  nord: {
-    name: "Nord",
-    background: "#2e3440",
-    foreground: "#eceff4",
-    card: "#2e3440",
-    primary: "#88c0d0",
-    muted: "#4c566a",
-    accent: "#a3be8c",
-    destructive: "#bf616a",
-    border: "#3b4252",
-  },
-  monokai: {
-    name: "Monokai",
-    background: "#272822",
-    foreground: "#f8f8f2",
-    card: "#272822",
-    primary: "#66d9ef",
-    muted: "#75715e",
-    accent: "#a6e22e",
-    destructive: "#f92672",
-    border: "#3e3d32",
-  },
-}
-
-type ThemeName = keyof typeof themes
-
-const fonts = {
-  jetbrains: {
-    name: "JetBrains Mono",
-    value: '"JetBrains Mono", monospace',
-  },
-  fira: {
-    name: "Fira Code",
-    value: '"Fira Code", monospace',
-  },
-  source: {
-    name: "Source Code Pro",
-    value: '"Source Code Pro", monospace',
-  },
-  ibm: {
-    name: "IBM Plex Mono",
-    value: '"IBM Plex Mono", monospace',
-  },
-  hack: {
-    name: "Hack",
-    value: '"Hack", monospace',
-  },
-  mono: {
-    name: "System Mono",
-    value: 'ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace',
-  },
-}
-
-type FontName = keyof typeof fonts
 
 const manPages: Record<string, string[]> = {
   man: [
@@ -441,6 +347,26 @@ const manPages: Record<string, string[]> = {
     "    theme, neofetch",
     "",
   ],
+  sound: [
+    "",
+    "NAME",
+    "    sound - toggle sound effects",
+    "",
+    "SYNOPSIS",
+    "    sound [on|off]",
+    "",
+    "DESCRIPTION",
+    "    Enable or disable retro sound effects. When enabled, plays",
+    "    keyclick sounds on typing, beeps on errors, and chimes on",
+    "    success. Sound preference is saved to localStorage.",
+    "    Without arguments, displays current sound state.",
+    "",
+    "EXAMPLES",
+    "    sound on        Enable sound effects",
+    "    sound off       Disable sound effects",
+    "    sound           Show current state",
+    "",
+  ],
   neofetch: [
     "",
     "NAME",
@@ -614,10 +540,15 @@ const manPages: Record<string, string[]> = {
 }
 
 const initialHistory: TerminalLine[] = [
+  { type: "banner", content: " ███████╗ █████╗  ██████╗██╗  ██╗ █████╗ ██████╗ ██╗   ██╗", centered: true },
+  { type: "banner", content: " ╚══███╔╝██╔══██╗██╔════╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝", centered: true },
+  { type: "banner", content: "   ███╔╝ ███████║██║     ███████║███████║██████╔╝ ╚████╔╝", centered: true },
+  { type: "banner", content: "  ███╔╝  ██╔══██║██║     ██╔══██║██╔══██║██╔══██╗  ╚██╔╝", centered: true },
+  { type: "banner", content: " ███████╗██║  ██║╚██████╗██║  ██║██║  ██║██║  ██║   ██║", centered: true },
+  { type: "banner", content: " ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝", centered: true },
+  { type: "output", content: "developer  ·  collector  ·  gamer", centered: true },
   { type: "output", content: "" },
-  { type: "success", content: "zachary@home" },
-  { type: "output", content: "" },
-  { type: "output", content: "Type 'help' for available commands." },
+  { type: "output", content: "Type 'help' for available commands or Ctrl+K to search.", centered: true },
   { type: "output", content: "" },
 ]
 
@@ -627,6 +558,7 @@ export function Terminal() {
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [gameState, setGameState] = useState<GameState>({ active: false, type: null })
+  const mountTime = useRef(Date.now())
 
   /* VFS Initialization */
   const [vfs] = useState(() => {
@@ -739,6 +671,56 @@ export function Terminal() {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>("lumon")
   const [currentFont, setCurrentFont] = useState<FontName>("jetbrains")
   const inputRef = useRef<InputLineHandle>(null)
+
+  // Sync state to TerminalContext so TerminalChrome can read it
+  const terminalCtx = useTerminalContext()
+  const soundState = useSound()
+
+  const isIdle = useIdleTimer(90000, !gameState.active)
+
+  const handleDismissScreensaver = () => {
+    // The idle timer resets on any input — just need to refocus
+    inputRef.current?.focus()
+  }
+
+  const [showPalette, setShowPalette] = useState(false)
+
+  const handleCommandPalette = () => setShowPalette(prev => !prev)
+
+  const handlePaletteExecute = (command: string) => {
+    const parts = command.split(' && ')
+    for (const part of parts) {
+      handleCommand(part.trim())
+    }
+  }
+
+  useEffect(() => {
+    terminalCtx.setCurrentDirectory(currentDirectory)
+  }, [currentDirectory, terminalCtx.setCurrentDirectory]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    terminalCtx.setCurrentTheme(currentTheme)
+  }, [currentTheme, terminalCtx.setCurrentTheme]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    terminalCtx.setCurrentFont(currentFont)
+  }, [currentFont, terminalCtx.setCurrentFont]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync sound state to context so status bar reflects it
+  useEffect(() => {
+    if (soundState.enabled !== terminalCtx.soundEnabled) {
+      if (soundState.enabled) {
+        if (!terminalCtx.soundEnabled) terminalCtx.toggleSound()
+      } else {
+        if (terminalCtx.soundEnabled) terminalCtx.toggleSound()
+      }
+    }
+  }, [soundState.enabled, terminalCtx.soundEnabled, terminalCtx.toggleSound]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
+  useEffect(() => {
+    terminalCtx.registerCommandHandler(handleCommand)
+  })
 
   // Load theme and font from localStorage on mount
   useEffect(() => {
@@ -1240,7 +1222,7 @@ export function Terminal() {
     }
   }
 
-  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | string | { text: string; href: string }> = {
+  const commands: Record<string, (args: string[]) => (string | { text: string; href: string })[] | (string | TerminalLine)[] | string | { text: string; href: string } | TerminalLine[] | null> = {
     help: () => {
       return [
         "",
@@ -1253,7 +1235,7 @@ export function Terminal() {
         "  Files          mkdir, touch, rm",
         "  Games          game <type>, suggest",
         "  Blog           notes",
-        "  Style          theme, font, neofetch",
+        "  Style          theme, font, sound, neofetch",
         "  Info           about, contact, projects, whoami, date",
         "  Other          clear, echo, exit",
         "",
@@ -1291,7 +1273,7 @@ export function Terminal() {
       const pwd = vfs.getPwd()
 
       if (!path && pwd === '/home/zachary/books') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1307,7 +1289,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/vinyl') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1323,7 +1305,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/hardware') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1339,7 +1321,7 @@ export function Terminal() {
       }
 
       if (!path && pwd === '/home/zachary/notes') {
-        const lines: (string | { type: string; content: string })[] = [""]
+        const lines: (string | TerminalLine)[] = [""]
         result.forEach(filename => {
           const node = vfs.resolve(filename)
           if (node && node.type === 'file' && node.content) {
@@ -1425,6 +1407,18 @@ export function Terminal() {
       setFont(fontName)
       return `Font set to ${fonts[fontName].name}`
     },
+    sound: (args) => {
+      const sub = args[0]?.toLowerCase()
+      if (sub === 'on') {
+        if (!soundState.enabled) soundState.toggle()
+        return 'Sound effects enabled'
+      }
+      if (sub === 'off') {
+        if (soundState.enabled) soundState.toggle()
+        return 'Sound effects disabled'
+      }
+      return `Sound effects: ${soundState.enabled ? 'on' : 'off'}`
+    },
     view: (args) => {
       const path = args[0]
       if (!path) return "Usage: view <file>"
@@ -1437,29 +1431,33 @@ export function Terminal() {
 
       // Determine type based on parent directory
       if (pwd.includes("/books")) {
-        const book = node.content as { title: string; author: string; genre: string; format: string; pages?: number }
-        return [
-          "",
-          `  Title:   ${book.title}`,
-          `  Author:  ${book.author}`,
-          `  Genre:   ${book.genre}`,
-          `  Format:  ${book.format}`,
-          book.pages ? `  Pages:   ${book.pages}` : "",
-          "",
-        ].filter(Boolean) as string[]
+        const book = node.content as { title: string; author: string; genre: string; format: string; pages?: number; cover?: string }
+        const lines: TerminalLine[] = [{ type: "output", content: "" }]
+        if (book.cover) {
+          lines.push({ type: "image", content: book.title, src: book.cover })
+        }
+        lines.push({ type: "output", content: `  Title:   ${book.title}` })
+        lines.push({ type: "output", content: `  Author:  ${book.author}` })
+        lines.push({ type: "output", content: `  Genre:   ${book.genre}` })
+        lines.push({ type: "output", content: `  Format:  ${book.format}` })
+        if (book.pages) lines.push({ type: "output", content: `  Pages:   ${book.pages}` })
+        lines.push({ type: "output", content: "" })
+        return lines
       }
 
       if (pwd.includes("/vinyl")) {
-        const record = node.content as { title: string; artist: string; genre: string; format: string; label: string }
-        return [
-          "",
-          `  Title:   ${record.title}`,
-          `  Artist:  ${record.artist}`,
-          `  Genre:   ${record.genre}`,
-          `  Format:  ${record.format}`,
-          `  Label:   ${record.label}`,
-          "",
-        ]
+        const record = node.content as { title: string; artist: string; genre: string; format: string; label: string; cover?: string }
+        const lines: TerminalLine[] = [{ type: "output", content: "" }]
+        if (record.cover) {
+          lines.push({ type: "image", content: record.title, src: record.cover })
+        }
+        lines.push({ type: "output", content: `  Title:   ${record.title}` })
+        lines.push({ type: "output", content: `  Artist:  ${record.artist}` })
+        lines.push({ type: "output", content: `  Genre:   ${record.genre}` })
+        lines.push({ type: "output", content: `  Format:  ${record.format}` })
+        lines.push({ type: "output", content: `  Label:   ${record.label}` })
+        lines.push({ type: "output", content: "" })
+        return lines
       }
 
       if (pwd.includes("/hardware")) {
@@ -1639,7 +1637,7 @@ export function Terminal() {
     },
     clear: () => {
       setHistory(initialHistory)
-      return ""
+      return null
     },
     whoami: () => "zachary",
     date: () => new Date().toLocaleString(),
@@ -1705,20 +1703,40 @@ export function Terminal() {
       saveFileSystem()
       return ""
     },
-    neofetch: () => [
-      "",
-      "  zachary@home",
-      "  ------------",
-      `  Theme: ${themes[currentTheme].name}`,
-      `  Font: ${fonts[currentFont].name}`,
-      "  Shell: web/1.0",
-      "  Terminal: browser",
-      `  Books: ${booksData.length}`,
-      `  Vinyl: ${vinylData.length}`,
-      `  Hardware: ${hardwareData.length}`,
-      `  Notes: ${notesData.length}`,
-      "",
-    ],
+    neofetch: () => {
+      const uptimeMs = Date.now() - mountTime.current
+      const uptimeMin = Math.floor(uptimeMs / 60000)
+      const uptimeSec = Math.floor((uptimeMs % 60000) / 1000)
+      const uptime = uptimeMin > 0 ? `${uptimeMin}m ${uptimeSec}s` : `${uptimeSec}s`
+
+      const art = [
+        '  ┌──────────┐',
+        '  │  ██████  │',
+        '  │  █    █  │',
+        '  │  █    █  │',
+        '  │  ██████  │',
+        '  │  ██  ██  │',
+        '  │          │',
+        '  └──────────┘',
+      ]
+      const info = [
+        '   zachary@home',
+        '   ──────────────',
+        `   OS: CYBER_PORTFOLIO v1.0`,
+        `   Shell: zach-sh`,
+        `   Theme: ${themes[currentTheme].name}`,
+        `   Font: ${fonts[currentFont].name}`,
+        `   Collections: ${booksData.length} books, ${vinylData.length} vinyl, ${hardwareData.length} hardware`,
+        `   Games: ${GAME_NAMES.length} available`,
+      ]
+      const lines = ['']
+      for (let i = 0; i < Math.max(art.length, info.length); i++) {
+        lines.push((art[i] || '                ') + (info[i] || ''))
+      }
+      lines.push(`                 Uptime: ${uptime}`)
+      lines.push('')
+      return lines
+    },
     cat: (args) => {
       const path = args[0]
       if (!path) return "Usage: cat <file>"
@@ -1824,20 +1842,22 @@ export function Terminal() {
 
     if (commands[cmd_lower]) {
       const result = commands[cmd_lower](args)
-      if (result) {
+      if (result === null || result === undefined) {
+        // Command handled its own output (e.g., clear)
+      } else if (Array.isArray(result) && result.length > 0 && typeof result[0] === 'object' && 'type' in result[0]) {
+        // TerminalLine[] — append directly, spreading to preserve all properties (src, centered, href)
+        setHistory(prev => [...prev, ...(result as TerminalLine[]).map(item => ({ ...item }))])
+      } else {
         const items = Array.isArray(result) ? result : [result]
         items.forEach((item) => {
           if (typeof item === "object" && "href" in item) {
             setHistory((prev) => [
               ...prev,
-              { type: "link", content: item.text, href: item.href },
+              { type: "link", content: (item as { text: string; href: string }).text, href: (item as { text: string; href: string }).href },
             ])
           } else if (typeof item === "object" && "type" in item && "content" in item) {
-            // Handle TerminalLine objects from commands
-            setHistory((prev) => [
-              ...prev,
-              { type: item.type, content: item.content },
-            ])
+            // Single TerminalLine object — spread to preserve all properties
+            setHistory((prev) => [...prev, { ...(item as TerminalLine) }])
           } else {
             const line = typeof item === "string" ? item : String(item)
             setHistory((prev) => [
@@ -1943,10 +1963,20 @@ export function Terminal() {
             onHistoryDown={handleHistoryDown}
             onClear={handleClear}
             onInterrupt={handleInterrupt}
+            onCommandPalette={handleCommandPalette}
             prompt={prompt}
             validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
           />
         </>
+      )}
+      {isIdle && !gameState.active && (
+        <Screensaver onDismiss={handleDismissScreensaver} />
+      )}
+      {showPalette && (
+        <CommandPalette
+          onClose={() => { setShowPalette(false); inputRef.current?.focus() }}
+          onExecute={handlePaletteExecute}
+        />
       )}
     </div>
   )

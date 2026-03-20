@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { ThemeName, ThemeColors } from '@/lib/types/terminal'
+import type { ThemeName, ThemeColors } from '@/lib/terminal-config'
 import { THEMES, DEFAULT_THEME, isValidTheme, applyTheme } from '@/lib/data/themes'
 
 const STORAGE_KEY = 'terminal-theme'

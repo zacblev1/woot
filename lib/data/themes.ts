@@ -1,4 +1,4 @@
-import type { ThemeName, ThemeColors } from '@/lib/types/terminal'
+import type { ThemeName, ThemeColors } from '@/lib/terminal-config'
 
 export const THEMES: Record<ThemeName, ThemeColors> = {
   lumon: {

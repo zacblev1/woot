@@ -9,11 +9,13 @@ import type { TerminalLineProps } from './types'
 function getColorClass(type: LineType): string {
   switch (type) {
     case 'input':
-      return 'text-primary'
+      return 'text-primary crt-glow'
     case 'error':
       return 'text-destructive'
     case 'success':
-      return 'text-accent'
+      return 'text-accent crt-glow'
+    case 'banner':
+      return 'text-accent crt-glow'
     case 'link':
       return 'text-foreground'
     case 'wordle':
@@ -75,6 +77,19 @@ function renderLineContent(line: TerminalLineType): ReactNode {
     case 'wordle':
       return renderWordleContent(line.content)
 
+    case 'image':
+      if (line.src) {
+        return (
+          <img
+            src={line.src}
+            alt={line.content}
+            className="max-w-[80px] border border-border"
+            onError={(e) => { (e.target as HTMLElement).style.display = 'none' }}
+          />
+        )
+      }
+      return null
+
     default:
       return highlightLine(line.content)
   }
@@ -87,10 +102,15 @@ function renderLineContent(line: TerminalLineType): ReactNode {
 export const TerminalLine = memo(function TerminalLine({ line }: TerminalLineProps) {
   const baseClass = 'whitespace-pre-wrap break-words break-all'
   const colorClass = getColorClass(line.type)
+  const centeredClass = line.centered ? ' text-center' : ''
 
   return (
-    <div className={`${baseClass}${colorClass ? ` ${colorClass}` : ''}`}>
-      {renderLineContent(line)}
+    <div className={`${baseClass}${colorClass ? ` ${colorClass}` : ''}${centeredClass}`}>
+      {line.centered ? (
+        <span className="inline-block text-left">{renderLineContent(line)}</span>
+      ) : (
+        renderLineContent(line)
+      )}
     </div>
   )
 })
