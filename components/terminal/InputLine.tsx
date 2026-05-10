@@ -93,6 +93,8 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
 
     // Keyboard event handler
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+      const key = e.key.toLowerCase()
+
       if (e.key === 'Enter') {
         onSubmit(value)
       } else if (e.key === 'Tab') {
@@ -106,13 +108,13 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
         e.preventDefault()
         const cmd = onHistoryDown()
         onChange(cmd ?? '')
-      } else if (e.key === 'l' && e.ctrlKey) {
+      } else if (key === 'l' && e.ctrlKey) {
         e.preventDefault()
         onClear()
-      } else if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+      } else if (key === 'k' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         onCommandPalette?.()
-      } else if (e.key === 'c' && (e.ctrlKey || e.metaKey)) {
+      } else if (key === 'c' && (e.ctrlKey || e.metaKey)) {
         // Let parent decide if interrupt should happen
         // (only intercept if game is active, which parent controls)
         onInterrupt()
