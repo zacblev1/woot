@@ -199,6 +199,22 @@ describe('InputLine', () => {
     })
   })
 
+  describe('keyboard events - Ctrl+K / Cmd+K', () => {
+    it('calls onCommandPalette when browser reports uppercase K', () => {
+      const onCommandPalette = vi.fn()
+      render(<InputLine {...createDefaultProps({ onCommandPalette })} />)
+
+      const input = screen.getByRole('textbox')
+      input.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'K',
+        ctrlKey: true,
+        bubbles: true,
+      }))
+
+      expect(onCommandPalette).toHaveBeenCalled()
+    })
+  })
+
   describe('keyboard events - Ctrl+C / Cmd+C', () => {
     it('calls onInterrupt on Ctrl+C', async () => {
       const user = userEvent.setup()
