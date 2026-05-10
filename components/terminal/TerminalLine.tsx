@@ -100,7 +100,9 @@ function renderLineContent(line: TerminalLineType): ReactNode {
  * Memoized because the same line content rarely changes.
  */
 export const TerminalLine = memo(function TerminalLine({ line }: TerminalLineProps) {
-  const baseClass = 'whitespace-pre-wrap break-words break-all'
+  const baseClass = line.type === 'banner'
+    ? 'whitespace-pre overflow-visible text-[7px] leading-[1.15] sm:text-xs md:text-sm lg:text-base'
+    : 'whitespace-pre-wrap break-words break-all'
   const colorClass = getColorClass(line.type)
   const centeredClass = line.centered ? ' text-center' : ''
 
