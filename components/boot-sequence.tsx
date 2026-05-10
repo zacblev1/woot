@@ -7,16 +7,17 @@ interface BootSequenceProps {
 }
 
 export function BootSequence({ children }: BootSequenceProps) {
-  const [showOverlay, setShowOverlay] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !sessionStorage.getItem('boot-v2-complete')
-  })
+  const [showOverlay, setShowOverlay] = useState(false)
 
   const dismiss = useCallback(() => {
     setShowOverlay(false)
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('boot-v2-complete', 'true')
     }
+  }, [])
+
+  useEffect(() => {
+    setShowOverlay(!sessionStorage.getItem('boot-v2-complete'))
   }, [])
 
   useEffect(() => {
