@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BootSequence } from '@/components/boot-sequence'
 
 beforeEach(() => {
@@ -12,9 +12,11 @@ describe('BootSequence', () => {
     expect(screen.getByText('terminal content')).toBeInTheDocument()
   })
 
-  it('shows overlay on first visit', () => {
+  it('shows overlay on first visit', async () => {
     const { container } = render(<BootSequence><div>content</div></BootSequence>)
-    expect(container.querySelector('[data-boot-overlay]')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container.querySelector('[data-boot-overlay]')).toBeInTheDocument()
+    })
   })
 
   it('skips overlay if session has boot-v2-complete', () => {
@@ -23,8 +25,11 @@ describe('BootSequence', () => {
     expect(container.querySelector('[data-boot-overlay]')).not.toBeInTheDocument()
   })
 
-  it('dismisses on click', () => {
+  it('dismisses on click', async () => {
     const { container } = render(<BootSequence><div>content</div></BootSequence>)
+    await waitFor(() => {
+      expect(container.querySelector('[data-boot-overlay]')).toBeInTheDocument()
+    })
     const overlay = container.querySelector('[data-boot-overlay]')!
     fireEvent.click(overlay)
     expect(container.querySelector('[data-boot-overlay]')).not.toBeInTheDocument()
