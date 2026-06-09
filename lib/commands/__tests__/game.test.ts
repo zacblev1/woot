@@ -42,10 +42,13 @@ function createMockContext(): ExecuteContext {
     currentDirectory: '~',
     setCurrentDirectory: vi.fn(),
     openUrl: vi.fn(),
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [],
       vinyl: [],
       hardware: [],
+      notes: [],
     },
   }
 }

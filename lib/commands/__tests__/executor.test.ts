@@ -43,10 +43,13 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     currentDirectory: '~',
     setCurrentDirectory: () => {},
     openUrl: () => {},
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [],
       vinyl: [],
       hardware: [],
+      notes: [],
     },
     ...overrides,
   }

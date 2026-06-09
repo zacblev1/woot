@@ -60,6 +60,7 @@ const mockCollections = {
     { name: 'iPad Pro', type: 'Tablet', processor: 'M2', memory: '8GB', storage: '256GB', status: 'Active' },
     { name: 'Dell XPS', type: 'Laptop', processor: 'i7', memory: '32GB', storage: '1TB', status: 'Retired' },
   ],
+  notes: [],
 }
 
 /**
@@ -100,6 +101,8 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     currentDirectory: '~',
     setCurrentDirectory: () => {},
     openUrl: () => {},
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: mockCollections,
     ...overrides,
   }

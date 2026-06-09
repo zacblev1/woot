@@ -38,10 +38,21 @@ export interface ExecuteContext {
     clear: () => void
   }
   game: {
-    start: (type: GameType) => void
+    /**
+     * Start a game. Returns the intro text for text-based games
+     * (the terminal owns the game state machine); canvas games
+     * return nothing and take over the UI.
+     */
+    start: (type: GameType) => import('@/lib/types/terminal').CommandOutput | void
     end: () => void
     isActive: () => boolean
   }
+  sound: {
+    enabled: boolean
+    toggle: () => void
+  }
+  /** Milliseconds since the terminal mounted (used by neofetch). */
+  uptime: () => number
   theme: {
     current: ThemeName
     set: (name: ThemeName) => void
@@ -65,7 +76,7 @@ export interface ExecuteContext {
       author: string | string[]
       genre: string
       format: string
-      pages?: number
+      pages?: number | string
     }>
     vinyl: Array<{
       title: string
@@ -83,6 +94,12 @@ export interface ExecuteContext {
       status: string
       graphics?: string
       operating_system?: string
+    }>
+    notes: Array<{
+      title: string
+      date: string
+      author: string
+      content: string[]
     }>
   }
 }

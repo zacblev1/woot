@@ -48,10 +48,13 @@ function createMockContext(): ExecuteContext {
     currentDirectory: '~',
     setCurrentDirectory: vi.fn(),
     openUrl: vi.fn(),
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [{} as ExecuteContext['collections']['books'][0], {} as ExecuteContext['collections']['books'][0], {} as ExecuteContext['collections']['books'][0]],
       vinyl: [{} as ExecuteContext['collections']['vinyl'][0], {} as ExecuteContext['collections']['vinyl'][0]],
       hardware: [{} as ExecuteContext['collections']['hardware'][0]],
+      notes: [],
     },
   }
 }

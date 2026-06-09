@@ -1,5 +1,6 @@
 import type { CommandDefinition, ThemeName, FontName } from '../types'
 import { success, error } from '../types'
+import { GAME_NAMES } from '@/lib/terminal-config'
 
 export const themeCommand: CommandDefinition = {
   name: 'theme',
@@ -64,18 +65,37 @@ export const neofetchCommand: CommandDefinition = {
     const fontConfig = context.font.config(context.font.current)
     const { collections } = context
 
-    return success([
-      '',
-      '  zachary@home',
-      '  ------------',
-      `  Theme: ${themeConfig.name}`,
-      `  Font: ${fontConfig.name}`,
-      '  Shell: web/1.0',
-      '  Terminal: browser',
-      `  Books: ${collections.books.length}`,
-      `  Vinyl: ${collections.vinyl.length}`,
-      `  Hardware: ${collections.hardware.length}`,
-      '',
-    ])
+    const uptimeMs = context.uptime()
+    const uptimeMin = Math.floor(uptimeMs / 60000)
+    const uptimeSec = Math.floor((uptimeMs % 60000) / 1000)
+    const uptime = uptimeMin > 0 ? `${uptimeMin}m ${uptimeSec}s` : `${uptimeSec}s`
+
+    const art = [
+      '  ┌──────────┐',
+      '  │  ██████  │',
+      '  │  █    █  │',
+      '  │  █    █  │',
+      '  │  ██████  │',
+      '  │  ██  ██  │',
+      '  │          │',
+      '  └──────────┘',
+    ]
+    const info = [
+      '   zachary@home',
+      '   ──────────────',
+      `   OS: CYBER_PORTFOLIO v1.0`,
+      `   Shell: zach-sh`,
+      `   Theme: ${themeConfig.name}`,
+      `   Font: ${fontConfig.name}`,
+      `   Collections: ${collections.books.length} books, ${collections.vinyl.length} vinyl, ${collections.hardware.length} hardware`,
+      `   Games: ${GAME_NAMES.length} available`,
+    ]
+    const lines = ['']
+    for (let i = 0; i < Math.max(art.length, info.length); i++) {
+      lines.push((art[i] || '                ') + (info[i] || ''))
+    }
+    lines.push(`                 Uptime: ${uptime}`)
+    lines.push('')
+    return success(lines)
   }
 }

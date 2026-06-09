@@ -24,6 +24,7 @@ export {
 
 // Info commands
 export {
+  notesCommand,
   aboutCommand,
   contactCommand,
   projectsCommand,
@@ -40,6 +41,7 @@ export {
 
 // System commands
 export {
+  soundCommand,
   helpCommand,
   manCommand,
   clearCommand,

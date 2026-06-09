@@ -63,3 +63,44 @@ export const dateCommand: CommandDefinition = {
     return success(new Date().toLocaleString())
   }
 }
+
+export const notesCommand: CommandDefinition = {
+  name: 'notes',
+  description: 'Read blog posts and updates',
+  usage: 'notes [number]',
+  execute: (args, context) => {
+    const noteNum = args[0]
+    const notes = context.collections.notes
+
+    if (!noteNum) {
+      const lines: string[] = ['', 'BLOG & UPDATES', '']
+      notes.forEach((note, idx) => {
+        lines.push(`  ${idx + 1}. ${note.title}`)
+        lines.push(`     ${note.date} by ${note.author}`)
+        lines.push('')
+      })
+      lines.push("Type 'notes <number>' to read a note")
+      lines.push('')
+      return success(lines)
+    }
+
+    const index = parseInt(noteNum) - 1
+    if (isNaN(index) || index < 0 || index >= notes.length) {
+      return success(`Invalid note number. Use 'notes' to see available notes.`)
+    }
+
+    const note = notes[index]
+    return success([
+      '',
+      '='.repeat(60),
+      note.title,
+      '='.repeat(60),
+      `Date: ${note.date} | Author: ${note.author}`,
+      '',
+      ...note.content,
+      '',
+      '='.repeat(60),
+      '',
+    ])
+  },
+}

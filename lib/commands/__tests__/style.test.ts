@@ -42,10 +42,13 @@ function createMockContext(): ExecuteContext {
     currentDirectory: '~',
     setCurrentDirectory: vi.fn(),
     openUrl: vi.fn(),
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [{} as ExecuteContext['collections']['books'][0], {} as ExecuteContext['collections']['books'][0], {} as ExecuteContext['collections']['books'][0]],
       vinyl: [{} as ExecuteContext['collections']['vinyl'][0], {} as ExecuteContext['collections']['vinyl'][0]],
       hardware: [{} as ExecuteContext['collections']['hardware'][0]],
+      notes: [],
     },
   }
 }
@@ -249,9 +252,7 @@ describe('neofetchCommand', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       const output = result.output as string[]
-      expect(output.some(line => line.includes('Books: 3'))).toBe(true)
-      expect(output.some(line => line.includes('Vinyl: 2'))).toBe(true)
-      expect(output.some(line => line.includes('Hardware: 1'))).toBe(true)
+      expect(output.some(line => line.includes('Collections: 3 books, 2 vinyl, 1 hardware'))).toBe(true)
     }
   })
 
@@ -273,8 +274,9 @@ describe('neofetchCommand', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       const output = result.output as string[]
-      expect(output.some(line => line.includes('Shell: web/1.0'))).toBe(true)
-      expect(output.some(line => line.includes('Terminal: browser'))).toBe(true)
+      expect(output.some(line => line.includes('Shell: zach-sh'))).toBe(true)
+      expect(output.some(line => line.includes('OS: CYBER_PORTFOLIO v1.0'))).toBe(true)
+      expect(output.some(line => line.includes('Uptime:'))).toBe(true)
     }
   })
 

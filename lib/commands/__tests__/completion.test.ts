@@ -43,10 +43,13 @@ function createMockContext(): ExecuteContext {
     currentDirectory: '~',
     setCurrentDirectory: vi.fn(),
     openUrl: vi.fn(),
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [],
       vinyl: [],
       hardware: [],
+      notes: [],
     },
   }
 }
@@ -262,7 +265,7 @@ describe('getCompletions - game completion', () => {
 
     const completions = getCompletions('game ', registry, context)
 
-    expect(completions).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron'])
+    expect(completions).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'])
   })
 
   it('returns filtered games for partial "game w"', () => {
@@ -289,7 +292,7 @@ describe('getCompletions - game completion', () => {
 
     const completions = getCompletions('game b', registry, context)
 
-    expect(completions).toEqual(['blackjack'])
+    expect(completions).toEqual(['blackjack', 'basketball'])
   })
 })
 

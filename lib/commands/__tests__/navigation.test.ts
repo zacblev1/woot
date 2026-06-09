@@ -14,6 +14,14 @@ function getOutput(result: CommandResult): CommandOutput {
   return result.output
 }
 
+/**
+ * Extract content strings from a TerminalLine[] command output.
+ */
+function lineContents(result: CommandResult): string[] {
+  const output = getOutput(result)
+  return (output as Array<{ content: string }>).map((l) => l.content)
+}
+
 
 /**
  * Create a mock ExecuteContext for testing.
@@ -54,10 +62,13 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     currentDirectory: '~',
     setCurrentDirectory: () => {},
     openUrl: () => {},
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [],
       vinyl: [],
       hardware: [],
+      notes: [],
     },
     ...overrides,
   }
@@ -171,10 +182,15 @@ describe('lsCommand', () => {
 
       const result = lsCommand.execute([], context)
 
-      expect(result).toEqual({
-        success: true,
-        output: ['', 'Dune', 'The Pragmatic Programmer', ''],
-      })
+      expect(result.success).toBe(true)
+      expect(getOutput(result)).toEqual([
+        { type: 'output', content: '' },
+        { type: 'success', content: 'Dune' },
+        { type: 'output', content: '    by Frank Herbert' },
+        { type: 'success', content: 'The Pragmatic Programmer' },
+        { type: 'output', content: '    by David Thomas' },
+        { type: 'output', content: '' },
+      ])
     })
 
     it('shows vinyl titles instead of slugs in ~/vinyl', () => {
@@ -197,10 +213,15 @@ describe('lsCommand', () => {
 
       const result = lsCommand.execute([], context)
 
-      expect(result).toEqual({
-        success: true,
-        output: ['', 'Abbey Road', 'The Dark Side of the Moon', ''],
-      })
+      expect(result.success).toBe(true)
+      expect(getOutput(result)).toEqual([
+        { type: 'output', content: '' },
+        { type: 'success', content: 'Abbey Road' },
+        { type: 'output', content: '    by The Beatles' },
+        { type: 'success', content: 'The Dark Side of the Moon' },
+        { type: 'output', content: '    by Pink Floyd' },
+        { type: 'output', content: '' },
+      ])
     })
 
     it('shows hardware names instead of slugs in ~/hardware', () => {
@@ -223,10 +244,15 @@ describe('lsCommand', () => {
 
       const result = lsCommand.execute([], context)
 
-      expect(result).toEqual({
-        success: true,
-        output: ['', 'MacBook Pro 14"', 'Raspberry Pi 4', ''],
-      })
+      expect(result.success).toBe(true)
+      expect(getOutput(result)).toEqual([
+        { type: 'output', content: '' },
+        { type: 'success', content: 'MacBook Pro 14"' },
+        { type: 'output', content: '    Laptop' },
+        { type: 'success', content: 'Raspberry Pi 4' },
+        { type: 'output', content: '    SBC' },
+        { type: 'output', content: '' },
+      ])
     })
 
     it('falls back to filename when content has no title/name', () => {
@@ -246,10 +272,12 @@ describe('lsCommand', () => {
 
       const result = lsCommand.execute([], context)
 
-      expect(result).toEqual({
-        success: true,
-        output: ['', 'unknown-file', ''],
-      })
+      expect(result.success).toBe(true)
+      expect(getOutput(result)).toEqual([
+        { type: 'output', content: '' },
+        { type: 'success', content: 'unknown-file' },
+        { type: 'output', content: '' },
+      ])
     })
 
     it('falls back to filename when resolve returns null', () => {
@@ -264,10 +292,12 @@ describe('lsCommand', () => {
 
       const result = lsCommand.execute([], context)
 
-      expect(result).toEqual({
-        success: true,
-        output: ['', 'orphan-file', ''],
-      })
+      expect(result.success).toBe(true)
+      expect(getOutput(result)).toEqual([
+        { type: 'output', content: '' },
+        { type: 'output', content: 'orphan-file' },
+        { type: 'output', content: '' },
+      ])
     })
 
     it('does not show display names for non-collection directories', () => {
@@ -288,7 +318,7 @@ describe('lsCommand', () => {
       })
     })
 
-    it('shows display names when ls path argument is a collection directory', () => {
+    it('shows raw slugs when ls is given a path argument (detailed view is pwd-only)', () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -318,7 +348,7 @@ describe('lsCommand', () => {
 
       expect(result).toEqual({
         success: true,
-        output: ['', 'Dune', 'Neuromancer', ''],
+        output: ['', 'dune', 'neuromancer', ''],
       })
     })
   })
@@ -628,7 +658,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(getOutput(result)).toEqual([
+      expect(lineContents(result)).toEqual([
         '',
         '  Title:   The Pragmatic Programmer',
         '  Author:  David Thomas',
@@ -656,7 +686,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(getOutput(result)).toContain('  Author:  David Thomas, Andrew Hunt')
+      expect(lineContents(result)).toContain('  Author:  David Thomas, Andrew Hunt')
     })
 
     it('includes pages when available', () => {
@@ -678,7 +708,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(getOutput(result)).toContain('  Pages:   350')
+      expect(lineContents(result)).toContain('  Pages:   350')
     })
   })
 
@@ -702,7 +732,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['record.json'], context)
 
       expect(result.success).toBe(true)
-      expect(getOutput(result)).toEqual([
+      expect(lineContents(result)).toEqual([
         '',
         '  Title:   Abbey Road',
         '  Artist:  The Beatles',

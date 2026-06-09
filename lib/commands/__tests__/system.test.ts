@@ -49,10 +49,13 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     currentDirectory: '~',
     setCurrentDirectory: () => {},
     openUrl: () => {},
+    sound: { enabled: false, toggle: () => {} },
+    uptime: () => 0,
     collections: {
       books: [],
       vinyl: [],
       hardware: [],
+      notes: [],
     },
     ...overrides,
   }
@@ -188,29 +191,18 @@ describe('clearCommand', () => {
     expect(context.history.clear).toHaveBeenCalled()
   })
 
-  it('adds welcome messages via context.history.add()', () => {
+  it('does not append anything itself (host resets to welcome state)', () => {
     const context = createMockContext()
     clearCommand.execute([], context)
 
-    // Should add 5 welcome lines
-    expect(context.history.add).toHaveBeenCalledTimes(5)
-  })
-
-  it('adds zachary@home success line', () => {
-    const context = createMockContext()
-    clearCommand.execute([], context)
-
-    expect(context.history.add).toHaveBeenCalledWith({
-      type: 'success',
-      content: 'zachary@home',
-    })
+    expect(context.history.add).not.toHaveBeenCalled()
   })
 
   it('returns empty success', () => {
     const context = createMockContext()
     const result = clearCommand.execute([], context)
 
-    expect(result).toEqual({ success: true, output: '' })
+    expect(result).toEqual({ success: true, output: [] })
   })
 })
 

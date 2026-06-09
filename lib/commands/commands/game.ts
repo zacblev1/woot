@@ -29,16 +29,16 @@ export const gameCommand: CommandDefinition = {
       return error(`Unknown game: ${gameType}`)
     }
 
-    // Start the game via context
-    context.game.start(gameType)
+    // Start the game via context; text games return their intro text
+    const startOutput = context.game.start(gameType)
 
     // Canvas games return empty (UI takes over), others return empty success - GameController handles the start message
     if (gameType === 'tron' || gameType === 'pacman' || gameType === 'basketball') {
       return success([])
     }
 
-    // For other games, return empty success - GameController handles the start message
-    return success('')
+    // Text games: surface the intro text returned by the host
+    return success(startOutput ?? '')
   }
 }
 

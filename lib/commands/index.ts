@@ -50,6 +50,7 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.projectsCommand)
   registry.register(commands.whoamiCommand)
   registry.register(commands.dateCommand)
+  registry.register(commands.notesCommand)
 
   // Style
   registry.register(commands.themeCommand)
@@ -63,6 +64,7 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.echoCommand)
   registry.register(commands.exitCommand)
   registry.register(commands.sudoCommand)
+  registry.register(commands.soundCommand)
 
   // Game
   registry.register(commands.gameCommand)

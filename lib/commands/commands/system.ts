@@ -1,4 +1,4 @@
-import type { CommandDefinition, TerminalLine } from '../types'
+import type { CommandDefinition } from '../types'
 import { success, error } from '../types'
 import { manPages } from '../man-pages'
 
@@ -16,8 +16,9 @@ export const helpCommand: CommandDefinition = {
       '  Navigation     ls, cd, pwd, cat, view',
       '  Collections    search, genre, format, type',
       '  Files          mkdir, touch, rm',
-      '  Games          game <type>',
-      '  Style          theme, font, neofetch',
+      '  Games          game <type>, suggest',
+      '  Blog           notes',
+      '  Style          theme, font, sound, neofetch',
       '  Info           about, contact, projects, whoami, date',
       '  Other          clear, echo, exit',
       '',
@@ -58,17 +59,9 @@ export const clearCommand: CommandDefinition = {
   description: 'Clear terminal screen',
   usage: 'clear',
   execute: (args, context) => {
-    // Clear history and add welcome message
+    // The host resets history to its initial welcome state; appending nothing
     context.history.clear()
-    const welcomeLines: TerminalLine[] = [
-      { type: 'output', content: '' },
-      { type: 'success', content: 'zachary@home' },
-      { type: 'output', content: '' },
-      { type: 'output', content: "Type 'help' for available commands." },
-      { type: 'output', content: '' },
-    ]
-    welcomeLines.forEach((line) => context.history.add(line))
-    return success('')
+    return success([])
   },
 }
 
@@ -96,5 +89,23 @@ export const sudoCommand: CommandDefinition = {
   usage: 'sudo <command>',
   execute: () => {
     return error('Permission denied')
+  },
+}
+
+export const soundCommand: CommandDefinition = {
+  name: 'sound',
+  description: 'Toggle sound effects',
+  usage: 'sound [on|off]',
+  execute: (args, context) => {
+    const sub = args[0]?.toLowerCase()
+    if (sub === 'on') {
+      if (!context.sound.enabled) context.sound.toggle()
+      return success('Sound effects enabled')
+    }
+    if (sub === 'off') {
+      if (context.sound.enabled) context.sound.toggle()
+      return success('Sound effects disabled')
+    }
+    return success(`Sound effects: ${context.sound.enabled ? 'on' : 'off'}`)
   },
 }

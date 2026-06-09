@@ -22,7 +22,7 @@ export const searchCommand: CommandDefinition = {
       if (results.length === 0) return success(`No results for "${term}"`)
       const list = results.map(r => {
         const idx = collections.vinyl.indexOf(r) + 1
-        return `  ${String(idx).padStart(3, ' ')}  ${r.title} \u2014 ${r.artist}`
+        return `  ${String(idx).padStart(3, ' ')}  ${r.title} - ${r.artist}`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }
@@ -47,8 +47,19 @@ export const searchCommand: CommandDefinition = {
       if (results.length === 0) return success(`No results for "${term}"`)
       const list = results.map(b => {
         const idx = collections.books.indexOf(b) + 1
-        const authorStr = Array.isArray(b.author) ? b.author.join(', ') : b.author
-        return `  ${String(idx).padStart(3, ' ')}  ${b.title} \u2014 ${authorStr}`
+        return `  ${String(idx).padStart(3, ' ')}  ${b.title} - ${b.author}`
+      })
+      return success(['', `${results.length} results`, '', ...list, ''])
+    }
+
+    if (currentDirectory === '~/notes') {
+      const results = collections.notes.filter(
+        n => n.title.toLowerCase().includes(term) || n.content.join(' ').toLowerCase().includes(term)
+      )
+      if (results.length === 0) return success(`No results for "${term}"`)
+      const list = results.map(n => {
+        const idx = collections.notes.indexOf(n) + 1
+        return `  ${String(idx).padStart(3, ' ')}  ${n.title} (${n.date})`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }
@@ -80,7 +91,7 @@ export const genreCommand: CommandDefinition = {
       if (results.length === 0) return success(`No records in genre "${genreName}"`)
       const list = results.map(r => {
         const idx = collections.vinyl.indexOf(r) + 1
-        return `  ${String(idx).padStart(3, ' ')}  ${r.title} \u2014 ${r.artist}`
+        return `  ${String(idx).padStart(3, ' ')}  ${r.title} - ${r.artist}`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }
@@ -94,8 +105,7 @@ export const genreCommand: CommandDefinition = {
       if (results.length === 0) return success(`No books in genre "${genreName}"`)
       const list = results.map(b => {
         const idx = collections.books.indexOf(b) + 1
-        const authorStr = Array.isArray(b.author) ? b.author.join(', ') : b.author
-        return `  ${String(idx).padStart(3, ' ')}  ${b.title} \u2014 ${authorStr}`
+        return `  ${String(idx).padStart(3, ' ')}  ${b.title} - ${b.author}`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }
@@ -127,7 +137,7 @@ export const formatCommand: CommandDefinition = {
       if (results.length === 0) return success(`No records in format "${formatType}"`)
       const list = results.map(r => {
         const idx = collections.vinyl.indexOf(r) + 1
-        return `  ${String(idx).padStart(3, ' ')}  ${r.title} \u2014 ${r.artist}`
+        return `  ${String(idx).padStart(3, ' ')}  ${r.title} - ${r.artist}`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }
@@ -141,8 +151,7 @@ export const formatCommand: CommandDefinition = {
       if (results.length === 0) return success(`No books in format "${formatType}"`)
       const list = results.map(b => {
         const idx = collections.books.indexOf(b) + 1
-        const authorStr = Array.isArray(b.author) ? b.author.join(', ') : b.author
-        return `  ${String(idx).padStart(3, ' ')}  ${b.title} \u2014 ${authorStr}`
+        return `  ${String(idx).padStart(3, ' ')}  ${b.title} - ${b.author}`
       })
       return success(['', `${results.length} results`, '', ...list, ''])
     }

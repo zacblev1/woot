@@ -1,50 +1,29 @@
 import type { CommandDefinition, ExecuteContext } from '../types'
+import type { TerminalLine } from '@/lib/types/terminal'
 import { success, error } from '../types'
 
 /**
- * Get the display name for a file in a collection directory.
- * Returns the title/name from the file content, or falls back to the filename.
+ * Rich listing for a collection directory: a success-styled title line plus an
+ * indented detail line per entry, mirroring the shipped terminal behavior.
  */
-function getDisplayName(filename: string, context: ExecuteContext): string {
-  const node = context.vfs.resolve(filename)
-  if (!node || node.type !== 'file' || !node.content) {
-    return filename
-  }
-
-  const content = node.content as { title?: string; name?: string }
-  // Books and vinyl have 'title', hardware has 'name'
-  return content.title || content.name || filename
-}
-
-/**
- * Check if the current or target path is a collection directory.
- */
-function isCollectionDirectory(path: string | undefined, context: ExecuteContext): boolean {
-  // Determine the effective path to check
-  let targetPath: string
-  if (path) {
-    // If a path argument is given, resolve it relative to pwd
-    const node = context.vfs.resolve(path)
-    if (!node) return false
-
-    // Build the absolute path
-    if (path.startsWith('/')) {
-      targetPath = path
-    } else if (path.startsWith('~')) {
-      targetPath = '/home/zachary' + path.slice(1)
+function listCollectionDirectory(
+  result: string[],
+  context: ExecuteContext,
+  detail: (content: Record<string, unknown>) => { title?: string; sub?: string }
+): TerminalLine[] {
+  const lines: TerminalLine[] = [{ type: 'output', content: '' }]
+  result.forEach((filename) => {
+    const node = context.vfs.resolve(filename)
+    if (node && node.type === 'file' && node.content) {
+      const { title, sub } = detail(node.content as Record<string, unknown>)
+      lines.push({ type: 'success', content: title || filename })
+      if (sub) lines.push({ type: 'output', content: sub })
     } else {
-      // Relative path - combine with pwd
-      const pwd = context.vfs.pwd()
-      targetPath = pwd === '/' ? '/' + path : pwd + '/' + path
+      lines.push({ type: 'output', content: filename })
     }
-  } else {
-    targetPath = context.vfs.pwd()
-  }
-
-  // Check if it's one of the collection directories
-  return targetPath === '/home/zachary/books' ||
-         targetPath === '/home/zachary/vinyl' ||
-         targetPath === '/home/zachary/hardware'
+  })
+  lines.push({ type: 'output', content: '' })
+  return lines
 }
 
 export const lsCommand: CommandDefinition = {
@@ -62,10 +41,35 @@ export const lsCommand: CommandDefinition = {
       return success(result[0])
     }
 
-    // If we're in a collection directory, show display names instead of slugs
-    if (isCollectionDirectory(path, context)) {
-      const displayNames = result.map(filename => getDisplayName(filename, context))
-      return success(['', ...displayNames, ''])
+    // Detailed listings when inside a collection directory (no path argument)
+    const pwd = context.vfs.pwd()
+
+    if (!path && pwd === '/home/zachary/books') {
+      return success(listCollectionDirectory(result, context, (c) => ({
+        title: c.title as string | undefined,
+        sub: c.author ? '    by ' + c.author : undefined,
+      })))
+    }
+
+    if (!path && pwd === '/home/zachary/vinyl') {
+      return success(listCollectionDirectory(result, context, (c) => ({
+        title: c.title as string | undefined,
+        sub: c.artist ? '    by ' + c.artist : undefined,
+      })))
+    }
+
+    if (!path && pwd === '/home/zachary/hardware') {
+      return success(listCollectionDirectory(result, context, (c) => ({
+        title: c.name as string | undefined,
+        sub: c.type ? '    ' + c.type + (c.status ? ' • ' + c.status : '') : undefined,
+      })))
+    }
+
+    if (!path && pwd === '/home/zachary/notes') {
+      return success(listCollectionDirectory(result, context, (c) => ({
+        title: c.title as string | undefined,
+        sub: c.date ? '    ' + c.date + (c.author ? ' by ' + c.author : '') : undefined,
+      })))
     }
 
     return success(['', ...result, ''])
@@ -133,30 +137,33 @@ export const viewCommand: CommandDefinition = {
 
     // Format based on collection type
     if (pwd.includes('/books')) {
-      const book = node.content as { title: string; author: string | string[]; genre: string; format: string; pages?: number }
-      const lines = [
-        '',
-        `  Title:   ${book.title}`,
-        `  Author:  ${Array.isArray(book.author) ? book.author.join(', ') : book.author}`,
-        `  Genre:   ${book.genre}`,
-        `  Format:  ${book.format}`,
-      ]
-      if (book.pages) lines.push(`  Pages:   ${book.pages}`)
-      lines.push('')
+      const book = node.content as { title: string; author: string | string[]; genre: string; format: string; pages?: number; cover?: string }
+      const lines: TerminalLine[] = [{ type: 'output', content: '' }]
+      if (book.cover) {
+        lines.push({ type: 'image', content: book.title, src: book.cover })
+      }
+      lines.push({ type: 'output', content: `  Title:   ${book.title}` })
+      lines.push({ type: 'output', content: `  Author:  ${Array.isArray(book.author) ? book.author.map(a => a.trim()).join(', ') : book.author}` })
+      lines.push({ type: 'output', content: `  Genre:   ${book.genre}` })
+      lines.push({ type: 'output', content: `  Format:  ${book.format}` })
+      if (book.pages) lines.push({ type: 'output', content: `  Pages:   ${book.pages}` })
+      lines.push({ type: 'output', content: '' })
       return success(lines)
     }
 
     if (pwd.includes('/vinyl')) {
-      const record = node.content as { title: string; artist: string; genre: string; format: string; label: string }
-      return success([
-        '',
-        `  Title:   ${record.title}`,
-        `  Artist:  ${record.artist}`,
-        `  Genre:   ${record.genre}`,
-        `  Format:  ${record.format}`,
-        `  Label:   ${record.label}`,
-        '',
-      ])
+      const record = node.content as { title: string; artist: string; genre: string; format: string; label: string; cover?: string }
+      const lines: TerminalLine[] = [{ type: 'output', content: '' }]
+      if (record.cover) {
+        lines.push({ type: 'image', content: record.title, src: record.cover })
+      }
+      lines.push({ type: 'output', content: `  Title:   ${record.title}` })
+      lines.push({ type: 'output', content: `  Artist:  ${record.artist}` })
+      lines.push({ type: 'output', content: `  Genre:   ${record.genre}` })
+      lines.push({ type: 'output', content: `  Format:  ${record.format}` })
+      lines.push({ type: 'output', content: `  Label:   ${record.label}` })
+      lines.push({ type: 'output', content: '' })
+      return success(lines)
     }
 
     if (pwd.includes('/hardware')) {
@@ -174,6 +181,22 @@ export const viewCommand: CommandDefinition = {
       if (device.operating_system) lines.push(`  OS:         ${device.operating_system}`)
       lines.push('')
       return success(lines)
+    }
+
+    if (pwd.includes('/notes')) {
+      const note = node.content as { title: string; date: string; author: string; content: string[] }
+      return success([
+        '',
+        '='.repeat(60),
+        note.title,
+        '='.repeat(60),
+        `Date: ${note.date} | Author: ${note.author}`,
+        '',
+        ...note.content,
+        '',
+        '='.repeat(60),
+        '',
+      ])
     }
 
     // Fallback to raw content
