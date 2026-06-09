@@ -441,6 +441,13 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
     }
   }, [gameState, startGame, onExit, shootBall])
 
+  // Mirror render into a ref so the loop always draws with current state
+  // without retriggering the effect.
+  const renderRef = useRef(render)
+  useEffect(() => {
+    renderRef.current = render
+  })
+
   // Game loop
   useEffect(() => {
     if (gameState !== "playing") {
@@ -535,7 +542,7 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
         }
       }
 
-      render(ctx, canvas)
+      renderRef.current(ctx, canvas)
       gameLoopRef.current = requestAnimationFrame(gameLoop)
     }
 

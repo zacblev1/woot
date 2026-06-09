@@ -111,9 +111,13 @@ export function CommandPalette({ onClose, onExecute }: CommandPaletteProps) {
     inputRef.current?.focus()
   }, [])
 
-  useEffect(() => {
+  // Reset the selection when the query changes (state adjustment during render,
+  // per the React docs pattern — avoids an extra effect-driven render pass)
+  const [prevQuery, setPrevQuery] = useState(query)
+  if (query !== prevQuery) {
+    setPrevQuery(query)
     setSelectedIndex(0)
-  }, [query])
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {

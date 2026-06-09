@@ -1,4 +1,5 @@
 import { memo, type ReactNode } from 'react'
+import Image from 'next/image'
 import type { TerminalLine as TerminalLineType, TerminalLineType as LineType } from '@/lib/types/terminal'
 import { highlightInput, highlightLine } from './SyntaxHighlighter'
 import type { TerminalLineProps } from './types'
@@ -80,10 +81,13 @@ function renderLineContent(line: TerminalLineType): ReactNode {
     case 'image':
       if (line.src) {
         return (
-          <img
+          <Image
             src={line.src}
             alt={line.content}
-            className="max-w-[80px] border border-border"
+            width={80}
+            height={120}
+            unoptimized
+            className="max-w-[80px] h-auto border border-border"
             onError={(e) => { (e.target as HTMLElement).style.display = 'none' }}
           />
         )

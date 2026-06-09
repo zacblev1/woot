@@ -23,27 +23,38 @@ export function useHighScores(gameType: 'tron' | 'pacman' | 'basketball'): UseHi
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Bumping the tick re-runs the fetch effect (used by refetch/submit)
+  const [fetchTick, setFetchTick] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`/api/scores/${gameType}?limit=10`)
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch scores')
+        return response.json()
+      })
+      .then((data) => {
+        if (cancelled) return
+        setScores(data.scores || [])
+        setError(null)
+        setIsLoading(false)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : 'Failed to fetch scores')
+        setScores([])
+        setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [gameType, fetchTick])
+
   const fetchScores = useCallback(async () => {
     setIsLoading(true)
     setError(null)
-    try {
-      const response = await fetch(`/api/scores/${gameType}?limit=10`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch scores')
-      }
-      const data = await response.json()
-      setScores(data.scores || [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch scores')
-      setScores([])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [gameType])
-
-  useEffect(() => {
-    fetchScores()
-  }, [fetchScores])
+    setFetchTick((t) => t + 1)
+  }, [])
 
   const submitScore = useCallback(
     async (initials: string, score: number, level: number): Promise<HighScore | null> => {

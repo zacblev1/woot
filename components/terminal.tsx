@@ -139,40 +139,38 @@ export function Terminal() {
       styleDir.children["font"] = { name: "font", type: "file", parent: styleDir, content: "config" }
     }
 
+    // Restore user mutations (mkdir/touch/rm) persisted from a previous visit.
+    // Safe during init: nothing in the initial render depends on VFS contents,
+    // so there is no hydration mismatch risk.
+    if (typeof window !== "undefined") {
+      const savedFS = localStorage.getItem("vfs-state")
+      if (savedFS) fs.fromJSON(savedFS)
+    }
+
     return fs
   })
-
-  // Force update for React reactivity on deep VFS changes
-  const [, forceUpdate] = useState(0)
-
-  // Load from localStorage on mount (Client-side only)
-  useEffect(() => {
-    const savedFS = localStorage.getItem("vfs-state")
-    if (savedFS) {
-      vfs.fromJSON(savedFS)
-      forceUpdate(n => n + 1)
-    }
-  }, [vfs])
 
   // Persistence helper
   const saveFileSystem = () => {
     localStorage.setItem("vfs-state", vfs.toJSON())
   }
 
-  // Sync currentDirectory string for display
+  // Display path shown in the prompt; updated by the cd command via ExecuteContext
   const [currentDirectory, setCurrentDirectory] = useState("~")
 
-  // Update display path whenever vfs changes
-  useEffect(() => {
-    let path = vfs.getPwd()
-    if (path.startsWith("/home/zachary")) {
-      path = "~" + path.slice("/home/zachary".length)
-    }
-    setCurrentDirectory(path)
-  }, [history, vfs])
-
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>("lumon")
-  const [currentFont, setCurrentFont] = useState<FontName>("jetbrains")
+  // Theme/font: read the persisted preference during init. The values only
+  // affect CSS variables (applied in effects below), never rendered markup,
+  // so reading localStorage here cannot cause a hydration mismatch.
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>(() => {
+    if (typeof window === "undefined") return "lumon"
+    const saved = localStorage.getItem("terminal-theme") as ThemeName | null
+    return saved && themes[saved] ? saved : "lumon"
+  })
+  const [currentFont, setCurrentFont] = useState<FontName>(() => {
+    if (typeof window === "undefined") return "jetbrains"
+    const saved = localStorage.getItem("terminal-font") as FontName | null
+    return saved && fonts[saved] ? saved : "jetbrains"
+  })
   const inputRef = useRef<InputLineHandle>(null)
 
   // Sync state to TerminalContext so TerminalChrome can read it
@@ -213,8 +211,14 @@ export function Terminal() {
     }
   }, [soundState.enabled, terminalCtx.soundEnabled, terminalCtx.toggleSound]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const applyTheme = (themeName: ThemeName) => {
-    const theme = themes[themeName]
+  // Record mount time for `uptime`
+  useEffect(() => {
+    if (mountTime.current === null) mountTime.current = Date.now()
+  }, [])
+
+  // Sync the active theme/font to CSS variables (external system: the DOM)
+  useEffect(() => {
+    const theme = themes[currentTheme]
     const root = document.documentElement
     root.style.setProperty("--background", theme.background)
     root.style.setProperty("--foreground", theme.foreground)
@@ -224,38 +228,21 @@ export function Terminal() {
     root.style.setProperty("--accent", theme.accent)
     root.style.setProperty("--destructive", theme.destructive)
     root.style.setProperty("--border", theme.border)
-  }
+  }, [currentTheme])
 
-  const applyFont = (fontName: FontName) => {
-    const font = fonts[fontName]
+  useEffect(() => {
+    const font = fonts[currentFont]
     document.documentElement.style.setProperty("--font-mono", font.value)
     document.documentElement.style.setProperty("--font-sans", font.value)
-  }
-
-  // Load theme and font from localStorage on mount; also record mount time for `uptime`
-  useEffect(() => {
-    if (mountTime.current === null) mountTime.current = Date.now()
-    const savedTheme = localStorage.getItem("terminal-theme") as ThemeName | null
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme)
-      applyTheme(savedTheme)
-    }
-    const savedFont = localStorage.getItem("terminal-font") as FontName | null
-    if (savedFont && fonts[savedFont]) {
-      setCurrentFont(savedFont)
-      applyFont(savedFont)
-    }
-  }, [])
+  }, [currentFont])
 
   const setTheme = (themeName: ThemeName) => {
     setCurrentTheme(themeName)
-    applyTheme(themeName)
     localStorage.setItem("terminal-theme", themeName)
   }
 
   const setFont = (fontName: FontName) => {
     setCurrentFont(fontName)
-    applyFont(fontName)
     localStorage.setItem("terminal-font", fontName)
   }
 

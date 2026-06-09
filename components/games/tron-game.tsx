@@ -373,6 +373,17 @@ export function TronGame({ onExit }: TronGameProps) {
         cpuDir.current = bestMove
     }
 
+    // Mirror frequently-changing values into refs so the game loop reads the
+    // latest without restarting the RAF loop mid-game.
+    const levelRef = useRef(level)
+    const isHighScoreRef = useRef(isHighScore)
+    const updateCpuRef = useRef(updateCpu)
+    useEffect(() => {
+        levelRef.current = level
+        isHighScoreRef.current = isHighScore
+        updateCpuRef.current = updateCpu
+    })
+
     useEffect(() => {
         if (gameState !== "playing") {
             if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current)
@@ -397,7 +408,7 @@ export function TronGame({ onExit }: TronGameProps) {
 
                 // Update directions
                 playerDir.current = playerNextDir.current
-                updateCpu()
+                updateCpuRef.current()
 
                 // Move Player
                 playerTrail.current.push({ ...playerPos.current })
@@ -451,10 +462,10 @@ export function TronGame({ onExit }: TronGameProps) {
                         setWinner("cpu")
                         setScore(s => {
                             // Calculate final score: (wins * 100) + (level * 500)
-                            const newFinalScore = (s.player * 100) + (level * 500)
+                            const newFinalScore = (s.player * 100) + (levelRef.current * 500)
                             setFinalScore(newFinalScore)
                             // Check if qualifies for high score
-                            if (isHighScore(newFinalScore) && newFinalScore > 0) {
+                            if (isHighScoreRef.current(newFinalScore) && newFinalScore > 0) {
                                 setGameState("initials")
                             } else {
                                 setGameState("gameover")
