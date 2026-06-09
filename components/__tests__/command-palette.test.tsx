@@ -34,6 +34,18 @@ describe('CommandPalette', () => {
     expect(screen.getByText('Bolander, Brian, Kusek, Christopher')).toBeInTheDocument()
   })
 
+  it('exposes results as an ARIA listbox with selected option', () => {
+    render(<CommandPalette onClose={vi.fn()} onExecute={vi.fn()} />)
+    const input = screen.getByPlaceholderText(/search/i)
+    expect(input).toHaveAttribute('role', 'combobox')
+    expect(input).toHaveAttribute('aria-expanded', 'true')
+    const listbox = screen.getByRole('listbox')
+    expect(listbox).toBeInTheDocument()
+    const options = screen.getAllByRole('option')
+    expect(options.length).toBeGreaterThan(0)
+    expect(options[0]).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('calls onExecute with first command on Enter with empty query', () => {
     const onExecute = vi.fn()
     render(<CommandPalette onClose={vi.fn()} onExecute={onExecute} />)

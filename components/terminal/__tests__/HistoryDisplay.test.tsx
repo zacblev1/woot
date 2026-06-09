@@ -174,6 +174,16 @@ describe('HistoryDisplay', () => {
     })
   })
 
+  describe('accessibility', () => {
+    it('exposes terminal output as a polite live region', () => {
+      const history: TerminalLine[] = [{ type: 'output', content: 'hello' }]
+      render(<HistoryDisplay history={history} />)
+      const log = screen.getByRole('log')
+      expect(log).toHaveAttribute('aria-live', 'polite')
+      expect(log).toHaveAccessibleName()
+    })
+  })
+
   describe('className prop', () => {
     it('applies default classes', () => {
       render(<HistoryDisplay history={[]} />)

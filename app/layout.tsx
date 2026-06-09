@@ -3,12 +3,38 @@ import type { Metadata, Viewport } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
+import { getSiteUrl } from "@/lib/site"
 import "./globals.css"
 
+const SITE_NAME = "Zachary Blevins — Terminal Portfolio"
+const SITE_DESCRIPTION =
+  "An interactive retro-terminal portfolio: browse books, vinyl, and hardware collections, play arcade games, and explore via a real command line."
+
 export const metadata: Metadata = {
-  title: "Zachary - CYBER_PORTFOLIO",
-  description: "Personal website and portfolio showcasing projects, writing, and creative work.",
-  generator: "v0.app",
+  metadataBase: getSiteUrl(),
+  title: {
+    default: SITE_NAME,
+    template: "%s | Zachary Blevins",
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
 }
 
 export const viewport: Viewport = {

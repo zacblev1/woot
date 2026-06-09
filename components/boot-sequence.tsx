@@ -17,7 +17,8 @@ export function BootSequence({ children }: BootSequenceProps) {
   }, [])
 
   useEffect(() => {
-    setShowOverlay(!sessionStorage.getItem('boot-v2-complete'))
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    setShowOverlay(!sessionStorage.getItem('boot-v2-complete') && !reducedMotion)
   }, [])
 
   useEffect(() => {

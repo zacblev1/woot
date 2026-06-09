@@ -24,6 +24,9 @@ function HistoryDisplayComponent({ history, className = '' }: HistoryDisplayProp
   return (
     <div
       ref={scrollRef}
+      role="log"
+      aria-live="polite"
+      aria-label="Terminal output"
       className={`flex-1 overflow-y-auto${className ? ` ${className}` : ''}`}
     >
       {history.map((line, i) => (

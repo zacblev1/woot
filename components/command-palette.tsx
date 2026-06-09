@@ -143,6 +143,11 @@ export function CommandPalette({ onClose, onExecute }: CommandPaletteProps) {
         <input
           ref={inputRef}
           type="text"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="command-palette-results"
+          aria-activedescendant={filtered[selectedIndex] ? `palette-option-${selectedIndex}` : undefined}
+          aria-label="Search commands, books, vinyl, hardware, notes"
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -151,10 +156,18 @@ export function CommandPalette({ onClose, onExecute }: CommandPaletteProps) {
           spellCheck={false}
           autoComplete="off"
         />
-        <div className="max-h-[300px] overflow-y-auto">
+        <div
+          id="command-palette-results"
+          role="listbox"
+          aria-label="Search results"
+          className="max-h-[300px] overflow-y-auto"
+        >
           {filtered.map((item, i) => (
             <div
               key={`${item.type}-${item.title}-${i}`}
+              id={`palette-option-${i}`}
+              role="option"
+              aria-selected={i === selectedIndex}
               className={`flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer ${
                 i === selectedIndex ? 'bg-muted text-foreground' : 'text-muted-foreground'
               }`}

@@ -42,7 +42,7 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
       // Fallback to default
     }
 
-    const draw = () => {
+    const drawFrame = () => {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -60,7 +60,18 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
         drops[i]++
       }
       ctx.globalAlpha = 1
+    }
 
+    // Respect prefers-reduced-motion: render a single static frame instead of animating
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      ctx.fillStyle = '#000'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      drawFrame()
+      return
+    }
+
+    const draw = () => {
+      drawFrame()
       animRef.current = requestAnimationFrame(draw)
     }
 
