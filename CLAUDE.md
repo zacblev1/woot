@@ -6,92 +6,68 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev             # Start development server (Next.js)
-npm run build           # Production build
+npm run build           # Production build (type-checks and lints; do not bypass)
 npm run start           # Start production server
-npm run lint            # Run ESLint
+npm run lint            # ESLint (flat config, eslint-config-next; 0 errors required)
+npm run typecheck       # tsc --noEmit
 npm run test            # Run all tests (Vitest)
 npm run test:coverage   # Run tests with coverage report
 
 # Database migrations (Drizzle ORM + Turso)
-npx drizzle-kit generate   # Generate migrations from schema
+npx drizzle-kit generate   # Generate migrations from schema (works without env vars)
 npx drizzle-kit migrate    # Run migrations
 npx drizzle-kit studio     # Open Drizzle Studio (database GUI)
 ```
 
 ## Architecture
 
-This is a personal portfolio website built with Next.js 15 (App Router) and React 19, featuring a retro terminal/cyberpunk aesthetic.
+A single-page personal portfolio: one route (`app/page.tsx`) rendering an
+interactive retro terminal. There are no separate collection pages — books,
+vinyl, hardware, and notes are browsed *inside* the terminal via a virtual
+file system.
 
 ### Key Technologies
-- **Framework**: Next.js 15 with App Router
-- **Styling**: Tailwind CSS v4 with `tw-animate-css` for animations
-- **UI Components**: Radix UI primitives with custom styling
-- **Database**: Turso (libSQL) with Drizzle ORM
-- **Testing**: Vitest with React Testing Library and happy-dom
-- **Fonts**: Geist Sans and Geist Mono
+- **Framework**: Next.js 15 (App Router), React 19
+- **Styling**: Tailwind CSS v4 (`app/globals.css` defines the theme via CSS variables)
+- **Database**: Turso (libSQL) with Drizzle ORM — optional; app degrades gracefully without it
+- **Testing**: Vitest + React Testing Library + happy-dom (global `fetch` is stubbed in `vitest.setup.ts`; tests must never hit the network)
+- **Fonts**: JetBrains Mono, Fira Code, Source Code Pro, IBM Plex Mono — self-hosted via `next/font`, exposed as CSS variables (see `app/layout.tsx` and `lib/terminal-config.ts`)
 
-### Project Structure
+### Command System (the important part)
 
-- `app/` - Next.js App Router pages (page.tsx for each route)
-- `components/` - Reusable React components
-  - `terminal.tsx` - Interactive terminal emulator with commands and mini-games
-  - `boot-sequence.tsx` - Animated boot sequence shown on first visit
-- `data/` - JSON data files for collections (books.json, vinyl.json, hardware.json)
-- `lib/utils.ts` - Utility functions (cn function for class merging)
+Terminal commands live in **`lib/commands/`** — a registry of pure command
+functions. `components/terminal.tsx` is the host: it owns React state, builds
+an `ExecuteContext` per invocation, and dispatches through `executeCommand`.
 
-### Core Features
+- `lib/commands/commands/*.ts` — command implementations (navigation, filesystem, collection, info, style, system, game)
+- `lib/commands/types.ts` — `ExecuteContext` (vfs, history, game, theme, font, sound, uptime, collections) and `CommandDefinition`
+- `lib/commands/executor.ts` — parse + dispatch; returns `CommandResult` (`success.output` is `string | string[] | TerminalLine | TerminalLine[]`)
+- `lib/commands/man-pages.ts` — canonical man pages
+- **Adding a command**: implement it in the right `commands/*.ts` file, register it in `lib/commands/index.ts` (`createDefaultRegistry`), add a man page, write unit tests against a mock `ExecuteContext` (see `lib/commands/__tests__/`)
 
-**Terminal Component** (`components/terminal.tsx`)
-- Simulates a command-line interface with custom commands
-- Commands are context-aware based on current directory (~/books, ~/vinyl, ~/hardware)
-- Includes arcade-style mini-games: Tron, Pac-Man, Arcade Hoops (basketball)
-- Supports dynamic themes (Lumon, Tokyo Night, Dracula, Gruvbox, Nord, Monokai) via `theme` command
-- Virtual File System (`lib/vfs.ts`) powers the simulated directory structure and navigation
-- Command history navigation with arrow keys
+Still owned by `components/terminal.tsx` by design: the text-game state
+machine (number/wordle/trivia/blackjack/rps input handling), the async
+`suggest` flow, keyboard shortcuts, history navigation, and the output→history
+mapping (`appendCommandOutput` / `classifyLine`).
 
-**Boot Sequence** (`components/boot-sequence.tsx`)
-- Displays on first visit (stored in sessionStorage)
-- Typewriter-style animation mimicking BIOS/boot process
+`components/__tests__/terminal-characterization.test.tsx` pins user-visible
+terminal behavior — if it fails, you changed shipped behavior.
 
-**Arcade Games**
-- Games are lazy-loaded using Next.js dynamic imports for better performance
-- High scores stored in Turso database and submitted via API routes
-- Game types: `tron`, `pacman`, `basketball`
-- Gracefully degrades when database is unavailable (returns empty scores)
+### Other Core Pieces
 
-**Collection Pages**
-- Books, Vinyl, Hardware pages display data from JSON files in `/data`
-- Each page includes the Terminal component for interactive navigation
-- Pages support search and filtering
+- **VFS** (`lib/vfs.ts`): virtual filesystem populated from `data/*.json`; user mutations (mkdir/touch/rm) persist to localStorage
+- **Boot sequence** (`components/boot-sequence.tsx`): first-visit overlay (sessionStorage); skipped under `prefers-reduced-motion`
+- **Games** (`components/games/`): text games are pure logic modules (`logic.ts` + tests) routed through `GameController`; canvas games (tron, pacman, basketball) are self-contained components lazy-loaded via `next/dynamic`
+- **High scores**: `/app/api/scores` (GET list, POST submit) — zod-validated (`lib/scores.ts`: gameType enum, score bounds, initials), per-IP rate-limited, cached GETs; returns empty data when Turso env vars are absent
+- **SEO**: metadata + OG image in `app/layout.tsx` / `app/opengraph-image.tsx`; site URL resolution in `lib/site.ts` (`NEXT_PUBLIC_SITE_URL` overrides)
 
-### Data Format
+### Database
 
-Collection data in `/data/*.json` follows consistent structures:
-- Books: title, author, genre, format, pages
-- Vinyl: title, artist, genre, format, label
-- Hardware: name, type, processor, memory, storage, status, etc.
+- Schema: `lib/db/schema.ts` (`high_scores` with composite index on `(game_type, score desc)`); migrations committed under `drizzle/`
+- Env vars: `TURSO_DATABASE_URL` (required for DB features), `TURSO_AUTH_TOKEN` (optional)
 
-### Database Architecture
+### Conventions
 
-**Turso (libSQL) with Drizzle ORM**
-- Configuration: `drizzle.config.ts` and `lib/db/index.ts`
-- Schema: `lib/db/schema.ts` - defines `highScores` table
-- Database client creation is optional - app functions without database
-- Environment variables: `TURSO_DATABASE_URL` (required), `TURSO_AUTH_TOKEN` (optional)
-- API routes: `/app/api/scores/route.ts` handles GET (fetch scores) and POST (submit scores)
-
-**High Scores Schema**
-- Fields: id (auto-increment), gameType (tron/pacman/basketball), initials (3 chars), score, level, createdAt
-- Initials are sanitized to uppercase alphanumeric, max 3 characters
-
-### Testing
-
-- **Test framework**: Vitest with React Testing Library
-- **Environment**: happy-dom (lightweight DOM simulation)
-- **Setup file**: `vitest.setup.ts`
-- **Config**: `vitest.config.ts` includes path aliases matching tsconfig
-- **Test patterns**: `**/*.test.{ts,tsx}`
-
-### Path Aliases
-
-- `@/` maps to the project root (configured in tsconfig.json and vitest.config.ts)
+- TDD is the norm here: failing test first, then the fix (see git history)
+- `next.config.mjs` must NOT set `ignoreBuildErrors`/`ignoreDuringBuilds` — the build is the safety net
+- Path alias `@/` maps to the repo root (tsconfig + vitest config)
