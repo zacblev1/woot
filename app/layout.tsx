@@ -1,10 +1,34 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { JetBrains_Mono, Fira_Code, Source_Code_Pro, IBM_Plex_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { getSiteUrl } from "@/lib/site"
 import "./globals.css"
+
+// Self-hosted via next/font; the terminal `font` command switches between
+// these families through the CSS variables defined here.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jetbrains-mono",
+})
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-fira-code",
+})
+const sourceCodePro = Source_Code_Pro({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-source-code-pro",
+})
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+})
+
+const fontVariables = `${jetbrainsMono.variable} ${firaCode.variable} ${sourceCodePro.variable} ${ibmPlexMono.variable}`
 
 const SITE_NAME = "Zachary Blevins — Terminal Portfolio"
 const SITE_DESCRIPTION =
@@ -50,16 +74,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={`font-sans antialiased h-full ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`h-full ${fontVariables}`}>
+      <body className="font-sans antialiased h-full">
         {children}
         <Analytics />
       </body>

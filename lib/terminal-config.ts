@@ -69,11 +69,14 @@ export const themes = {
 
 export type ThemeName = keyof typeof themes
 
+// Font families are self-hosted via next/font in app/layout.tsx and exposed
+// as CSS variables; `hack` relies on a locally installed font with a system
+// monospace fallback.
 export const fonts = {
-  jetbrains: { name: "JetBrains Mono", value: '"JetBrains Mono", monospace' },
-  fira: { name: "Fira Code", value: '"Fira Code", monospace' },
-  source: { name: "Source Code Pro", value: '"Source Code Pro", monospace' },
-  ibm: { name: "IBM Plex Mono", value: '"IBM Plex Mono", monospace' },
+  jetbrains: { name: "JetBrains Mono", value: 'var(--font-jetbrains-mono), monospace' },
+  fira: { name: "Fira Code", value: 'var(--font-fira-code), monospace' },
+  source: { name: "Source Code Pro", value: 'var(--font-source-code-pro), monospace' },
+  ibm: { name: "IBM Plex Mono", value: 'var(--font-ibm-plex-mono), monospace' },
   hack: { name: "Hack", value: '"Hack", monospace' },
   mono: { name: "System Mono", value: 'ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace' },
 } as const

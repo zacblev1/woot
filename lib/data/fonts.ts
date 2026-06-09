@@ -1,31 +1,8 @@
-import type { FontName, FontConfig } from '@/lib/terminal-config'
+import { fonts, type FontName, type FontConfig } from '@/lib/terminal-config'
 
-export const FONTS: Record<FontName, FontConfig> = {
-  jetbrains: {
-    name: 'JetBrains Mono',
-    value: '"JetBrains Mono", monospace',
-  },
-  fira: {
-    name: 'Fira Code',
-    value: '"Fira Code", monospace',
-  },
-  source: {
-    name: 'Source Code Pro',
-    value: '"Source Code Pro", monospace',
-  },
-  ibm: {
-    name: 'IBM Plex Mono',
-    value: '"IBM Plex Mono", monospace',
-  },
-  hack: {
-    name: 'Hack',
-    value: '"Hack", monospace',
-  },
-  mono: {
-    name: 'System Mono',
-    value: 'ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace',
-  },
-}
+// Single source of truth lives in lib/terminal-config.ts (font families are
+// self-hosted via next/font CSS variables defined in app/layout.tsx).
+export const FONTS: Record<FontName, FontConfig> = fonts
 
 export const DEFAULT_FONT: FontName = 'jetbrains'
 
