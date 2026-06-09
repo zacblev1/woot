@@ -24,9 +24,9 @@ function createMockContext(): ExecuteContext {
       isActive: () => false,
     },
     theme: {
-      current: 'lumon' as ThemeName,
+      current: 'midnight' as ThemeName,
       set: vi.fn(),
-      list: () => ['lumon', 'dracula', 'gruvbox'] as ThemeName[],
+      list: () => ['midnight', 'dracula', 'gruvbox'] as ThemeName[],
       config: (name: ThemeName) => ({
         name: name.charAt(0).toUpperCase() + name.slice(1),
       }),

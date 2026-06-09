@@ -162,9 +162,11 @@ export function Terminal() {
   // affect CSS variables (applied in effects below), never rendered markup,
   // so reading localStorage here cannot cause a hydration mismatch.
   const [currentTheme, setCurrentTheme] = useState<ThemeName>(() => {
-    if (typeof window === "undefined") return "lumon"
-    const saved = localStorage.getItem("terminal-theme") as ThemeName | null
-    return saved && themes[saved] ? saved : "lumon"
+    if (typeof window === "undefined") return "midnight"
+    let saved = localStorage.getItem("terminal-theme") as ThemeName | null
+    // Legacy migration: the default theme was previously named "lumon"
+    if ((saved as string | null) === "lumon") saved = "midnight"
+    return saved && themes[saved] ? saved : "midnight"
   })
   const [currentFont, setCurrentFont] = useState<FontName>(() => {
     if (typeof window === "undefined") return "jetbrains"

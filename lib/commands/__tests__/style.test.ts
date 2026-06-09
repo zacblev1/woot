@@ -24,11 +24,11 @@ function createMockContext(): ExecuteContext {
       isActive: () => false,
     },
     theme: {
-      current: 'lumon' as ThemeName,
+      current: 'midnight' as ThemeName,
       set: vi.fn(),
-      list: () => ['lumon', 'dracula', 'gruvbox'] as ThemeName[],
+      list: () => ['midnight', 'dracula', 'gruvbox'] as ThemeName[],
       config: (name: ThemeName) => ({
-        name: name === 'lumon' ? 'Lumon' : name.charAt(0).toUpperCase() + name.slice(1),
+        name: name === 'midnight' ? 'Midnight' : name.charAt(0).toUpperCase() + name.slice(1),
       }),
     },
     font: {
@@ -72,8 +72,8 @@ describe('themeCommand', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       const output = result.output as string[]
-      const lumonLine = output.find(line => line.includes('lumon') && line.includes('Lumon'))
-      expect(lumonLine).toContain('*')
+      const midnightLine = output.find(line => line.includes('midnight') && line.includes('Midnight'))
+      expect(midnightLine).toContain('*')
     }
   })
 
@@ -230,7 +230,7 @@ describe('neofetchCommand', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       const output = result.output as string[]
-      expect(output.some(line => line.includes('Theme:') && line.includes('Lumon'))).toBe(true)
+      expect(output.some(line => line.includes('Theme:') && line.includes('Midnight'))).toBe(true)
     }
   })
 

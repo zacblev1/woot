@@ -342,8 +342,23 @@ describe('Terminal - Characterization Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Available themes:')).toBeInTheDocument()
-        expect(screen.getByText(/lumon/)).toBeInTheDocument()
+        expect(screen.getByText(/midnight/)).toBeInTheDocument()
         expect(screen.getByText(/dracula/)).toBeInTheDocument()
+      })
+    })
+
+    it('migrates a legacy saved "lumon" theme to midnight', async () => {
+      mockLocalStorage.setItem('terminal-theme', 'lumon')
+      const user = userEvent.setup()
+      render(<WrappedTerminal />)
+
+      const input = screen.getByRole('textbox')
+      await user.type(input, 'theme{Enter}')
+
+      await waitFor(() => {
+        // The active-theme marker sits on midnight, not on a dead "lumon" entry
+        expect(screen.getByText(/\* midnight/)).toBeInTheDocument()
+        expect(screen.queryByText(/lumon/)).not.toBeInTheDocument()
       })
     })
   })

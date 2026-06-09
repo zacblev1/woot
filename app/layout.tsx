@@ -7,25 +7,38 @@ import "./globals.css"
 
 // Self-hosted via next/font; the terminal `font` command switches between
 // these families through the CSS variables defined here.
+//
+// adjustFontFallback MUST stay false: the default injects a size-adjusted
+// Arial fallback, and any glyph missing from the latin subset (the banner's
+// box-drawing characters: █ ╔ ═ ║) would render proportionally and wreck
+// ASCII art alignment. The explicit fallback keeps everything monospace.
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-jetbrains-mono",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SF Mono", "Menlo", "Monaco", "Consolas", "monospace"],
 })
 const firaCode = Fira_Code({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-fira-code",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SF Mono", "Menlo", "Monaco", "Consolas", "monospace"],
 })
 const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-source-code-pro",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SF Mono", "Menlo", "Monaco", "Consolas", "monospace"],
 })
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-ibm-plex-mono",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SF Mono", "Menlo", "Monaco", "Consolas", "monospace"],
 })
 
 const fontVariables = `${jetbrainsMono.variable} ${firaCode.variable} ${sourceCodePro.variable} ${ibmPlexMono.variable}`

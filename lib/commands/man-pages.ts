@@ -280,7 +280,7 @@ export const manPages: Record<string, string[]> = {
     "    Theme preference is saved to localStorage.",
     "",
     "THEMES",
-    "    lumon, tokyonight, dracula, gruvbox, nord, monokai",
+    "    midnight, tokyonight, dracula, gruvbox, nord, monokai",
     "",
     "EXAMPLES",
     "    theme              List themes",

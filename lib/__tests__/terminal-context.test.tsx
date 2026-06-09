@@ -22,7 +22,7 @@ describe('TerminalContext', () => {
       </TerminalContextProvider>
     )
     expect(screen.getByTestId('dir').textContent).toBe('~')
-    expect(screen.getByTestId('theme').textContent).toBe('lumon')
+    expect(screen.getByTestId('theme').textContent).toBe('midnight')
     expect(screen.getByTestId('font').textContent).toBe('jetbrains')
     expect(screen.getByTestId('sound').textContent).toBe('off')
   })

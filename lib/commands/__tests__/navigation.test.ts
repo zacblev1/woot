@@ -48,10 +48,10 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
       isActive: () => false,
     },
     theme: {
-      current: 'lumon' as ThemeName,
+      current: 'midnight' as ThemeName,
       set: () => {},
-      list: () => ['lumon', 'dracula'] as ThemeName[],
-      config: () => ({ name: 'Lumon' }),
+      list: () => ['midnight', 'dracula'] as ThemeName[],
+      config: () => ({ name: 'Midnight' }),
     },
     font: {
       current: 'jetbrains' as FontName,

@@ -28,10 +28,10 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
       isActive: vi.fn(() => false),
     },
     theme: {
-      current: 'lumon' as ThemeName,
+      current: 'midnight' as ThemeName,
       set: vi.fn(),
-      list: vi.fn(() => ['lumon', 'dracula'] as ThemeName[]),
-      config: vi.fn(() => ({ name: 'Lumon' })),
+      list: vi.fn(() => ['midnight', 'dracula'] as ThemeName[]),
+      config: vi.fn(() => ({ name: 'Midnight' })),
     },
     font: {
       current: 'jetbrains' as FontName,

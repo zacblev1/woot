@@ -1,6 +1,6 @@
 export const themes = {
-  lumon: {
-    name: "Lumon",
+  midnight: {
+    name: "Midnight",
     background: "#0a1628",
     foreground: "#e8f4f8",
     card: "#0d1e36",

@@ -20,7 +20,7 @@ const TerminalContext = createContext<TerminalContextValue | null>(null)
 
 export function TerminalContextProvider({ children }: { children: ReactNode }) {
   const [currentDirectory, setCurrentDirectory] = useState('~')
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>('lumon')
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>('midnight')
   const [currentFont, setCurrentFont] = useState<FontName>('jetbrains')
   const [soundEnabled, setSoundEnabled] = useState(false)
   const commandHandlerRef = useRef<((cmd: string) => void) | null>(null)

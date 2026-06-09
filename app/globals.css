@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Lumon-inspired Terminal Palette */
+  /* Midnight terminal palette: deep navy + teal */
   --background: #0a1628;
   --foreground: #e8f4f8;
 
