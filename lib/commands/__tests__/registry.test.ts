@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { CommandRegistry, createRegistry } from '../registry'
-import type { CommandDefinition, ExecuteContext } from '../types'
+import type { CommandDefinition } from '../types'
 
 // Helper to create a mock command definition
 function createMockCommand(name: string, description = 'Test command'): CommandDefinition {

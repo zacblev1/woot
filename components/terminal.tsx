@@ -558,7 +558,7 @@ export function Terminal() {
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [gameState, setGameState] = useState<GameState>({ active: false, type: null })
-  const mountTime = useRef(Date.now())
+  const mountTime = useRef<number | null>(null)
 
   /* VFS Initialization */
   const [vfs] = useState(() => {
@@ -687,13 +687,6 @@ export function Terminal() {
 
   const handleCommandPalette = () => setShowPalette(prev => !prev)
 
-  const handlePaletteExecute = (command: string) => {
-    const parts = command.split(' && ')
-    for (const part of parts) {
-      handleCommand(part.trim())
-    }
-  }
-
   useEffect(() => {
     terminalCtx.setCurrentDirectory(currentDirectory)
   }, [currentDirectory, terminalCtx.setCurrentDirectory]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -717,25 +710,6 @@ export function Terminal() {
     }
   }, [soundState.enabled, terminalCtx.soundEnabled, terminalCtx.toggleSound]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
-  useEffect(() => {
-    terminalCtx.registerCommandHandler(handleCommand)
-  })
-
-  // Load theme and font from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("terminal-theme") as ThemeName | null
-    if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme)
-      applyTheme(savedTheme)
-    }
-    const savedFont = localStorage.getItem("terminal-font") as FontName | null
-    if (savedFont && fonts[savedFont]) {
-      setCurrentFont(savedFont)
-      applyFont(savedFont)
-    }
-  }, [])
-
   const applyTheme = (themeName: ThemeName) => {
     const theme = themes[themeName]
     const root = document.documentElement
@@ -749,16 +723,31 @@ export function Terminal() {
     root.style.setProperty("--border", theme.border)
   }
 
-  const setTheme = (themeName: ThemeName) => {
-    setCurrentTheme(themeName)
-    applyTheme(themeName)
-    localStorage.setItem("terminal-theme", themeName)
-  }
-
   const applyFont = (fontName: FontName) => {
     const font = fonts[fontName]
     document.documentElement.style.setProperty("--font-mono", font.value)
     document.documentElement.style.setProperty("--font-sans", font.value)
+  }
+
+  // Load theme and font from localStorage on mount; also record mount time for `uptime`
+  useEffect(() => {
+    if (mountTime.current === null) mountTime.current = Date.now()
+    const savedTheme = localStorage.getItem("terminal-theme") as ThemeName | null
+    if (savedTheme && themes[savedTheme]) {
+      setCurrentTheme(savedTheme)
+      applyTheme(savedTheme)
+    }
+    const savedFont = localStorage.getItem("terminal-font") as FontName | null
+    if (savedFont && fonts[savedFont]) {
+      setCurrentFont(savedFont)
+      applyFont(savedFont)
+    }
+  }, [])
+
+  const setTheme = (themeName: ThemeName) => {
+    setCurrentTheme(themeName)
+    applyTheme(themeName)
+    localStorage.setItem("terminal-theme", themeName)
   }
 
   const setFont = (fontName: FontName) => {
@@ -1704,7 +1693,7 @@ export function Terminal() {
       return ""
     },
     neofetch: () => {
-      const uptimeMs = Date.now() - mountTime.current
+      const uptimeMs = Date.now() - (mountTime.current ?? Date.now())
       const uptimeMin = Math.floor(uptimeMs / 60000)
       const uptimeSec = Math.floor((uptimeMs % 60000) / 1000)
       const uptime = uptimeMin > 0 ? `${uptimeMin}m ${uptimeSec}s` : `${uptimeSec}s`
@@ -1879,6 +1868,18 @@ export function Terminal() {
 
     setInput("")
   }
+
+  const handlePaletteExecute = (command: string) => {
+    const parts = command.split(' && ')
+    for (const part of parts) {
+      handleCommand(part.trim())
+    }
+  }
+
+  // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
+  useEffect(() => {
+    terminalCtx.registerCommandHandler(handleCommand)
+  })
 
   // InputLine callback handlers
   const handleTabComplete = (partial: string) => {

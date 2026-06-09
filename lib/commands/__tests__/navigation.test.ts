@@ -1,7 +1,19 @@
 import { describe, it, expect, vi } from 'vitest'
 import { lsCommand, cdCommand, pwdCommand, catCommand, viewCommand } from '../commands/navigation'
 import type { ExecuteContext } from '../types'
+import type { CommandResult, CommandOutput } from '@/lib/types/terminal'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
+
+/**
+ * Narrow a CommandResult to its success branch, failing loudly otherwise.
+ */
+function getOutput(result: CommandResult): CommandOutput {
+  if (!result.success) {
+    throw new Error(`Expected success result, got error: ${result.error}`)
+  }
+  return result.output
+}
+
 
 /**
  * Create a mock ExecuteContext for testing.
@@ -616,7 +628,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toEqual([
+      expect(getOutput(result)).toEqual([
         '',
         '  Title:   The Pragmatic Programmer',
         '  Author:  David Thomas',
@@ -644,7 +656,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toContain('  Author:  David Thomas, Andrew Hunt')
+      expect(getOutput(result)).toContain('  Author:  David Thomas, Andrew Hunt')
     })
 
     it('includes pages when available', () => {
@@ -666,7 +678,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toContain('  Pages:   350')
+      expect(getOutput(result)).toContain('  Pages:   350')
     })
   })
 
@@ -690,7 +702,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['record.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toEqual([
+      expect(getOutput(result)).toEqual([
         '',
         '  Title:   Abbey Road',
         '  Artist:  The Beatles',
@@ -725,7 +737,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['device.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toEqual([
+      expect(getOutput(result)).toEqual([
         '',
         '  Name:       MacBook Pro',
         '  Type:       Laptop',
@@ -759,7 +771,7 @@ describe('viewCommand', () => {
       const result = viewCommand.execute(['device.json'], context)
 
       expect(result.success).toBe(true)
-      expect(result.output).toEqual([
+      expect(getOutput(result)).toEqual([
         '',
         '  Name:       Raspberry Pi',
         '  Type:       SBC',

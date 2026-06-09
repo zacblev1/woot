@@ -26,7 +26,6 @@ describe('Tron collision detection with Set', () => {
 
     it('detects cross-collision between players', () => {
       const playerTrail = new Set(['10,10', '11,10', '12,10'])
-      const cpuTrail = new Set(['10,8', '10,9', '10,10'])
 
       // CPU position where player trail exists
       const cpuPos = { x: 11, y: 10 }

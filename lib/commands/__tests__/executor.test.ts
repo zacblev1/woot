@@ -3,7 +3,6 @@ import { executeCommand } from '../executor'
 import { CommandRegistry } from '../registry'
 import type { CommandDefinition, ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
-import type { GameType } from '@/lib/types/games'
 
 /**
  * Create a mock ExecuteContext for testing.

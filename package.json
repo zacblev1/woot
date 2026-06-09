@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "start": "next start",
     "test": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -76,6 +77,8 @@
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.18",
     "drizzle-kit": "^0.31.8",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.7",
     "happy-dom": "^20.3.7",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",

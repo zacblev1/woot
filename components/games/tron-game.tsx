@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Monitor, RefreshCw, X, Trophy } from "lucide-react"
-import { useHighScores, type HighScore } from "@/lib/hooks/useHighScores"
+import { useHighScores } from "@/lib/hooks/useHighScores"
 
 interface TronGameProps {
     onExit: () => void

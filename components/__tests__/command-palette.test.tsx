@@ -27,6 +27,13 @@ describe('CommandPalette', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
+  it('joins multi-author books with commas in the subtitle', () => {
+    render(<CommandPalette onClose={vi.fn()} onExecute={vi.fn()} />)
+    fireEvent.change(screen.getByPlaceholderText(/search/i), { target: { value: 'vsphere' } })
+    // books.json has one multi-author entry: ["Bolander, Brian", " Kusek, Christopher"]
+    expect(screen.getByText('Bolander, Brian, Kusek, Christopher')).toBeInTheDocument()
+  })
+
   it('calls onExecute with first command on Enter with empty query', () => {
     const onExecute = vi.fn()
     render(<CommandPalette onClose={vi.fn()} onExecute={onExecute} />)

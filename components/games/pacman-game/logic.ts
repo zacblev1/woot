@@ -28,7 +28,7 @@ const GHOST_CONFIGS = [
 ]
 
 export function createInitialGhosts(): Ghost[] {
-  return GHOST_CONFIGS.map((config, i) => ({
+  return GHOST_CONFIGS.map((config) => ({
     pos: { x: GHOST_START.x, y: GHOST_START.y },
     dir: 'LEFT' as Direction,
     mode: 'scatter' as GhostMode,
@@ -58,10 +58,10 @@ export function canMove(maze: number[][], x: number, y: number): boolean {
 }
 
 export function wrapPosition(pos: Point): Point {
-  let { x, y } = pos
+  let x = pos.x
   if (x < 0) x = MAZE_WIDTH - 1
   if (x >= MAZE_WIDTH) x = 0
-  return { x, y }
+  return { x, y: pos.y }
 }
 
 export function getNextPosition(pos: Point, dir: Direction): Point {
@@ -111,7 +111,7 @@ export function getGhostDirection(
   pacman: Point,
   frameCount: number
 ): Direction {
-  const { pos, dir, mode, scatterTarget, isHome, exitTimer } = ghost
+  const { pos, dir, mode, scatterTarget, exitTimer } = ghost
 
   // Still waiting to exit
   if (exitTimer > frameCount) {
@@ -135,8 +135,8 @@ export function getGhostDirection(
     target = pacman
   }
 
-  // Get valid moves
-  const validMoves = getValidMoves(maze, pos, dir, mode === 'frightened')
+  // Get valid moves (frightened mode returned early above, so reversing is never allowed here)
+  const validMoves = getValidMoves(maze, pos, dir, false)
 
   if (validMoves.length === 0) return dir
   if (validMoves.length === 1) return validMoves[0]

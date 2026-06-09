@@ -7,7 +7,18 @@ import {
 } from '../commands/collection'
 import type { ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
-import type { CommandOutput } from '@/lib/types/terminal'
+import type { CommandResult, CommandOutput } from '@/lib/types/terminal'
+
+/**
+ * Narrow a CommandResult to its success branch, failing loudly otherwise.
+ */
+function getOutput(result: CommandResult): CommandOutput {
+  if (!result.success) {
+    throw new Error(`Expected success result, got error: ${result.error}`)
+  }
+  return result.output
+}
+
 
 /**
  * Helper to check if any line in an array output contains a substring.
@@ -114,44 +125,44 @@ describe('searchCommand', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['dune'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '1 results')).toBe(true)
-      expect(outputContains(result.output, 'Dune')).toBe(true)
+      expect(outputContains(getOutput(result), '1 results')).toBe(true)
+      expect(outputContains(getOutput(result), 'Dune')).toBe(true)
     })
 
     it('searches books by author', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['asimov'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '1 results')).toBe(true)
-      expect(outputContains(result.output, 'Foundation')).toBe(true)
+      expect(outputContains(getOutput(result), '1 results')).toBe(true)
+      expect(outputContains(getOutput(result), 'Foundation')).toBe(true)
     })
 
     it('handles array author in books', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['gaiman'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'Good Omens')).toBe(true)
+      expect(outputContains(getOutput(result), 'Good Omens')).toBe(true)
     })
 
     it('searches case-insensitively', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['DUNE'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'Dune')).toBe(true)
+      expect(outputContains(getOutput(result), 'Dune')).toBe(true)
     })
 
     it('returns "No results" message when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['xyz123'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No results for "xyz123"')
+      expect(getOutput(result)).toBe('No results for "xyz123"')
     })
 
     it('includes index in results', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = searchCommand.execute(['dune'], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const duneLine = outputLines.find(line => line.includes('Dune'))
       expect(duneLine).toContain('  1  ')
     })
@@ -162,21 +173,21 @@ describe('searchCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = searchCommand.execute(['random'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'Random Access Memories')).toBe(true)
+      expect(outputContains(getOutput(result), 'Random Access Memories')).toBe(true)
     })
 
     it('searches vinyl by artist', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = searchCommand.execute(['daft'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
     it('returns "No results" message for vinyl when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = searchCommand.execute(['unknown123'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No results for "unknown123"')
+      expect(getOutput(result)).toBe('No results for "unknown123"')
     })
   })
 
@@ -185,21 +196,21 @@ describe('searchCommand', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = searchCommand.execute(['macbook'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'MacBook Pro')).toBe(true)
+      expect(outputContains(getOutput(result), 'MacBook Pro')).toBe(true)
     })
 
     it('searches hardware by type', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = searchCommand.execute(['laptop'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
     it('formats hardware results with type in parentheses', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = searchCommand.execute(['iphone'], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const iphoneLine = outputLines.find(line => line.includes('iPhone'))
       expect(iphoneLine).toContain('(Phone)')
     })
@@ -208,7 +219,7 @@ describe('searchCommand', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = searchCommand.execute(['xyz987'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No results for "xyz987"')
+      expect(getOutput(result)).toBe('No results for "xyz987"')
     })
   })
 })
@@ -233,7 +244,7 @@ describe('genreCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = genreCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Electronic')
       expect(outputLines).toContain('  Jazz')
       expect(outputLines).toContain('  Pop')
@@ -243,7 +254,7 @@ describe('genreCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = genreCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const genres = outputLines.filter(line => line.trim() && !line.includes('results'))
       // Sorted: Electronic, Jazz, Pop
       expect(genres[0]).toContain('Electronic')
@@ -255,16 +266,16 @@ describe('genreCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = genreCommand.execute(['electronic'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
-      expect(outputContains(result.output, 'Random Access Memories')).toBe(true)
-      expect(outputContains(result.output, 'Discovery')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), 'Random Access Memories')).toBe(true)
+      expect(outputContains(getOutput(result), 'Discovery')).toBe(true)
     })
 
     it('returns "No records in genre" when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = genreCommand.execute(['country'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No records in genre "country"')
+      expect(getOutput(result)).toBe('No records in genre "country"')
     })
   })
 
@@ -273,7 +284,7 @@ describe('genreCommand', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = genreCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Fantasy')
       expect(outputLines).toContain('  Science Fiction')
     })
@@ -282,29 +293,29 @@ describe('genreCommand', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = genreCommand.execute(['fantasy'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
     it('handles partial genre match', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = genreCommand.execute(['science'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'Dune')).toBe(true)
-      expect(outputContains(result.output, 'Foundation')).toBe(true)
+      expect(outputContains(getOutput(result), 'Dune')).toBe(true)
+      expect(outputContains(getOutput(result), 'Foundation')).toBe(true)
     })
 
     it('returns "No books in genre" when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = genreCommand.execute(['horror'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No books in genre "horror"')
+      expect(getOutput(result)).toBe('No books in genre "horror"')
     })
 
     it('formats results with author', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = genreCommand.execute(['fantasy'], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const hobbitLine = outputLines.find(line => line.includes('Hobbit'))
       expect(hobbitLine).toContain('Tolkien')
     })
@@ -331,7 +342,7 @@ describe('formatCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = formatCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  7"')
       expect(outputLines).toContain('  LP')
     })
@@ -340,14 +351,14 @@ describe('formatCommand', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = formatCommand.execute(['lp'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '3 results')).toBe(true)
+      expect(outputContains(getOutput(result), '3 results')).toBe(true)
     })
 
     it('returns "No records in format" when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
       const result = formatCommand.execute(['cassette'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No records in format "cassette"')
+      expect(getOutput(result)).toBe('No records in format "cassette"')
     })
   })
 
@@ -356,7 +367,7 @@ describe('formatCommand', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = formatCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Hardcover')
       expect(outputLines).toContain('  Paperback')
     })
@@ -365,21 +376,21 @@ describe('formatCommand', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = formatCommand.execute(['hardcover'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
     it('returns "No books in format" when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = formatCommand.execute(['audiobook'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No books in format "audiobook"')
+      expect(getOutput(result)).toBe('No books in format "audiobook"')
     })
 
     it('handles case-insensitive matching', () => {
       const context = createMockContext({ currentDirectory: '~/books' })
       const result = formatCommand.execute(['PAPERBACK'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
   })
 })
@@ -410,7 +421,7 @@ describe('typeCommand', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Laptop')
       expect(outputLines).toContain('  Phone')
       expect(outputLines).toContain('  Tablet')
@@ -420,7 +431,7 @@ describe('typeCommand', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute([], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const types = outputLines.filter(line => line.trim() && !line.includes('results'))
       // Sorted: Laptop, Phone, Tablet
       expect(types[0]).toContain('Laptop')
@@ -432,30 +443,30 @@ describe('typeCommand', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute(['laptop'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, '2 results')).toBe(true)
-      expect(outputContains(result.output, 'MacBook Pro')).toBe(true)
-      expect(outputContains(result.output, 'Dell XPS')).toBe(true)
+      expect(outputContains(getOutput(result), '2 results')).toBe(true)
+      expect(outputContains(getOutput(result), 'MacBook Pro')).toBe(true)
+      expect(outputContains(getOutput(result), 'Dell XPS')).toBe(true)
     })
 
     it('returns "No devices of type" when no matches', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute(['watch'], context)
       expect(result.success).toBe(true)
-      expect(result.output).toBe('No devices of type "watch"')
+      expect(getOutput(result)).toBe('No devices of type "watch"')
     })
 
     it('handles case-insensitive matching', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute(['PHONE'], context)
       expect(result.success).toBe(true)
-      expect(outputContains(result.output, 'iPhone 15')).toBe(true)
+      expect(outputContains(getOutput(result), 'iPhone 15')).toBe(true)
     })
 
     it('includes index in results', () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
       const result = typeCommand.execute(['tablet'], context)
       expect(result.success).toBe(true)
-      const outputLines = result.output as string[]
+      const outputLines = getOutput(result) as string[]
       const ipadLine = outputLines.find(line => line.includes('iPad'))
       expect(ipadLine).toContain('  3  ') // iPad is 3rd in the array
     })

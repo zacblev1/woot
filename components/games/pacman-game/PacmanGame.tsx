@@ -20,7 +20,6 @@ interface PacmanGameProps {
 }
 
 const CELL_SIZE = 20
-const TARGET_FPS = 60
 const PACMAN_SPEED = 8 // Cells per second
 const GHOST_SPEED = 7
 const GHOST_FRIGHTENED_SPEED = 4
@@ -31,7 +30,7 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(3)
   const [level, setLevel] = useState(1)
-  const [pelletsRemaining, setPelletsRemaining] = useState(0)
+  const [, setPelletsRemaining] = useState(0)
 
   // High scores
   const { scores: highScores, isLoading: scoresLoading, submitScore, isHighScore } = useHighScores('pacman')
@@ -119,6 +118,128 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
       setGameState("gameover")
     }
   }, [playerInitials, finalScore, level, submitScore])
+
+  // Render function
+  const render = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    ctx.fillStyle = "#000"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    const maze = mazeRef.current
+    const offsetX = (canvas.width - MAZE_WIDTH * CELL_SIZE) / 2
+    const offsetY = (canvas.height - MAZE_HEIGHT * CELL_SIZE) / 2
+
+    // Draw maze
+    for (let y = 0; y < MAZE_HEIGHT; y++) {
+      for (let x = 0; x < MAZE_WIDTH; x++) {
+        const cell = maze[y][x]
+        const px = offsetX + x * CELL_SIZE
+        const py = offsetY + y * CELL_SIZE
+
+        if (cell === 0) {
+          ctx.fillStyle = "#2121de"
+          ctx.fillRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4)
+        } else if (cell === 1) {
+          ctx.fillStyle = "#ffb897"
+          ctx.beginPath()
+          ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 3, 0, Math.PI * 2)
+          ctx.fill()
+        } else if (cell === 2) {
+          const pulse = Math.sin(frameCount.current * 0.1) * 0.3 + 0.7
+          ctx.fillStyle = `rgba(255, 184, 151, ${pulse})`
+          ctx.beginPath()
+          ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 6, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
+    }
+
+    // Draw Pac-Man
+    const pacX = offsetX + pacmanPos.current.x * CELL_SIZE + CELL_SIZE / 2
+    const pacY = offsetY + pacmanPos.current.y * CELL_SIZE + CELL_SIZE / 2
+    const pacRadius = CELL_SIZE / 2 - 1
+
+    ctx.fillStyle = "#ffff00"
+    ctx.beginPath()
+
+    let startAngle = 0
+    switch (pacmanDir.current) {
+      case 'RIGHT': startAngle = 0; break
+      case 'DOWN': startAngle = Math.PI / 2; break
+      case 'LEFT': startAngle = Math.PI; break
+      case 'UP': startAngle = -Math.PI / 2; break
+    }
+
+    const mouth = mouthAngle.current
+    ctx.arc(pacX, pacY, pacRadius, startAngle + mouth, startAngle + Math.PI * 2 - mouth)
+    ctx.lineTo(pacX, pacY)
+    ctx.fill()
+
+    // Draw ghosts
+    ghostsRef.current.forEach(ghost => {
+      const gx = offsetX + ghost.pos.x * CELL_SIZE + CELL_SIZE / 2
+      const gy = offsetY + ghost.pos.y * CELL_SIZE + CELL_SIZE / 2
+      const gr = CELL_SIZE / 2 - 1
+
+      let color = ghost.color
+      if (ghost.mode === 'frightened') {
+        if (frightenedTimer.current < 120 && Math.floor(frameCount.current / 8) % 2 === 0) {
+          color = '#ffffff'
+        } else {
+          color = '#2121de'
+        }
+      } else if (ghost.mode === 'eaten') {
+        // Just draw eyes for eaten ghost
+        ctx.fillStyle = '#fff'
+        ctx.beginPath()
+        ctx.arc(gx - 4, gy - 2, 4, 0, Math.PI * 2)
+        ctx.arc(gx + 4, gy - 2, 4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#00f'
+        ctx.beginPath()
+        ctx.arc(gx - 4, gy - 1, 2, 0, Math.PI * 2)
+        ctx.arc(gx + 4, gy - 1, 2, 0, Math.PI * 2)
+        ctx.fill()
+        return
+      }
+
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.arc(gx, gy - 2, gr, Math.PI, 0)
+      ctx.lineTo(gx + gr, gy + gr - 2)
+
+      // Wavy bottom
+      for (let i = 0; i < 4; i++) {
+        const wx = gx + gr - (i + 0.5) * (gr / 2)
+        const wy = gy + gr - 2 + (i % 2 === 0 ? 3 : -1)
+        ctx.lineTo(wx, wy)
+      }
+      ctx.lineTo(gx - gr, gy - 2)
+      ctx.fill()
+
+      // Eyes
+      if (ghost.mode !== 'frightened') {
+        ctx.fillStyle = '#fff'
+        ctx.beginPath()
+        ctx.arc(gx - 4, gy - 3, 4, 0, Math.PI * 2)
+        ctx.arc(gx + 4, gy - 3, 4, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Pupils look toward movement direction
+        let pupilOffsetX = 0, pupilOffsetY = 0
+        switch (ghost.dir) {
+          case 'LEFT': pupilOffsetX = -1; break
+          case 'RIGHT': pupilOffsetX = 1; break
+          case 'UP': pupilOffsetY = -1; break
+          case 'DOWN': pupilOffsetY = 1; break
+        }
+        ctx.fillStyle = '#00f'
+        ctx.beginPath()
+        ctx.arc(gx - 4 + pupilOffsetX, gy - 2 + pupilOffsetY, 2, 0, Math.PI * 2)
+        ctx.arc(gx + 4 + pupilOffsetX, gy - 2 + pupilOffsetY, 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    })
+  }
 
   // Keyboard controls
   useEffect(() => {
@@ -346,127 +467,6 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
     }
   }, [gameState, level, handleDeath])
 
-  // Render function
-  const render = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-    ctx.fillStyle = "#000"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    const maze = mazeRef.current
-    const offsetX = (canvas.width - MAZE_WIDTH * CELL_SIZE) / 2
-    const offsetY = (canvas.height - MAZE_HEIGHT * CELL_SIZE) / 2
-
-    // Draw maze
-    for (let y = 0; y < MAZE_HEIGHT; y++) {
-      for (let x = 0; x < MAZE_WIDTH; x++) {
-        const cell = maze[y][x]
-        const px = offsetX + x * CELL_SIZE
-        const py = offsetY + y * CELL_SIZE
-
-        if (cell === 0) {
-          ctx.fillStyle = "#2121de"
-          ctx.fillRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4)
-        } else if (cell === 1) {
-          ctx.fillStyle = "#ffb897"
-          ctx.beginPath()
-          ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 3, 0, Math.PI * 2)
-          ctx.fill()
-        } else if (cell === 2) {
-          const pulse = Math.sin(frameCount.current * 0.1) * 0.3 + 0.7
-          ctx.fillStyle = `rgba(255, 184, 151, ${pulse})`
-          ctx.beginPath()
-          ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 6, 0, Math.PI * 2)
-          ctx.fill()
-        }
-      }
-    }
-
-    // Draw Pac-Man
-    const pacX = offsetX + pacmanPos.current.x * CELL_SIZE + CELL_SIZE / 2
-    const pacY = offsetY + pacmanPos.current.y * CELL_SIZE + CELL_SIZE / 2
-    const pacRadius = CELL_SIZE / 2 - 1
-
-    ctx.fillStyle = "#ffff00"
-    ctx.beginPath()
-
-    let startAngle = 0
-    switch (pacmanDir.current) {
-      case 'RIGHT': startAngle = 0; break
-      case 'DOWN': startAngle = Math.PI / 2; break
-      case 'LEFT': startAngle = Math.PI; break
-      case 'UP': startAngle = -Math.PI / 2; break
-    }
-
-    const mouth = mouthAngle.current
-    ctx.arc(pacX, pacY, pacRadius, startAngle + mouth, startAngle + Math.PI * 2 - mouth)
-    ctx.lineTo(pacX, pacY)
-    ctx.fill()
-
-    // Draw ghosts
-    ghostsRef.current.forEach(ghost => {
-      const gx = offsetX + ghost.pos.x * CELL_SIZE + CELL_SIZE / 2
-      const gy = offsetY + ghost.pos.y * CELL_SIZE + CELL_SIZE / 2
-      const gr = CELL_SIZE / 2 - 1
-
-      let color = ghost.color
-      if (ghost.mode === 'frightened') {
-        if (frightenedTimer.current < 120 && Math.floor(frameCount.current / 8) % 2 === 0) {
-          color = '#ffffff'
-        } else {
-          color = '#2121de'
-        }
-      } else if (ghost.mode === 'eaten') {
-        // Just draw eyes for eaten ghost
-        ctx.fillStyle = '#fff'
-        ctx.beginPath()
-        ctx.arc(gx - 4, gy - 2, 4, 0, Math.PI * 2)
-        ctx.arc(gx + 4, gy - 2, 4, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.fillStyle = '#00f'
-        ctx.beginPath()
-        ctx.arc(gx - 4, gy - 1, 2, 0, Math.PI * 2)
-        ctx.arc(gx + 4, gy - 1, 2, 0, Math.PI * 2)
-        ctx.fill()
-        return
-      }
-
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.arc(gx, gy - 2, gr, Math.PI, 0)
-      ctx.lineTo(gx + gr, gy + gr - 2)
-
-      // Wavy bottom
-      for (let i = 0; i < 4; i++) {
-        const wx = gx + gr - (i + 0.5) * (gr / 2)
-        const wy = gy + gr - 2 + (i % 2 === 0 ? 3 : -1)
-        ctx.lineTo(wx, wy)
-      }
-      ctx.lineTo(gx - gr, gy - 2)
-      ctx.fill()
-
-      // Eyes
-      if (ghost.mode !== 'frightened') {
-        ctx.fillStyle = '#fff'
-        ctx.beginPath()
-        ctx.arc(gx - 4, gy - 3, 4, 0, Math.PI * 2)
-        ctx.arc(gx + 4, gy - 3, 4, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Pupils look toward movement direction
-        let pupilOffsetX = 0, pupilOffsetY = 0
-        switch (ghost.dir) {
-          case 'LEFT': pupilOffsetX = -1; break
-          case 'RIGHT': pupilOffsetX = 1; break
-          case 'UP': pupilOffsetY = -1; break
-          case 'DOWN': pupilOffsetY = 1; break
-        }
-        ctx.fillStyle = '#00f'
-        ctx.beginPath()
-        ctx.arc(gx - 4 + pupilOffsetX, gy - 2 + pupilOffsetY, 2, 0, Math.PI * 2)
-        ctx.arc(gx + 4 + pupilOffsetX, gy - 2 + pupilOffsetY, 2, 0, Math.PI * 2)
-        ctx.fill()
-      }
-    })
-  }
 
   // Canvas setup
   useEffect(() => {

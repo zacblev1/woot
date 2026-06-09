@@ -292,7 +292,7 @@ describe('Terminal - Characterization Tests', () => {
       await waitFor(() => {
         // The Tron game component should be rendered
         // It shows "Loading Tron..." initially due to dynamic import
-        const tronText = screen.queryByText('Loading Tron...')
+        screen.queryByText('Loading Tron...')
         // Either loading text or the game canvas should be present
         // The game state is set to active, so terminal should have game UI
         expect(document.body.textContent).toBeDefined()

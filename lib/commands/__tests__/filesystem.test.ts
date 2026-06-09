@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mkdirCommand, touchCommand, rmCommand } from '../commands/filesystem'
 import type { ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'

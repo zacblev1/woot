@@ -154,177 +154,6 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
     setGameState("gameover")
   }, [])
 
-  // Timer
-  useEffect(() => {
-    if (gameState !== "playing") {
-      if (timerRef.current) clearInterval(timerRef.current)
-      return
-    }
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          endGame()
-          return 0
-        }
-        return t - 1
-      })
-    }, 1000)
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [gameState, endGame])
-
-  // Keyboard
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameState === "menu" || gameState === "gameover") {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          startGame()
-        }
-        if (e.key === "Escape") onExit()
-        return
-      }
-
-      if (gameState === "playing") {
-        if (e.key === "Escape") {
-          onExit()
-          return
-        }
-
-        keysPressed.current.add(e.key)
-
-        if (e.key === " " && !ballInFlight.current && !isCharging.current) {
-          e.preventDefault()
-          isCharging.current = true
-        }
-      }
-    }
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysPressed.current.delete(e.key)
-
-      if (gameState === "playing" && e.key === " " && isCharging.current) {
-        e.preventDefault()
-        shootBall()
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-      window.removeEventListener("keyup", handleKeyUp)
-    }
-  }, [gameState, startGame, onExit, shootBall])
-
-  // Game loop
-  useEffect(() => {
-    if (gameState !== "playing") {
-      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current)
-      return
-    }
-
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext("2d")
-    if (!canvas || !ctx) return
-
-    lastTimeRef.current = performance.now()
-
-    const gameLoop = (time: number) => {
-      const deltaTime = Math.min((time - lastTimeRef.current) / 1000, 0.05)
-      lastTimeRef.current = time
-
-      // Aiming
-      if (!ballInFlight.current) {
-        if (keysPressed.current.has("ArrowUp")) {
-          aimAngle.current = Math.min(MAX_ANGLE, aimAngle.current + AIM_SPEED * deltaTime)
-        }
-        if (keysPressed.current.has("ArrowDown")) {
-          aimAngle.current = Math.max(MIN_ANGLE, aimAngle.current - AIM_SPEED * deltaTime)
-        }
-        if (isCharging.current) {
-          power.current = Math.min(MAX_POWER, power.current + CHARGE_SPEED * deltaTime)
-        }
-      }
-
-      // Physics
-      if (ballInFlight.current) {
-        prevBallPos.current = { ...ballPos.current }
-
-        // Apply gravity and air resistance
-        ballVelocity.current = {
-          x: ballVelocity.current.x * AIR_RESISTANCE,
-          y: ballVelocity.current.y + GRAVITY * deltaTime
-        }
-
-        ballPos.current = {
-          x: ballPos.current.x + ballVelocity.current.x * deltaTime,
-          y: ballPos.current.y + ballVelocity.current.y * deltaTime
-        }
-
-        // Trail
-        ballTrail.current.push({ ...ballPos.current })
-        if (ballTrail.current.length > 12) ballTrail.current.shift()
-
-        // Check scoring FIRST (before collisions can interfere)
-        if (!hasScored.current && checkScore(ballPos.current, prevBallPos.current, RIM_LEFT_X, RIM_RIGHT_X)) {
-          handleScore(!hitRim.current)
-        }
-
-        // Rim collision
-        const rimCollision = checkRimCollision(
-          ballPos.current,
-          ballVelocity.current,
-          RIM_LEFT_X,
-          RIM_RIGHT_X
-        )
-        if (rimCollision.collided && rimCollision.newVelocity) {
-          ballVelocity.current = rimCollision.newVelocity
-          hitRim.current = true
-        }
-
-        // Backboard collision
-        const backboardCollision = checkBackboardCollision(
-          ballPos.current,
-          ballVelocity.current,
-          BACKBOARD_X,
-          BACKBOARD_TOP,
-          BACKBOARD_BOTTOM
-        )
-        if (backboardCollision.collided && backboardCollision.newVelocity) {
-          ballVelocity.current = backboardCollision.newVelocity
-          // Push ball out of backboard to prevent sticking
-          if (backboardCollision.newPosition) {
-            ballPos.current = backboardCollision.newPosition
-          }
-          hitRim.current = true
-        }
-
-        // Reset if off screen
-        if (
-          ballPos.current.y > CANVAS_HEIGHT + 50 ||
-          ballPos.current.x < -50 ||
-          ballPos.current.x > CANVAS_WIDTH + 50
-        ) {
-          if (!hasScored.current) handleMiss()
-          resetBall()
-        }
-      }
-
-      render(ctx, canvas)
-      gameLoopRef.current = requestAnimationFrame(gameLoop)
-    }
-
-    gameLoopRef.current = requestAnimationFrame(gameLoop)
-
-    return () => {
-      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current)
-    }
-  }, [gameState, handleScore, handleMiss, resetBall])
-
   const render = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     // Background
     ctx.fillStyle = "#0a0a12"
@@ -545,6 +374,178 @@ export function BasketballGame({ onExit }: BasketballGameProps) {
       ctx.fillText("UP/DOWN: Aim | HOLD SPACE: Power | RELEASE: Shoot", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 5)
     }
   }
+
+  // Timer
+  useEffect(() => {
+    if (gameState !== "playing") {
+      if (timerRef.current) clearInterval(timerRef.current)
+      return
+    }
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          endGame()
+          return 0
+        }
+        return t - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [gameState, endGame])
+
+  // Keyboard
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState === "menu" || gameState === "gameover") {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          startGame()
+        }
+        if (e.key === "Escape") onExit()
+        return
+      }
+
+      if (gameState === "playing") {
+        if (e.key === "Escape") {
+          onExit()
+          return
+        }
+
+        keysPressed.current.add(e.key)
+
+        if (e.key === " " && !ballInFlight.current && !isCharging.current) {
+          e.preventDefault()
+          isCharging.current = true
+        }
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current.delete(e.key)
+
+      if (gameState === "playing" && e.key === " " && isCharging.current) {
+        e.preventDefault()
+        shootBall()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("keyup", handleKeyUp)
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("keyup", handleKeyUp)
+    }
+  }, [gameState, startGame, onExit, shootBall])
+
+  // Game loop
+  useEffect(() => {
+    if (gameState !== "playing") {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current)
+      return
+    }
+
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext("2d")
+    if (!canvas || !ctx) return
+
+    lastTimeRef.current = performance.now()
+
+    const gameLoop = (time: number) => {
+      const deltaTime = Math.min((time - lastTimeRef.current) / 1000, 0.05)
+      lastTimeRef.current = time
+
+      // Aiming
+      if (!ballInFlight.current) {
+        if (keysPressed.current.has("ArrowUp")) {
+          aimAngle.current = Math.min(MAX_ANGLE, aimAngle.current + AIM_SPEED * deltaTime)
+        }
+        if (keysPressed.current.has("ArrowDown")) {
+          aimAngle.current = Math.max(MIN_ANGLE, aimAngle.current - AIM_SPEED * deltaTime)
+        }
+        if (isCharging.current) {
+          power.current = Math.min(MAX_POWER, power.current + CHARGE_SPEED * deltaTime)
+        }
+      }
+
+      // Physics
+      if (ballInFlight.current) {
+        prevBallPos.current = { ...ballPos.current }
+
+        // Apply gravity and air resistance
+        ballVelocity.current = {
+          x: ballVelocity.current.x * AIR_RESISTANCE,
+          y: ballVelocity.current.y + GRAVITY * deltaTime
+        }
+
+        ballPos.current = {
+          x: ballPos.current.x + ballVelocity.current.x * deltaTime,
+          y: ballPos.current.y + ballVelocity.current.y * deltaTime
+        }
+
+        // Trail
+        ballTrail.current.push({ ...ballPos.current })
+        if (ballTrail.current.length > 12) ballTrail.current.shift()
+
+        // Check scoring FIRST (before collisions can interfere)
+        if (!hasScored.current && checkScore(ballPos.current, prevBallPos.current, RIM_LEFT_X, RIM_RIGHT_X)) {
+          handleScore(!hitRim.current)
+        }
+
+        // Rim collision
+        const rimCollision = checkRimCollision(
+          ballPos.current,
+          ballVelocity.current,
+          RIM_LEFT_X,
+          RIM_RIGHT_X
+        )
+        if (rimCollision.collided && rimCollision.newVelocity) {
+          ballVelocity.current = rimCollision.newVelocity
+          hitRim.current = true
+        }
+
+        // Backboard collision
+        const backboardCollision = checkBackboardCollision(
+          ballPos.current,
+          ballVelocity.current,
+          BACKBOARD_X,
+          BACKBOARD_TOP,
+          BACKBOARD_BOTTOM
+        )
+        if (backboardCollision.collided && backboardCollision.newVelocity) {
+          ballVelocity.current = backboardCollision.newVelocity
+          // Push ball out of backboard to prevent sticking
+          if (backboardCollision.newPosition) {
+            ballPos.current = backboardCollision.newPosition
+          }
+          hitRim.current = true
+        }
+
+        // Reset if off screen
+        if (
+          ballPos.current.y > CANVAS_HEIGHT + 50 ||
+          ballPos.current.x < -50 ||
+          ballPos.current.x > CANVAS_WIDTH + 50
+        ) {
+          if (!hasScored.current) handleMiss()
+          resetBall()
+        }
+      }
+
+      render(ctx, canvas)
+      gameLoopRef.current = requestAnimationFrame(gameLoop)
+    }
+
+    gameLoopRef.current = requestAnimationFrame(gameLoop)
+
+    return () => {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current)
+    }
+  }, [gameState, handleScore, handleMiss, resetBall])
+
 
   useEffect(() => {
     if (canvasRef.current) {

@@ -36,13 +36,15 @@ function buildIndex(): PaletteItem[] {
   }
 
   // Books
-  booksData.forEach((book: { title: string; author: string }) => {
+  booksData.forEach((book: { title: string; author: string | string[] }) => {
     const filename = book.title.toLowerCase().replace(/[^a-z0-9]/g, '-')
     items.push({
       type: 'book',
       icon: '📖',
       title: book.title,
-      subtitle: book.author,
+      subtitle: Array.isArray(book.author)
+        ? book.author.map(a => a.trim()).join(', ')
+        : book.author,
       command: `cd ~/books && view ${filename}`,
     })
   })
@@ -89,7 +91,7 @@ export function CommandPalette({ onClose, onExecute }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
-  const allItems = useMemo(buildIndex, [])
+  const allItems = useMemo(() => buildIndex(), [])
 
   const filtered = useMemo(() => {
     if (!query.trim()) {

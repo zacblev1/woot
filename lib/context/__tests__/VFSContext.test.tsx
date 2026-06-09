@@ -152,7 +152,7 @@ describe('VFSContext', () => {
 
   describe('useVFSOptional', () => {
     it('returns null when used outside provider', () => {
-      let capturedCtx: ReturnType<typeof useVFSOptional> = {} as any
+      let capturedCtx: ReturnType<typeof useVFSOptional> = null
 
       render(
         <OptionalConsumer onRender={(ctx) => { capturedCtx = ctx }} />

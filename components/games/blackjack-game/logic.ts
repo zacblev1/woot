@@ -162,7 +162,7 @@ export function handleInput(input: string, data: BlackjackData): GameResult {
 
     if (cmd === 'stand') {
       // Dealer's turn - draw until >= 17
-      let dHand = [...dealerHand]
+      const dHand = [...dealerHand]
       let dDeck = [...deck]
 
       while (handValue(dHand) < 17) {

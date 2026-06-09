@@ -98,7 +98,7 @@ describe('Game Integration Tests', () => {
     })
 
     it('tracks wins and losses correctly', () => {
-      let data = rpsGame.createInitialData()
+      const data = rpsGame.createInitialData()
 
       // Mock computer always plays rock
       vi.spyOn(Math, 'random').mockReturnValue(0) // rock
@@ -164,7 +164,7 @@ describe('Game Integration Tests', () => {
     })
 
     it('tracks correct answers', () => {
-      let data = triviaGame.createInitialData()
+      const data = triviaGame.createInitialData()
 
       // Answer first question correctly
       const correctAnswer = data.questions[0].a

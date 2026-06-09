@@ -5,7 +5,15 @@ export interface FileSystemNode {
     type: FileSystemNodeType
     parent?: FileSystemNode
     children?: { [key: string]: FileSystemNode }
-    content?: any
+    content?: unknown
+}
+
+// JSON-safe shape of a node (no circular parent refs)
+interface SerializedFileSystemNode {
+    name: string
+    type: FileSystemNodeType
+    children?: { [key: string]: SerializedFileSystemNode }
+    content?: unknown
 }
 
 export class VirtualFileSystem {
@@ -73,7 +81,7 @@ export class VirtualFileSystem {
             path = "/home/zachary" + path.slice(1)
         }
 
-        let startNode = path.startsWith("/") ? this.root : this.current
+        const startNode = path.startsWith("/") ? this.root : this.current
         const parts = path.split("/").filter(Boolean)
 
         let node = startNode
@@ -118,9 +126,6 @@ export class VirtualFileSystem {
         const parts = path.split("/")
         const newDirName = parts.pop()
         if (!newDirName) return "mkdir: invalid path"
-
-        const parentPath = parts.join("/")
-        const parent = parts.length > 0 ? this.resolve(path.startsWith("/") ? parts.join("/") : parentPath) : this.current
 
         // Handle absolute paths or paths with subdirectories like mkdir foo/bar
         // For simplicity, let's just resolve the parent of the final segment
@@ -201,8 +206,8 @@ export class VirtualFileSystem {
 
     // Serialize to simple JSON object (removing circular parent refs)
     toJSON(): string {
-        const serializeNode = (node: FileSystemNode): any => {
-            const obj: any = {
+        const serializeNode = (node: FileSystemNode): SerializedFileSystemNode => {
+            const obj: SerializedFileSystemNode = {
                 name: node.name,
                 type: node.type
             }
@@ -221,10 +226,10 @@ export class VirtualFileSystem {
     // Restore from JSON object
     fromJSON(json: string): void {
         try {
-            const data = JSON.parse(json)
+            const data = JSON.parse(json) as SerializedFileSystemNode
 
             // Recursive restoration of parent links
-            const restoreNode = (data: any, parent: FileSystemNode) => {
+            const restoreNode = (data: SerializedFileSystemNode, parent: FileSystemNode): FileSystemNode => {
                 const node: FileSystemNode = {
                     name: data.name,
                     type: data.type,
