@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Monitor, RefreshCw, X, Trophy } from "lucide-react"
 import { useHighScores } from "@/lib/hooks/useHighScores"
+import { chooseCpuMove } from "./tron-game/ai"
 
 interface TronGameProps {
     onExit: () => void
@@ -155,222 +156,22 @@ export function TronGame({ onExit }: TronGameProps) {
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [gameState, winner, playerInitials, startGame, onExit, handleInitialsSubmit])
 
-    // AI Logic - Flood Fill Heuristic
-    const countReachable = (startPos: Point, trails: Set<string>, w: number, h: number, maxDepth: number = 50): number => {
-        const queue: Point[] = [startPos]
-        const visited = new Set<string>()
-        visited.add(`${startPos.x},${startPos.y}`)
-        let count = 0
-
-        while (queue.length > 0 && count < maxDepth) {
-            const curr = queue.shift()!
-            count++
-
-            const neighbors: Point[] = [
-                { x: curr.x + 1, y: curr.y },
-                { x: curr.x - 1, y: curr.y },
-                { x: curr.x, y: curr.y + 1 },
-                { x: curr.x, y: curr.y - 1 }
-            ]
-
-            for (const n of neighbors) {
-                const key = `${n.x},${n.y}`
-                if (
-                    n.x >= 0 && n.x < w &&
-                    n.y >= 0 && n.y < h &&
-                    !trails.has(key) &&
-                    !visited.has(key)
-                ) {
-                    visited.add(key)
-                    queue.push(n)
-                }
-            }
-        }
-        return count
-    }
-
-    // Minimax with Alpha-Beta Pruning
-    const minimax = (
-        depth: number,
-        isMaximizing: boolean,
-        cpuPosition: Point,
-        playerPosition: Point,
-        obstacles: Set<string>,
-        w: number,
-        h: number,
-        alpha: number,
-        beta: number
-    ): number => {
-        // Head-to-head collision
-        if (cpuPosition.x === playerPosition.x && cpuPosition.y === playerPosition.y) {
-            return 0 // Draw
-        }
-
-        // Leaf node - use heuristic (space available to each player)
-        if (depth === 0) {
-            const cpuSpace = countReachable(cpuPosition, obstacles, w, h, 30)
-            const playerSpace = countReachable(playerPosition, obstacles, w, h, 30)
-            return cpuSpace - playerSpace
-        }
-
-        const moves: Direction[] = ["UP", "DOWN", "LEFT", "RIGHT"]
-
-        if (isMaximizing) {
-            // CPU's turn - maximize
-            let maxEval = -Infinity
-            let hasValidMove = false
-
-            for (const move of moves) {
-                let nextX = cpuPosition.x
-                let nextY = cpuPosition.y
-                if (move === "UP") nextY--
-                if (move === "DOWN") nextY++
-                if (move === "LEFT") nextX--
-                if (move === "RIGHT") nextX++
-
-                const nextKey = `${nextX},${nextY}`
-
-                // Check if move is valid
-                if (nextX < 0 || nextX >= w || nextY < 0 || nextY >= h) continue
-                if (obstacles.has(nextKey)) continue
-                // Can't move into player's current position
-                if (nextX === playerPosition.x && nextY === playerPosition.y) continue
-
-                hasValidMove = true
-                const nextPos = { x: nextX, y: nextY }
-
-                // Add current CPU position to obstacles (trail left behind)
-                const currentKey = `${cpuPosition.x},${cpuPosition.y}`
-                obstacles.add(currentKey)
-
-                const evalScore = minimax(depth - 1, false, nextPos, playerPosition, obstacles, w, h, alpha, beta)
-
-                obstacles.delete(currentKey)
-
-                maxEval = Math.max(maxEval, evalScore)
-                alpha = Math.max(alpha, evalScore)
-                if (beta <= alpha) break // Prune
-            }
-
-            // No valid moves = CPU is trapped and loses
-            return hasValidMove ? maxEval : -1000
-        } else {
-            // Player's turn - minimize (simulate player trying to survive)
-            let minEval = Infinity
-            let hasValidMove = false
-
-            for (const move of moves) {
-                let nextX = playerPosition.x
-                let nextY = playerPosition.y
-                if (move === "UP") nextY--
-                if (move === "DOWN") nextY++
-                if (move === "LEFT") nextX--
-                if (move === "RIGHT") nextX++
-
-                const nextKey = `${nextX},${nextY}`
-
-                // Check if move is valid
-                if (nextX < 0 || nextX >= w || nextY < 0 || nextY >= h) continue
-                if (obstacles.has(nextKey)) continue
-                // Can't move into CPU's current position
-                if (nextX === cpuPosition.x && nextY === cpuPosition.y) continue
-
-                hasValidMove = true
-                const nextPos = { x: nextX, y: nextY }
-
-                // Add current player position to obstacles (trail left behind)
-                const currentKey = `${playerPosition.x},${playerPosition.y}`
-                obstacles.add(currentKey)
-
-                const evalScore = minimax(depth - 1, true, cpuPosition, nextPos, obstacles, w, h, alpha, beta)
-
-                obstacles.delete(currentKey)
-
-                minEval = Math.min(minEval, evalScore)
-                beta = Math.min(beta, evalScore)
-                if (beta <= alpha) break // Prune
-            }
-
-            // No valid moves = player is trapped and CPU wins
-            return hasValidMove ? minEval : 1000
-        }
-    }
-
     const updateCpu = () => {
-        const w = gridWidth.current
-        const h = gridHeight.current
-
-        // Create a Set of all trail obstacles (NOT current positions)
+        // Build trail obstacle set (NOT current positions)
         const obstacles = new Set<string>()
         playerTrail.current.forEach(p => obstacles.add(`${p.x},${p.y}`))
         cpuTrail.current.forEach(p => obstacles.add(`${p.x},${p.y}`))
 
-        const moves: Direction[] = ["UP", "DOWN", "LEFT", "RIGHT"]
-
-        // 1. Identify valid moves
-        const validMoves = moves.filter(move => {
-            let nextX = cpuPos.current.x
-            let nextY = cpuPos.current.y
-            if (move === "UP") nextY--
-            if (move === "DOWN") nextY++
-            if (move === "LEFT") nextX--
-            if (move === "RIGHT") nextX++
-
-            // Bounds
-            if (nextX < 0 || nextX >= w || nextY < 0 || nextY >= h) return false
-            // Obstacles (trails)
-            if (obstacles.has(`${nextX},${nextY}`)) return false
-            // Can't move into player's current position
-            if (nextX === playerPos.current.x && nextY === playerPos.current.y) return false
-
-            return true
+        const bestMove = chooseCpuMove({
+            cpuPos: cpuPos.current,
+            playerPos: playerPos.current,
+            cpuDir: cpuDir.current,
+            obstacles,
+            w: gridWidth.current,
+            h: gridHeight.current,
         })
 
-        if (validMoves.length === 0) return // Dead
-
-        // 2. Choose best move using Minimax with Alpha-Beta Pruning
-        let bestMove = validMoves[0]
-        let maxVal = -Infinity
-
-        // Depth 5 gives better lookahead while staying performant
-        const DEPTH = 5
-
-        // Prioritize current direction to reduce wiggling, then other moves
-        const currentDir = cpuDir.current
-        const orderedMoves = [
-            ...validMoves.filter(m => m === currentDir),
-            ...validMoves.filter(m => m !== currentDir).sort(() => Math.random() - 0.5)
-        ]
-
-        for (const move of orderedMoves) {
-            let nextX = cpuPos.current.x
-            let nextY = cpuPos.current.y
-            if (move === "UP") nextY--
-            if (move === "DOWN") nextY++
-            if (move === "LEFT") nextX--
-            if (move === "RIGHT") nextX++
-
-            // Add CPU's current position to obstacles (trail left behind when moving)
-            const trailKey = `${cpuPos.current.x},${cpuPos.current.y}`
-            obstacles.add(trailKey)
-
-            // Evaluate this move - player responds trying to minimize CPU's score
-            let val = minimax(DEPTH, false, { x: nextX, y: nextY }, playerPos.current, obstacles, w, h, -Infinity, Infinity)
-
-            // Small bonus for continuing in same direction (reduces wiggling)
-            if (move === currentDir) {
-                val += 0.5
-            }
-
-            obstacles.delete(trailKey)
-
-            if (val > maxVal) {
-                maxVal = val
-                bestMove = move
-            }
-        }
-
-        cpuDir.current = bestMove
+        if (bestMove) cpuDir.current = bestMove
     }
 
     // Mirror frequently-changing values into refs so the game loop reads the

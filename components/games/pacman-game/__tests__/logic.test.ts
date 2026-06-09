@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import {
+  getGhostDirection,
+  distanceSquared as dist2,
+  type Ghost,
+  type Direction,
   getOppositeDirection,
   canMove,
   getNextPosition,
@@ -8,7 +12,31 @@ import {
   checkCollision,
   createInitialGhosts,
 } from '../logic'
-import { cloneMaze, countPellets, INITIAL_MAZE } from '../maze'
+import { cloneMaze, countPellets, INITIAL_MAZE, GHOST_START } from '../maze'
+
+// 21x21 fully open maze (every cell walkable) for ghost AI tests
+const OPEN_MAZE: number[][] = Array.from({ length: 21 }, () => Array(21).fill(1))
+
+function makeGhost(overrides: Partial<Ghost> = {}): Ghost {
+  return {
+    pos: { x: 5, y: 5 },
+    dir: 'LEFT',
+    mode: 'chase',
+    color: '#f00',
+    scatterTarget: { x: 18, y: 1 },
+    homePos: { x: GHOST_START.x, y: GHOST_START.y },
+    isHome: false,
+    exitTimer: 0,
+    ...overrides,
+  }
+}
+
+function nextPos(pos: { x: number; y: number }, dir: Direction) {
+  return {
+    x: pos.x + (dir === 'LEFT' ? -1 : dir === 'RIGHT' ? 1 : 0),
+    y: pos.y + (dir === 'UP' ? -1 : dir === 'DOWN' ? 1 : 0),
+  }
+}
 
 describe('Pac-Man Logic', () => {
   describe('getOppositeDirection', () => {
@@ -122,6 +150,53 @@ describe('Pac-Man Maze', () => {
     it('counts all pellets in maze', () => {
       const count = countPellets(INITIAL_MAZE)
       expect(count).toBeGreaterThan(0)
+    })
+  })
+
+  describe('getGhostDirection', () => {
+    it('waits in place while exitTimer has not elapsed', () => {
+      const ghost = makeGhost({ exitTimer: 100, dir: 'UP' })
+      expect(getGhostDirection(ghost, OPEN_MAZE, { x: 1, y: 1 }, 50)).toBe('UP')
+    })
+
+    it('chases pacman: chosen step reduces distance to pacman', () => {
+      const pacman = { x: 15, y: 5 }
+      const ghost = makeGhost({ mode: 'chase', pos: { x: 5, y: 5 }, dir: 'RIGHT' })
+      const dir = getGhostDirection(ghost, OPEN_MAZE, pacman, 200)
+      expect(dist2(nextPos(ghost.pos, dir), pacman)).toBeLessThan(dist2(ghost.pos, pacman))
+    })
+
+    it('scatter mode heads toward the scatter corner instead of pacman', () => {
+      const pacman = { x: 1, y: 20 }
+      const ghost = makeGhost({ mode: 'scatter', pos: { x: 10, y: 10 }, dir: 'UP', scatterTarget: { x: 18, y: 1 } })
+      const dir = getGhostDirection(ghost, OPEN_MAZE, pacman, 200)
+      expect(dist2(nextPos(ghost.pos, dir), ghost.scatterTarget)).toBeLessThan(dist2(ghost.pos, ghost.scatterTarget))
+    })
+
+    it('eaten mode returns toward the ghost house', () => {
+      const ghost = makeGhost({ mode: 'eaten', pos: { x: 2, y: 2 }, dir: 'DOWN' })
+      const dir = getGhostDirection(ghost, OPEN_MAZE, { x: 20, y: 20 }, 200)
+      expect(dist2(nextPos(ghost.pos, dir), GHOST_START)).toBeLessThan(dist2(ghost.pos, GHOST_START))
+    })
+
+    it('never reverses direction in chase mode on an open board', () => {
+      for (let i = 0; i < 25; i++) {
+        const ghost = makeGhost({ mode: 'chase', pos: { x: 10, y: 10 }, dir: 'RIGHT' })
+        const dir = getGhostDirection(ghost, OPEN_MAZE, { x: 0, y: 10 }, 200)
+        expect(dir).not.toBe('LEFT')
+      }
+    })
+
+    it('frightened mode picks a random valid non-reverse direction', () => {
+      const seen = new Set<Direction>()
+      for (let i = 0; i < 100; i++) {
+        const ghost = makeGhost({ mode: 'frightened', pos: { x: 10, y: 10 }, dir: 'UP' })
+        const dir = getGhostDirection(ghost, OPEN_MAZE, { x: 0, y: 0 }, 200)
+        seen.add(dir)
+        expect(dir).not.toBe('DOWN') // no reversing
+        expect(['UP', 'LEFT', 'RIGHT']).toContain(dir)
+      }
+      expect(seen.size).toBeGreaterThan(1) // actually random
     })
   })
 })
