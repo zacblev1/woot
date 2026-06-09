@@ -866,6 +866,30 @@ export function Terminal() {
     terminalCtx.registerCommandHandler(handleCommand)
   })
 
+  // Mirror handleCommand for one-shot consumers (deep links)
+  const handleCommandRef = useRef(handleCommand)
+  useEffect(() => {
+    handleCommandRef.current = handleCommand
+  })
+
+  // Shareable deep links: /?cmd=ls%20~/books runs the command(s) on load.
+  // Deferred to a macrotask so execution happens outside the effect body and
+  // after the first paint.
+  const deepLinkRan = useRef(false)
+  useEffect(() => {
+    if (deepLinkRan.current) return
+    deepLinkRan.current = true
+    const cmd = new URLSearchParams(window.location.search).get("cmd")
+    if (!cmd) return
+    const timer = setTimeout(() => {
+      cmd.split("&&").forEach((part) => {
+        const trimmed = part.trim()
+        if (trimmed) handleCommandRef.current(trimmed)
+      })
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [])
+
   // InputLine callback handlers
   const handleTabComplete = (partial: string) => {
     const completions = getCompletions(partial)
