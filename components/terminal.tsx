@@ -794,12 +794,29 @@ export function Terminal() {
     const trimmedCmd = cmd.trim()
     if (!trimmedCmd) return
 
-    setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${trimmedCmd}` }])
+    // bash-style history expansion: `!!` = previous command, `!n` = nth
+    let expandedCmd = trimmedCmd
+    const bang = trimmedCmd.match(/^!(!|\d+)$/)
+    if (bang) {
+      const target = bang[1] === "!" ? commandHistory[commandHistory.length - 1] : commandHistory[parseInt(bang[1], 10) - 1]
+      if (!target) {
+        setHistory((prev) => [
+          ...prev,
+          { type: "input", content: `${currentDirectory} $ ${trimmedCmd}` },
+          { type: "error", content: `${trimmedCmd}: event not found` },
+        ])
+        setInput("")
+        return
+      }
+      expandedCmd = target
+    }
+
+    setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${expandedCmd}` }])
 
     if (gameState.active) {
       // Handle async suggest command separately
       if (gameState.type === "suggest") {
-        handleSuggestCommand(trimmedCmd).then(result => {
+        handleSuggestCommand(expandedCmd).then(result => {
           const lines = Array.isArray(result) ? result : [result]
           lines.forEach(line => {
             setHistory(prev => [...prev, { type: "output", content: line }])
@@ -811,15 +828,15 @@ export function Terminal() {
 
       let result: string | (string | { wordle: string })[]
       if (gameState.type === "number") {
-        result = handleNumberGame(trimmedCmd)
+        result = handleNumberGame(expandedCmd)
       } else if (gameState.type === "wordle") {
-        result = handleWordleGame(trimmedCmd)
+        result = handleWordleGame(expandedCmd)
       } else if (gameState.type === "trivia") {
-        result = handleTriviaGame(trimmedCmd)
+        result = handleTriviaGame(expandedCmd)
       } else if (gameState.type === "blackjack") {
-        result = handleBlackjackGame(trimmedCmd)
+        result = handleBlackjackGame(expandedCmd)
       } else if (gameState.type === "rps") {
-        result = handleRPSGame(trimmedCmd)
+        result = handleRPSGame(expandedCmd)
       } else {
         result = "Error: Unknown game state"
       }
@@ -836,17 +853,17 @@ export function Terminal() {
       return
     }
 
-    setCommandHistory((prev) => [...prev, trimmedCmd])
+    setCommandHistory((prev) => [...prev, expandedCmd])
     setHistoryIndex(-1)
 
-    const [command] = trimmedCmd.split(" ")
+    const [command] = expandedCmd.split(" ")
     const cmd_lower = command.toLowerCase()
 
     // `suggest` runs an async interactive flow owned by the terminal
     if (cmd_lower === "suggest") {
       appendCommandOutput(startSuggestCommand())
     } else {
-      const result = executeCommand(trimmedCmd, buildExecuteContext(), commandRegistry)
+      const result = executeCommand(expandedCmd, buildExecuteContext(), commandRegistry)
       if (result.success) {
         appendCommandOutput(result.output)
       } else {
