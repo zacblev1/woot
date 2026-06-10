@@ -351,6 +351,21 @@ describe('InputLine', () => {
       render(<InputLine {...createDefaultProps({ value: 'cd b' })} />)
       expect(screen.queryByText('ooks')).not.toBeInTheDocument()
     })
+
+    it('ArrowRight mid-input does not accept the suggestion', () => {
+      const onChange = vi.fn()
+      render(<InputLine {...createDefaultProps({ value: 'cd b', suggestion: 'cd books', onChange })} />)
+      const input = screen.getByRole('textbox') as HTMLInputElement
+      input.setSelectionRange(2, 2)
+      fireEvent.keyDown(input, { key: 'ArrowRight' })
+      expect(onChange).not.toHaveBeenCalledWith('cd books')
+    })
+
+    it('renders no ghost text when the suggestion is not a prefix extension', () => {
+      render(<InputLine {...createDefaultProps({ value: 'ls', suggestion: 'cd books' })} />)
+      expect(screen.queryByText('cd books')).not.toBeInTheDocument()
+      expect(screen.queryByText('d books')).not.toBeInTheDocument()
+    })
   })
 
   describe('mobile focus scroll', () => {

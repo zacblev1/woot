@@ -1002,7 +1002,7 @@ export function Terminal() {
             onCommandPalette={handleCommandPalette}
             prompt={prompt}
             validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
-            suggestion={ghostSuggestion}
+            suggestion={gameState.active ? undefined : ghostSuggestion}
           />
         </>
       )}
