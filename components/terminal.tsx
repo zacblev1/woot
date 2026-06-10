@@ -213,6 +213,7 @@ export function Terminal() {
   }
 
   const [showPalette, setShowPalette] = useState(false)
+  const [editorTrap, setEditorTrap] = useState(false)
 
   const handleCommandPalette = () => setShowPalette(prev => !prev)
 
@@ -885,6 +886,36 @@ export function Terminal() {
 
     if (expandedCmd === "sl") {
       playScript(TRAIN_FRAME.map((content) => ({ type: "output" as const, content })), 120)
+      setInput("")
+      return
+    }
+
+    // The vim trap: there is no editor here, only regret
+    if (editorTrap) {
+      if (/^:(q!?|wq|x)$/.test(expandedCmd)) {
+        setEditorTrap(false)
+        setHistory((prev) => [
+          ...prev,
+          { type: "success", content: "you are free now. (this terminal only has one editor: your browser devtools)" },
+        ])
+      } else {
+        setHistory((prev) => [...prev, { type: "error", content: `E492: Not an editor command: ${expandedCmd}` }])
+      }
+      setInput("")
+      return
+    }
+
+    if (/^(vim|vi|nano|emacs)$/.test(expandedCmd)) {
+      setEditorTrap(true)
+      setHistory((prev) => [
+        ...prev,
+        { type: "output", content: "" },
+        { type: "output", content: "~                    VIM - Vi IMproved" },
+        { type: "output", content: "~                     (sort of. not really.)" },
+        { type: "output", content: "~" },
+        { type: "output", content: "~        you're trapped. type :q! to escape" },
+        { type: "output", content: "" },
+      ])
       setInput("")
       return
     }

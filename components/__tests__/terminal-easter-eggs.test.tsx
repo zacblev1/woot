@@ -70,6 +70,21 @@ describe('terminal easter eggs', () => {
     }, { timeout: 3000 })
   })
 
+  it('vim traps the user until :q!', async () => {
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'vim{Enter}')
+    await waitFor(() => expect(screen.getByText(/VIM - Vi IMproved/)).toBeInTheDocument())
+    await user.type(input, 'exit{Enter}')
+    await waitFor(() => expect(screen.getByText(/E492: Not an editor command: exit/)).toBeInTheDocument())
+    await user.type(input, ':q!{Enter}')
+    await waitFor(() => expect(screen.getByText(/you are free now/)).toBeInTheDocument())
+    // commands work again
+    await user.type(input, 'pwd{Enter}')
+    await waitFor(() => expect(screen.getByText('/home/zachary')).toBeInTheDocument())
+  })
+
   it('plain rm still works on files', async () => {
     const user = userEvent.setup()
     render(<WrappedTerminal />)
