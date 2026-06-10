@@ -65,7 +65,21 @@ export const themes = {
     destructive: "#f92672",
     border: "#3e3d32",
   },
+  phosphor: {
+    name: "Phosphor",
+    background: "#050f05",
+    foreground: "#c8facc",
+    card: "#0a1a0a",
+    primary: "#33ff66",
+    muted: "#4d805d",
+    accent: "#66ff99",
+    destructive: "#ff5555",
+    border: "#1a4d2a",
+  },
 } as const
+
+// Hidden theme: unlocked via the Konami code (see Terminal's keydown listener)
+export const HIDDEN_THEMES: readonly (keyof typeof themes)[] = ['phosphor']
 
 export type ThemeName = keyof typeof themes
 

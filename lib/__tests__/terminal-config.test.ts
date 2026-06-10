@@ -3,9 +3,10 @@ import { themes, fonts, GAME_NAMES, COMMAND_DESCRIPTIONS } from '@/lib/terminal-
 import { VALID_COMMANDS } from '@/components/terminal/types'
 
 describe('terminal-config', () => {
-  it('exports all 6 themes', () => {
-    expect(Object.keys(themes)).toHaveLength(6)
+  it('exports all 7 themes (6 visible + hidden phosphor)', () => {
+    expect(Object.keys(themes)).toHaveLength(7)
     expect(themes.midnight.name).toBe('Midnight')
+    expect(themes.phosphor.name).toBe('Phosphor')
   })
 
   it('exports all 6 fonts', () => {

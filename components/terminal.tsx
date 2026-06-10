@@ -9,7 +9,7 @@ import { VirtualFileSystem } from "@/lib/vfs"
 import dynamic from "next/dynamic"
 import { useState, useRef, useEffect } from "react"
 import type { TerminalLine } from "@/lib/types/terminal"
-import { themes, fonts, type ThemeName, type FontName } from "@/lib/terminal-config"
+import { themes, fonts, HIDDEN_THEMES, type ThemeName, type FontName } from "@/lib/terminal-config"
 import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
 import { useTerminalContext } from '@/lib/terminal-context'
 import { createDefaultRegistry, executeCommand, type ExecuteContext } from '@/lib/commands'
@@ -214,6 +214,29 @@ export function Terminal() {
 
   const [showPalette, setShowPalette] = useState(false)
   const [editorTrap, setEditorTrap] = useState(false)
+
+  // Konami code unlocks the hidden phosphor theme (persisted across visits)
+  const [phosphorUnlocked, setPhosphorUnlocked] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false
+    return localStorage.getItem("phosphor-unlocked") === "true"
+  })
+
+  useEffect(() => {
+    const KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"]
+    let progress = 0
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      const key = e.key.toLowerCase()
+      progress = key === KONAMI[progress] ? progress + 1 : key === KONAMI[0] ? 1 : 0
+      if (progress === KONAMI.length) {
+        progress = 0
+        setPhosphorUnlocked(true)
+        localStorage.setItem("phosphor-unlocked", "true")
+        setHistory((prev) => [...prev, { type: "success", content: "*** PHOSPHOR MODE UNLOCKED — try `theme phosphor` ***" }])
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
 
   const handleCommandPalette = () => setShowPalette(prev => !prev)
 
@@ -792,7 +815,12 @@ export function Terminal() {
     theme: {
       current: currentTheme,
       set: setTheme,
-      list: () => Object.keys(themes) as ThemeName[],
+      // Hidden themes stay out of the list (and thus out of `theme <name>`
+      // validation and completion) until unlocked via the Konami code
+      list: () =>
+        (Object.keys(themes) as ThemeName[]).filter(
+          (t) => !HIDDEN_THEMES.includes(t) || phosphorUnlocked
+        ),
       config: (name) => themes[name],
     },
     font: {

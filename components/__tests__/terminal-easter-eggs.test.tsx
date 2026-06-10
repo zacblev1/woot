@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Terminal } from '../terminal'
 import { TerminalContextProvider } from '@/lib/terminal-context'
@@ -83,6 +83,27 @@ describe('terminal easter eggs', () => {
     // commands work again
     await user.type(input, 'pwd{Enter}')
     await waitFor(() => expect(screen.getByText('/home/zachary')).toBeInTheDocument())
+  })
+
+  describe('konami / phosphor', () => {
+    const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
+
+    it('phosphor is hidden from the theme list before unlock', async () => {
+      const user = userEvent.setup()
+      render(<WrappedTerminal />)
+      await user.type(screen.getByRole('textbox'), 'theme{Enter}')
+      await waitFor(() => expect(screen.getByText('Available themes:')).toBeInTheDocument())
+      expect(screen.queryByText(/phosphor/)).not.toBeInTheDocument()
+    })
+
+    it('konami code unlocks phosphor', async () => {
+      const user = userEvent.setup()
+      render(<WrappedTerminal />)
+      for (const key of KONAMI) fireEvent.keyDown(window, { key })
+      await waitFor(() => expect(screen.getByText(/PHOSPHOR MODE UNLOCKED/)).toBeInTheDocument())
+      await user.type(screen.getByRole('textbox'), 'theme phosphor{Enter}')
+      await waitFor(() => expect(screen.getByText('Theme set to Phosphor')).toBeInTheDocument())
+    })
   })
 
   it('plain rm still works on files', async () => {
