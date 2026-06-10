@@ -101,8 +101,8 @@ describe('grep', () => {
   it('-v inverts the match', () => {
     expect(grepCommand.execute(['-v', 'bravo'], ctx(LINES))).toEqual({ success: true, output: ['alpha', 'charlie', ''] })
   })
-  it('reports no matches', () => {
-    expect(grepCommand.execute(['zz'], ctx(LINES))).toEqual({ success: true, output: 'grep: no matches' })
+  it('returns empty output on no matches (pipeline-safe, like real grep)', () => {
+    expect(grepCommand.execute(['zz'], ctx(LINES))).toEqual({ success: true, output: [] })
   })
   it('is marked as a filter', () => {
     expect(grepCommand.filter).toBe(true)
@@ -165,9 +165,9 @@ export const grepCommand: CommandDefinition = {
     const invert = args.includes('-v')
     const pattern = args.filter((a) => a !== '-v').join(' ').toLowerCase()
     if (!pattern) return error('Usage: grep <pattern>')
-    const matched = context.stdin!.filter((l) => l.toLowerCase().includes(pattern) !== invert)
-    if (matched.length === 0) return success('grep: no matches')
-    return success(matched)
+    // Empty output on no matches (like real grep) so pipelines stay correct:
+    // `ls | grep zzz | wc` must report 0, not count an error message.
+    return success(context.stdin!.filter((l) => l.toLowerCase().includes(pattern) !== invert))
   },
 }
 

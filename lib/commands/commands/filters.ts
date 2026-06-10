@@ -17,9 +17,9 @@ export const grepCommand: CommandDefinition = {
     const invert = args.includes('-v')
     const pattern = args.filter((a) => a !== '-v').join(' ').toLowerCase()
     if (!pattern) return error('Usage: grep <pattern>')
-    const matched = context.stdin!.filter((l) => l.toLowerCase().includes(pattern) !== invert)
-    if (matched.length === 0) return success('grep: no matches')
-    return success(matched)
+    // Empty output on no matches (like real grep) so pipelines stay correct:
+    // `ls | grep zzz | wc` must report 0, not count an error message.
+    return success(context.stdin!.filter((l) => l.toLowerCase().includes(pattern) !== invert))
   },
 }
 
@@ -32,8 +32,8 @@ function sliceCommand(name: 'head' | 'tail'): CommandDefinition {
     execute: (args, context) => {
       const missing = requireStdin(name, context.stdin, `notes | ${name} 5`)
       if (missing) return missing
+      if (args[0] !== undefined && !/^\d+$/.test(args[0])) return error(`${name}: invalid count: ${args[0]}`)
       const n = args[0] === undefined ? 10 : parseInt(args[0], 10)
-      if (Number.isNaN(n) || n < 0) return error(`${name}: invalid count: ${args[0]}`)
       const lines = context.stdin!
       return success(name === 'head' ? lines.slice(0, n) : lines.slice(Math.max(0, lines.length - n)))
     },
@@ -63,7 +63,7 @@ export const sortCommand: CommandDefinition = {
   execute: (args, context) => {
     const missing = requireStdin('sort', context.stdin, 'ls | sort')
     if (missing) return missing
-    const sorted = [...context.stdin!].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    const sorted = [...context.stdin!].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
     return success(args.includes('-r') ? sorted.reverse() : sorted)
   },
 }
