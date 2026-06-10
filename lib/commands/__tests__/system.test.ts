@@ -6,6 +6,7 @@ import {
   echoCommand,
   exitCommand,
   sudoCommand,
+  historyCommand,
 } from '../commands/system'
 import type { ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
@@ -270,5 +271,19 @@ describe('sudoCommand', () => {
     expect(result1.success).toBe(false)
     expect(result2.success).toBe(false)
     expect(result3.success).toBe(false)
+  })
+})
+
+describe('historyCommand', () => {
+  it('lists numbered commands oldest-first', () => {
+    const context = createMockContext()
+    context.history.commands = () => ['ls', 'cd books', 'view dune']
+    expect(historyCommand.execute([], context)).toEqual({
+      success: true,
+      output: ['', '    1  ls', '    2  cd books', '    3  view dune', ''],
+    })
+  })
+  it('reports empty history', () => {
+    expect(historyCommand.execute([], createMockContext())).toEqual({ success: true, output: 'history: no commands yet' })
   })
 })

@@ -65,6 +65,7 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.exitCommand)
   registry.register(commands.sudoCommand)
   registry.register(commands.soundCommand)
+  registry.register(commands.historyCommand)
 
   // Filters
   registry.register(commands.grepCommand)

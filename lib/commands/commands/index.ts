@@ -48,6 +48,7 @@ export {
   echoCommand,
   exitCommand,
   sudoCommand,
+  historyCommand,
 } from './system'
 
 // Filter commands

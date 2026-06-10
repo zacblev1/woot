@@ -109,3 +109,14 @@ export const soundCommand: CommandDefinition = {
     return success(`Sound effects: ${context.sound.enabled ? 'on' : 'off'}`)
   },
 }
+
+export const historyCommand: CommandDefinition = {
+  name: 'history',
+  description: 'Show command history',
+  usage: 'history',
+  execute: (args, context) => {
+    const commands = context.history.commands()
+    if (commands.length === 0) return success('history: no commands yet')
+    return success(['', ...commands.map((c, i) => `${String(i + 1).padStart(5, ' ')}  ${c}`), ''])
+  },
+}
