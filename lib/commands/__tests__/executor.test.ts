@@ -1,8 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { executeCommand } from '../executor'
-import { CommandRegistry } from '../registry'
+import { CommandRegistry, createRegistry } from '../registry'
 import type { CommandDefinition, ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
+import { grepCommand, wcCommand } from '../commands/filters'
+import { success as ok } from '../types'
 
 /**
  * Create a mock ExecuteContext for testing.
@@ -263,5 +265,59 @@ describe('executeCommand', () => {
 
       expect(result).toEqual(errorResult)
     })
+  })
+})
+
+describe('pipelines', () => {
+  function pipeRegistry() {
+    const registry = createRegistry()
+    registry.register({ name: 'emit', description: '', usage: '', execute: () => ok(['one', 'two', 'three']) })
+    registry.register({
+      name: 'rich', description: '', usage: '',
+      execute: () => ok([{ type: 'success', content: 'Dune' }, { type: 'output', content: '    by Frank Herbert' }]),
+    })
+    registry.register(grepCommand)
+    registry.register(wcCommand)
+    return registry
+  }
+
+  it('pipes output lines into a filter', () => {
+    const result = executeCommand('emit | grep t', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: true, output: ['two', 'three'] })
+  })
+
+  it('chains multiple stages', () => {
+    const result = executeCommand('emit | grep t | wc', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: true, output: '2' })
+  })
+
+  it('a no-match grep stage yields zero through wc', () => {
+    const result = executeCommand('emit | grep zzz | wc', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: true, output: '0' })
+  })
+
+  it('flattens TerminalLine output to content strings', () => {
+    const result = executeCommand('rich | grep frank', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: true, output: ['    by Frank Herbert'] })
+  })
+
+  it('rejects non-filter commands after a pipe', () => {
+    const result = executeCommand('emit | emit', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: false, error: 'emit: not a filter command' })
+  })
+
+  it('reports unknown commands after a pipe', () => {
+    const result = executeCommand('emit | nope', createMockContext(), pipeRegistry())
+    expect(result).toEqual({ success: false, error: 'command not found: nope' })
+  })
+
+  it('propagates a first-stage error without running filters', () => {
+    const registry = pipeRegistry()
+    registry.register({ name: 'boom', description: '', usage: '', execute: () => ({ success: false, error: 'boom failed' }) })
+    expect(executeCommand('boom | wc', createMockContext(), registry)).toEqual({ success: false, error: 'boom failed' })
+  })
+
+  it('rejects empty pipe segments', () => {
+    expect(executeCommand('emit | | wc', createMockContext(), pipeRegistry())).toEqual({ success: false, error: 'syntax error near unexpected token `|`' })
   })
 })
