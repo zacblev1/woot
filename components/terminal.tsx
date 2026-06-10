@@ -55,6 +55,32 @@ const initialHistory: TerminalLine[] = [
 // state through the ExecuteContext built per invocation.
 const commandRegistry = createDefaultRegistry()
 
+// `sl`: the classic punishment for mistyping `ls`
+const TRAIN_FRAME = [
+  '      ====        ________                ___________',
+  '  _D _|  |_______/        \\__I_I_____===__|_________|',
+  '   |(_)---  |   H\\________/ |   |        =|___ ___|  ',
+  '   /     |  |   H  |  |     |   |         ||_| |_||  ',
+  '  |      |  |   H  |__--------------------| [___] |  ',
+  '  | ________|___H__/__|_____/[][]~\\_______|       |  ',
+  '  |/ |   |-----------I_____I [][] []  D   |=======|__',
+  '__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__',
+  ' |/-=|___|=    ||    ||    ||    |_____/~\\___/        ',
+  '  \\_/      \\O=====O=====O=====O_/      \\_/            ',
+]
+
+const MELTDOWN_LINES: TerminalLine[] = [
+  { type: 'error', content: 'rm: removing /home ...' },
+  { type: 'error', content: 'rm: removing /usr ...' },
+  { type: 'error', content: 'rm: removing /bin ...' },
+  { type: 'error', content: 'rm: removing /boot ... wait' },
+  { type: 'error', content: 'rm: cannot remove /dev/regret: device busy' },
+  { type: 'error', content: 'segmentation fault (core dumped)' },
+  { type: 'error', content: '*** KERNEL PANIC — not syncing: VFS deleted while in use ***' },
+  { type: 'output', content: '' },
+  { type: 'success', content: 'just kidding. rebooting…' },
+]
+
 export function Terminal() {
   const [history, setHistory] = useState<TerminalLine[]>(initialHistory)
   const [input, setInput] = useState("")
@@ -790,6 +816,36 @@ export function Terminal() {
     },
   })
 
+  // Timed "script" playback for theatrical easter eggs (sl, rm -rf /).
+  // Reduced motion renders the whole script instantly.
+  const scriptTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const scriptLock = useRef(false)
+  useEffect(() => {
+    const timers = scriptTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const playScript = (lines: TerminalLine[], stepMs: number, onDone?: () => void) => {
+    const finish = () => {
+      scriptLock.current = false
+      onDone?.()
+    }
+    scriptLock.current = true
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setHistory((prev) => [...prev, ...lines])
+      finish()
+      return
+    }
+    lines.forEach((line, i) => {
+      scriptTimers.current.push(
+        setTimeout(() => {
+          setHistory((prev) => [...prev, line])
+          if (i === lines.length - 1) finish()
+        }, (i + 1) * stepMs)
+      )
+    })
+  }
+
   const handleCommand = (cmd: string) => {
     const trimmedCmd = cmd.trim()
     if (!trimmedCmd) return
@@ -812,6 +868,26 @@ export function Terminal() {
     }
 
     setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${expandedCmd}` }])
+
+    // Theatrical easter eggs: ignore input while a script is mid-performance
+    if (scriptLock.current) {
+      setInput("")
+      return
+    }
+
+    if (/^rm\s+(-rf|-fr)\s+\/\s*$/.test(expandedCmd)) {
+      playScript(MELTDOWN_LINES, 250, () => {
+        scriptTimers.current.push(setTimeout(() => setHistory(initialHistory), 1200))
+      })
+      setInput("")
+      return
+    }
+
+    if (expandedCmd === "sl") {
+      playScript(TRAIN_FRAME.map((content) => ({ type: "output" as const, content })), 120)
+      setInput("")
+      return
+    }
 
     if (gameState.active) {
       // Handle async suggest command separately
