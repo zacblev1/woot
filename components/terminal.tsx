@@ -963,6 +963,12 @@ export function Terminal() {
 
   const prompt = gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`
 
+  // Fish-style ghost suggestion: most recent history entry extending the input
+  const ghostSuggestion =
+    input.length > 0
+      ? [...commandHistory].reverse().find((c) => c.startsWith(input) && c !== input)
+      : undefined
+
   return (
     <div
       className="h-full w-full bg-background p-4 md:p-6 font-mono text-sm md:text-base cursor-text flex flex-col relative"
@@ -996,6 +1002,7 @@ export function Terminal() {
             onCommandPalette={handleCommandPalette}
             prompt={prompt}
             validCommands={gameState.active ? [] : [...VALID_COMMANDS]}
+            suggestion={ghostSuggestion}
           />
         </>
       )}

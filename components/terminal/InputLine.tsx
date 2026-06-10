@@ -28,6 +28,8 @@ export interface InputLineProps {
   prompt: string
   disabled?: boolean
   validCommands?: string[]
+  /** Full-command ghost suggestion from history; rendered dimmed beyond the cursor */
+  suggestion?: string
 }
 
 /**
@@ -60,6 +62,7 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
       prompt,
       disabled = false,
       validCommands = [...VALID_COMMANDS],
+      suggestion,
     } = props
 
     // Expose imperative methods
@@ -94,6 +97,18 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
     // Keyboard event handler
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       const key = e.key.toLowerCase()
+
+      if (
+        e.key === 'ArrowRight' &&
+        suggestion &&
+        suggestion.startsWith(value) &&
+        suggestion !== value &&
+        inputRef.current?.selectionStart === value.length
+      ) {
+        e.preventDefault()
+        onChange(suggestion)
+        return
+      }
 
       if (e.key === 'Enter') {
         onSubmit(value)
@@ -140,6 +155,9 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(
                 animation: 'cursor-blink 1s step-end infinite',
               }}
             />
+            {suggestion && suggestion.startsWith(value) && suggestion !== value && (
+              <span className="text-muted-foreground opacity-50">{suggestion.slice(value.length)}</span>
+            )}
           </div>
           {/* Actual input (transparent text) */}
           <input

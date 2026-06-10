@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { InputLine, type InputLineHandle, type InputLineProps } from '../InputLine'
 
@@ -329,6 +329,27 @@ describe('InputLine', () => {
       await user.type(input, 'a')
 
       expect(onChange).toHaveBeenCalledWith('a')
+    })
+  })
+
+  describe('ghost suggestion', () => {
+    it('renders the remainder of the suggestion dimmed', () => {
+      render(<InputLine {...createDefaultProps({ value: 'cd b', suggestion: 'cd books' })} />)
+      expect(screen.getByText('ooks')).toBeInTheDocument()
+    })
+
+    it('ArrowRight at end of input accepts the suggestion', () => {
+      const onChange = vi.fn()
+      render(<InputLine {...createDefaultProps({ value: 'cd b', suggestion: 'cd books', onChange })} />)
+      const input = screen.getByRole('textbox') as HTMLInputElement
+      input.setSelectionRange(4, 4)
+      fireEvent.keyDown(input, { key: 'ArrowRight' })
+      expect(onChange).toHaveBeenCalledWith('cd books')
+    })
+
+    it('renders nothing extra without a suggestion', () => {
+      render(<InputLine {...createDefaultProps({ value: 'cd b' })} />)
+      expect(screen.queryByText('ooks')).not.toBeInTheDocument()
     })
   })
 
