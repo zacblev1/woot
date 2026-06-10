@@ -69,8 +69,8 @@ without stdin).
   panic instantly without staged delays.
 - `vim` / `vi` / `nano`: enters a trapped mode (terminal-side, like game
   mode); all input answers with vim-style errors until `:q` / `:q!` exits.
-- `sl`: ASCII locomotive animation rendered as staged frames; static single
-  frame under reduced motion.
+- `sl`: ASCII locomotive revealed line-by-line (single frame); rendered
+  instantly under reduced motion.
 - `cowsay <text>`: speech-bubble cow, wraps text at ~40 cols.
 - Konami code (`↑↑↓↓←→←→ba` on the keydown listener): unlocks hidden
   `phosphor` theme (green-on-black CRT). Until unlocked it is absent from
@@ -199,7 +199,8 @@ migration. Index on `createdAt desc`.
 - **Help/man/completion:** every new visible command added to `help`, man
   pages, COMMAND_DESCRIPTIONS, VALID_COMMANDS, and completion. Hidden:
   `wall purge`, `phosphor` (pre-unlock), easter eggs (discoverable, not
-  listed — except `cowsay` which appears in man pages only).
+  listed — except `cowsay`, which is fully listed (help/man/completions):
+  it is harmless and fun enough to advertise.
 - **Reduced motion:** sl/meltdown/tour all degrade to instant/static.
 - **Sequencing:** A → B → C → D, one commit series per sub-project, full
   gate (lint 0/0, typecheck, tests, build) before each commit.

@@ -854,9 +854,11 @@ export function Terminal() {
     return () => timers.forEach(clearTimeout)
   }, [])
 
-  const playScript = (lines: TerminalLine[], stepMs: number, onDone?: () => void) => {
+  const playScript = (lines: TerminalLine[], stepMs: number, onDone?: () => void, holdLock = false) => {
+    // holdLock: the caller's onDone owns releasing scriptLock (e.g. the
+    // meltdown keeps input swallowed until the reboot actually happens)
     const finish = () => {
-      scriptLock.current = false
+      if (!holdLock) scriptLock.current = false
       onDone?.()
     }
     scriptLock.current = true
@@ -896,29 +898,16 @@ export function Terminal() {
       expandedCmd = target
     }
 
-    setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${expandedCmd}` }])
-
-    // Theatrical easter eggs: ignore input while a script is mid-performance
+    // Theatrical easter eggs: swallow input (without echo) while a script
+    // is mid-performance — keeps the train/meltdown art uninterrupted
     if (scriptLock.current) {
       setInput("")
       return
     }
 
-    if (/^rm\s+(-rf|-fr)\s+\/\s*$/.test(expandedCmd)) {
-      playScript(MELTDOWN_LINES, 250, () => {
-        scriptTimers.current.push(setTimeout(() => setHistory(initialHistory), 1200))
-      })
-      setInput("")
-      return
-    }
+    setHistory((prev) => [...prev, { type: "input", content: `${currentDirectory} $ ${expandedCmd}` }])
 
-    if (expandedCmd === "sl") {
-      playScript(TRAIN_FRAME.map((content) => ({ type: "output" as const, content })), 120)
-      setInput("")
-      return
-    }
-
-    // The vim trap: there is no editor here, only regret
+    // The vim trap traps everything — including the other easter eggs
     if (editorTrap) {
       if (/^:(q!?|wq|x)$/.test(expandedCmd)) {
         setEditorTrap(false)
@@ -933,7 +922,33 @@ export function Terminal() {
       return
     }
 
-    if (/^(vim|vi|nano|emacs)$/.test(expandedCmd)) {
+    // Easter eggs never hijack game input
+    if (!gameState.active && /^rm\s+(-rf|-fr)\s+\/\s*$/.test(expandedCmd)) {
+      playScript(
+        MELTDOWN_LINES,
+        250,
+        () => {
+          scriptTimers.current.push(
+            setTimeout(() => {
+              setHistory(initialHistory)
+              setEditorTrap(false)
+              scriptLock.current = false
+            }, 1200)
+          )
+        },
+        true
+      )
+      setInput("")
+      return
+    }
+
+    if (!gameState.active && expandedCmd === "sl") {
+      playScript(TRAIN_FRAME.map((content) => ({ type: "output" as const, content })), 120)
+      setInput("")
+      return
+    }
+
+    if (!gameState.active && /^(vim|vi|nano|emacs)$/.test(expandedCmd)) {
       setEditorTrap(true)
       setHistory((prev) => [
         ...prev,

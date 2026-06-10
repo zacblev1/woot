@@ -106,6 +106,46 @@ describe('terminal easter eggs', () => {
     })
   })
 
+  it('input typed during the meltdown is swallowed, not executed', async () => {
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'rm -rf /{Enter}')
+    // reduced motion: panic prints instantly, but the reboot timer is still pending
+    await waitFor(() => expect(screen.getByText(/KERNEL PANIC/)).toBeInTheDocument())
+    await user.type(input, 'cd books{Enter}')
+    // the reboot is signalled by the panic line being wiped from history
+    await waitFor(() => {
+      expect(screen.queryByText(/KERNEL PANIC/)).not.toBeInTheDocument()
+    }, { timeout: 3000 })
+    // the cd was swallowed: pwd shows home, not ~/books
+    await user.type(input, 'pwd{Enter}')
+    await waitFor(() => expect(screen.getByText('/home/zachary')).toBeInTheDocument())
+    expect(screen.queryByText('/home/zachary/books')).not.toBeInTheDocument()
+  })
+
+  it('easter eggs do not hijack input during a text game', async () => {
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'game number{Enter}')
+    await waitFor(() => expect(screen.getByText(/NUMBER GUESSING GAME/)).toBeInTheDocument())
+    await user.type(input, 'sl{Enter}')
+    // the train must not run mid-game; sl is just a (bad) guess
+    expect(screen.queryByText(/I_I_____===__/)).not.toBeInTheDocument()
+  })
+
+  it('the vim trap traps the other easter eggs too', async () => {
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'vim{Enter}')
+    await waitFor(() => expect(screen.getByText(/VIM - Vi IMproved/)).toBeInTheDocument())
+    await user.type(input, 'sl{Enter}')
+    await waitFor(() => expect(screen.getByText('E492: Not an editor command: sl')).toBeInTheDocument())
+    expect(screen.queryByText(/I_I_____===__/)).not.toBeInTheDocument()
+  })
+
   it('plain rm still works on files', async () => {
     const user = userEvent.setup()
     render(<WrappedTerminal />)
