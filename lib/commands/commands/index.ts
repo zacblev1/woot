@@ -60,5 +60,8 @@ export {
   sortCommand,
 } from './filters'
 
+// Fun commands
+export { cowsayCommand } from './fun'
+
 // Game command
 export { gameCommand, VALID_GAMES } from './game'

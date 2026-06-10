@@ -74,6 +74,9 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.wcCommand)
   registry.register(commands.sortCommand)
 
+  // Fun
+  registry.register(commands.cowsayCommand)
+
   // Game
   registry.register(commands.gameCommand)
 
