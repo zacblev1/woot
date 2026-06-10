@@ -66,6 +66,13 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.sudoCommand)
   registry.register(commands.soundCommand)
 
+  // Filters
+  registry.register(commands.grepCommand)
+  registry.register(commands.headCommand)
+  registry.register(commands.tailCommand)
+  registry.register(commands.wcCommand)
+  registry.register(commands.sortCommand)
+
   // Game
   registry.register(commands.gameCommand)
 

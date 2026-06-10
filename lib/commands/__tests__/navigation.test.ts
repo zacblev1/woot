@@ -41,6 +41,7 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     history: {
       add: () => {},
       clear: () => {},
+      commands: () => [],
     },
     game: {
       start: () => {},

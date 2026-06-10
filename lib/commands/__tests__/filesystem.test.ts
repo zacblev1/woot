@@ -21,6 +21,7 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
     history: {
       add: vi.fn(),
       clear: vi.fn(),
+      commands: () => [],
     },
     game: {
       start: vi.fn(),

@@ -18,6 +18,7 @@ function createMockContext(): ExecuteContext {
     history: {
       add: vi.fn(),
       clear: vi.fn(),
+      commands: () => [],
     },
     game: {
       start: vi.fn(),

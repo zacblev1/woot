@@ -36,7 +36,11 @@ export interface ExecuteContext {
   history: {
     add: (line: TerminalLine) => void
     clear: () => void
+    /** Submitted command strings, oldest first (for `history` and `!!`). */
+    commands: () => string[]
   }
+  /** Lines piped from the previous pipeline stage (filter commands only). */
+  stdin?: string[]
   game: {
     /**
      * Start a game. Returns the intro text for text-based games
@@ -112,6 +116,8 @@ export interface CommandDefinition {
   name: string
   description: string
   usage: string
+  /** Filter commands consume context.stdin and may appear after a `|`. */
+  filter?: boolean
   execute: (args: string[], context: ExecuteContext) => import('@/lib/types/terminal').CommandResult
 }
 

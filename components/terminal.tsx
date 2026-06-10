@@ -746,6 +746,7 @@ export function Terminal() {
     history: {
       add: (line) => setHistory((prev) => [...prev, line]),
       clear: () => setHistory(initialHistory),
+      commands: () => commandHistory,
     },
     game: {
       start: (type) => {

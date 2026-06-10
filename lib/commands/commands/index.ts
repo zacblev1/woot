@@ -50,5 +50,14 @@ export {
   sudoCommand,
 } from './system'
 
+// Filter commands
+export {
+  grepCommand,
+  headCommand,
+  tailCommand,
+  wcCommand,
+  sortCommand,
+} from './filters'
+
 // Game command
 export { gameCommand, VALID_GAMES } from './game'
