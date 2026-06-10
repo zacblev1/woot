@@ -54,6 +54,13 @@ export const VALID_COMMANDS = [
   'echo',
   'exit',
   'sudo',
+  'grep',
+  'head',
+  'tail',
+  'wc',
+  'sort',
+  'history',
+  'cowsay',
 ] as const
 
 // Header keywords for highlightLine

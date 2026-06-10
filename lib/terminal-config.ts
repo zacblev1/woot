@@ -103,6 +103,13 @@ export type FontConfig = typeof fonts[FontName]
 export const GAME_NAMES = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'] as const
 
 export const COMMAND_DESCRIPTIONS: Record<string, string> = {
+  grep: 'Filter piped lines by substring',
+  head: 'First n piped lines',
+  tail: 'Last n piped lines',
+  wc: 'Count piped lines',
+  sort: 'Sort piped lines',
+  history: 'Show command history',
+  cowsay: 'A cow says things',
   ls: 'List directory contents',
   cd: 'Change directory',
   pwd: 'Print working directory',
