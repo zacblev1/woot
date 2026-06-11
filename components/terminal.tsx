@@ -48,6 +48,7 @@ const initialHistory: TerminalLine[] = [
   { type: "output", content: "developer  ·  collector  ·  gamer", centered: true },
   { type: "output", content: "" },
   { type: "output", content: "Type 'help' for available commands or Ctrl+K to search.", centered: true },
+  { type: "output", content: "Type 'tour' for a guided demo.", centered: true },
   { type: "output", content: "" },
 ]
 
@@ -80,6 +81,46 @@ const MELTDOWN_LINES: TerminalLine[] = [
   { type: 'output', content: '' },
   { type: 'success', content: 'just kidding. rebooting…' },
 ]
+
+interface TourStep {
+  narrate?: string[]
+  type?: string
+}
+
+// Guided demo: narration lines, then a command typed and executed for real.
+// Closing narration will gain a `wall` line when the guestbook ships.
+const TOUR_STEPS: TourStep[] = [
+  { narrate: ["", "*** GUIDED TOUR ***", "Sit back — I'll drive. Press any key to take over.", ""] },
+  { narrate: ["Everything here is a command. help lists them:"], type: "help" },
+  { narrate: ["Collections are directories. The books live in ~/books:"], type: "cd books" },
+  { type: "ls" },
+  { narrate: ["view pretty-prints any file:"], type: "view pulp" },
+  { narrate: ["Vinyl works the same way:"], type: "cd ~/vinyl" },
+  { narrate: ["search digs through the current collection:"], type: "search police" },
+  { narrate: ["stats charts all of it:"], type: "stats" },
+  { narrate: ["And there are games. Real ones:"], type: "game" },
+  {
+    narrate: [
+      "",
+      "That's the tour. A few things to try:",
+      "  theme        change the look (rumor: a code unlocks an extra one)",
+      "  game tron    light cycles",
+      "  Ctrl+K       fuzzy command palette",
+      "",
+      "The terminal is yours.",
+      "",
+    ],
+  },
+]
+
+const TOUR_TYPE_MS = 40
+const TOUR_STEP_PAUSE_MS = 900
+const TOUR_PRE_TYPE_MS = 600
+const TOUR_POST_TYPE_MS = 250
+// Reduced motion still needs a real (if tiny) pause between steps: each
+// command must see the previous one's state, which lands via a re-render +
+// effect — a 0ms timer can race ahead of React's own scheduled work.
+const TOUR_REDUCED_STEP_MS = 50
 
 export function Terminal() {
   const [history, setHistory] = useState<TerminalLine[]>(initialHistory)
@@ -877,9 +918,46 @@ export function Terminal() {
     })
   }
 
-  const handleCommand = (cmd: string) => {
+  // --- tour: data-driven guided demo ---
+  const [isTouring, setIsTouring] = useState(false)
+  const tourActive = useRef(false)
+  const tourTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  useEffect(() => {
+    const timers = tourTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const tourDelay = (ms: number) =>
+    new Promise<void>((resolve) => tourTimers.current.push(setTimeout(resolve, ms)))
+
+  const stopTour = (aborted: boolean) => {
+    tourActive.current = false
+    setIsTouring(false)
+    tourTimers.current.forEach(clearTimeout)
+    tourTimers.current = []
+    setInput("")
+    if (aborted) {
+      setHistory((prev) => [...prev, { type: "success", content: "(tour ended — the terminal is yours)" }])
+    }
+  }
+
+  // Any keypress while the tour is driving hands control back to the user
+  useEffect(() => {
+    if (!isTouring) return
+    const abort = () => stopTour(true)
+    window.addEventListener("keydown", abort)
+    return () => window.removeEventListener("keydown", abort)
+  }, [isTouring]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCommand = (cmd: string, opts?: { fromTour?: boolean }) => {
     const trimmedCmd = cmd.trim()
     if (!trimmedCmd) return
+
+    // A user-submitted command while the tour is driving = taking over
+    if (tourActive.current && !opts?.fromTour) {
+      stopTour(true)
+      return
+    }
 
     // bash-style history expansion: `!!` = previous command, `!n` = nth
     let expandedCmd = trimmedCmd
@@ -1012,6 +1090,8 @@ export function Terminal() {
     // `suggest` runs an async interactive flow owned by the terminal
     if (cmd_lower === "suggest") {
       appendCommandOutput(startSuggestCommand())
+    } else if (cmd_lower === "tour") {
+      void startTour()
     } else {
       const result = executeCommand(expandedCmd, buildExecuteContext(), commandRegistry)
       if (result.success) {
@@ -1041,6 +1121,41 @@ export function Terminal() {
   useEffect(() => {
     handleCommandRef.current = handleCommand
   })
+
+  const startTour = async () => {
+    if (tourActive.current) return
+    tourActive.current = true
+    setIsTouring(true)
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    for (const step of TOUR_STEPS) {
+      if (!tourActive.current) return
+      for (const line of step.narrate ?? []) {
+        setHistory((prev) => [...prev, { type: "success", content: line }])
+      }
+      if (step.type) {
+        const command = step.type
+        if (reduced) {
+          await tourDelay(TOUR_REDUCED_STEP_MS) // let the previous command's state land
+          if (!tourActive.current) return
+          handleCommandRef.current(command, { fromTour: true })
+        } else {
+          await tourDelay(TOUR_PRE_TYPE_MS)
+          for (let i = 1; i <= command.length; i++) {
+            if (!tourActive.current) return
+            setInput(command.slice(0, i))
+            await tourDelay(TOUR_TYPE_MS)
+          }
+          if (!tourActive.current) return
+          await tourDelay(TOUR_POST_TYPE_MS)
+          if (!tourActive.current) return
+          handleCommandRef.current(command, { fromTour: true })
+        }
+      }
+      if (!reduced) await tourDelay(TOUR_STEP_PAUSE_MS)
+    }
+    tourActive.current = false
+    setIsTouring(false)
+  }
 
   // Shareable deep links: /?cmd=ls%20~/books runs the command(s) on load.
   // Deferred to a macrotask so execution happens outside the effect body and
