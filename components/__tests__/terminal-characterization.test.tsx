@@ -241,7 +241,8 @@ describe('Terminal - Characterization Tests', () => {
       await user.type(input, 'game wordle{Enter}')
 
       await waitFor(() => {
-        expect(screen.getByText('WORDLE')).toBeInTheDocument()
+        // daily mode titles the round with the date
+        expect(screen.getByText(/WORDLE — daily \d{4}-\d{2}-\d{2}/)).toBeInTheDocument()
       })
     })
 

@@ -47,7 +47,7 @@ export interface ExecuteContext {
      * (the terminal owns the game state machine); canvas games
      * return nothing and take over the UI.
      */
-    start: (type: GameType) => import('@/lib/types/terminal').CommandOutput | void
+    start: (type: GameType, args?: string[]) => import('@/lib/types/terminal').CommandOutput | void
     end: () => void
     isActive: () => boolean
   }

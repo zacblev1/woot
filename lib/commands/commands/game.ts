@@ -29,8 +29,12 @@ export const gameCommand: CommandDefinition = {
       return error(`Unknown game: ${gameType}`)
     }
 
+    if (gameType === 'wordle' && args[1] && args[1] !== 'practice') {
+      return error(`game: unknown wordle mode '${args[1]}' (try: game wordle practice)`)
+    }
+
     // Start the game via context; text games return their intro text
-    const startOutput = context.game.start(gameType)
+    const startOutput = context.game.start(gameType, args.slice(1))
 
     // Canvas games return empty (UI takes over), others return empty success - GameController handles the start message
     if (gameType === 'tron' || gameType === 'pacman' || gameType === 'basketball') {

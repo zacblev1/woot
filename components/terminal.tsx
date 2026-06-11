@@ -15,6 +15,7 @@ import { useTerminalContext } from '@/lib/terminal-context'
 import { createDefaultRegistry, executeCommand, type ExecuteContext } from '@/lib/commands'
 import type { CommandOutput } from '@/lib/types/terminal'
 import { useSound } from '@/lib/hooks/useSound'
+import { dailyWord, localDateString, emojiGrid, updateStreak, type StreakRecord } from '@/components/games/wordle-game/daily'
 import { useIdleTimer } from '@/lib/hooks/useIdleTimer'
 import { Screensaver } from '@/components/screensaver'
 import { CommandPalette } from '@/components/command-palette'
@@ -425,12 +426,58 @@ export function Terminal() {
     "radar", "space", "train", "unity", "voice", "world", "youth", "blaze", "cloud", "drift"
   ]
 
-  const startWordleGame = () => {
-    const word = wordleWords[Math.floor(Math.random() * wordleWords.length)]
-    setGameState({ active: true, type: "wordle", data: { word, attempts: 0, maxAttempts: 6, guesses: [] } })
+  const WORDLE_STREAK_KEY = "wordle-streak"
+  const WORDLE_DAILY_KEY = "wordle-daily"
+
+  interface DailyRecord {
+    date: string
+    rows: string[]
+    won: boolean
+    attempts: number
+  }
+
+  const readJSON = <T,>(key: string): T | null => {
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? (JSON.parse(raw) as T) : null
+    } catch {
+      return null
+    }
+  }
+
+  const startWordleGame = (gameArgs?: string[]) => {
+    const practice = gameArgs?.[0] === "practice"
+    const today = localDateString()
+
+    if (!practice) {
+      const record = readJSON<DailyRecord>(WORDLE_DAILY_KEY)
+      if (record?.date === today) {
+        const streak = readJSON<StreakRecord>(WORDLE_STREAK_KEY) ?? { lastWinDate: null, streak: 0 }
+        return [
+          "",
+          record.won
+            ? `Already solved today's wordle (${record.attempts}/6).`
+            : "Already played today's wordle.",
+          ...emojiGrid(record.rows),
+          `Streak: ${streak.streak} day${streak.streak === 1 ? "" : "s"}`,
+          "",
+          "Come back tomorrow, or try 'game wordle practice'.",
+          "",
+        ]
+      }
+    }
+
+    const word = practice
+      ? wordleWords[Math.floor(Math.random() * wordleWords.length)]
+      : dailyWord(today)
+    setGameState({
+      active: true,
+      type: "wordle",
+      data: { word, attempts: 0, maxAttempts: 6, guesses: [], mode: practice ? "practice" : "daily", dateStr: today },
+    })
     return [
       "",
-      "WORDLE",
+      practice ? "WORDLE (practice)" : `WORDLE — daily ${today}`,
       "Guess the 5-letter word in 6 tries.",
       "",
       "  GREEN  = correct position",
@@ -454,10 +501,28 @@ export function Terminal() {
       return "Enter a 5-letter word."
     }
 
-    const data = gameState.data as { word: string; attempts: number; maxAttempts: number; guesses: string[] }
+    const data = gameState.data as { word: string; attempts: number; maxAttempts: number; guesses: string[]; mode?: string; dateStr?: string }
     const word = data.word
     const attempts = data.attempts + 1
     const guesses = [...data.guesses]
+
+    // Daily mode: persist the completion, update the streak on a win, and
+    // append the shareable emoji grid + streak to the final output.
+    const finishDaily = (won: boolean, rows: string[]): string[] => {
+      if (data.mode !== "daily") return []
+      const dateStr = data.dateStr ?? localDateString()
+      localStorage.setItem(WORDLE_DAILY_KEY, JSON.stringify({ date: dateStr, rows, won, attempts }))
+      let streak = readJSON<StreakRecord>(WORDLE_STREAK_KEY) ?? { lastWinDate: null, streak: 0 }
+      if (won) {
+        streak = updateStreak(streak, dateStr)
+        localStorage.setItem(WORDLE_STREAK_KEY, JSON.stringify(streak))
+      }
+      return [
+        `Wordle ${dateStr} ${won ? `${attempts}/6` : "X/6"}`,
+        ...emojiGrid(rows),
+        `Streak: ${streak.streak} day${streak.streak === 1 ? "" : "s"}`,
+      ]
+    }
 
     // Build result
     const wordArr = word.split("")
@@ -498,6 +563,7 @@ export function Terminal() {
         wordleResult,
         "",
         `You got it in ${attempts}/${data.maxAttempts}!`,
+        ...finishDaily(true, guesses),
         "",
       ]
     }
@@ -508,6 +574,7 @@ export function Terminal() {
         wordleResult,
         "",
         `Game over. The word was: ${word.toUpperCase()}`,
+        ...finishDaily(false, guesses),
         "",
       ]
     }
@@ -840,9 +907,9 @@ export function Terminal() {
       commands: () => commandHistory,
     },
     game: {
-      start: (type) => {
+      start: (type, gameArgs) => {
         if (type === "number") return startNumberGame()
-        if (type === "wordle") return startWordleGame()
+        if (type === "wordle") return startWordleGame(gameArgs)
         if (type === "trivia") return startTriviaGame()
         if (type === "blackjack") return startBlackjackGame()
         if (type === "rps") return startRPSGame()

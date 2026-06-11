@@ -95,49 +95,49 @@ describe('gameCommand', () => {
     const context = createMockContext()
     await gameCommand.execute(['number'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('number')
+    expect(context.game.start).toHaveBeenCalledWith('number', [])
   })
 
   it('starts wordle game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['wordle'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('wordle')
+    expect(context.game.start).toHaveBeenCalledWith('wordle', [])
   })
 
   it('starts trivia game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['trivia'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('trivia')
+    expect(context.game.start).toHaveBeenCalledWith('trivia', [])
   })
 
   it('starts blackjack game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['blackjack'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('blackjack')
+    expect(context.game.start).toHaveBeenCalledWith('blackjack', [])
   })
 
   it('starts rps game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['rps'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('rps')
+    expect(context.game.start).toHaveBeenCalledWith('rps', [])
   })
 
   it('starts tron game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['tron'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('tron')
+    expect(context.game.start).toHaveBeenCalledWith('tron', [])
   })
 
   it('starts pacman game via context.game.start()', async () => {
     const context = createMockContext()
     await gameCommand.execute(['pacman'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('pacman')
+    expect(context.game.start).toHaveBeenCalledWith('pacman', [])
   })
 
   it('returns error for unknown game type', async () => {
@@ -185,14 +185,14 @@ describe('gameCommand', () => {
     const context = createMockContext()
     await gameCommand.execute(['NUMBER'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('number')
+    expect(context.game.start).toHaveBeenCalledWith('number', [])
   })
 
   it('handles mixed case game names', async () => {
     const context = createMockContext()
     await gameCommand.execute(['Wordle'], context)
 
-    expect(context.game.start).toHaveBeenCalledWith('wordle')
+    expect(context.game.start).toHaveBeenCalledWith('wordle', [])
   })
 
   it('exports VALID_GAMES array', async () => {
