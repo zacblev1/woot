@@ -266,7 +266,7 @@ describe('getCompletions - game completion', () => {
 
     const completions = getCompletions('game ', registry, context)
 
-    expect(completions).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'])
+    expect(completions).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball', 'typespeed'])
   })
 
   it('returns filtered games for partial "game w"', async () => {
@@ -284,7 +284,7 @@ describe('getCompletions - game completion', () => {
 
     const completions = getCompletions('game t', registry, context)
 
-    expect(completions).toEqual(['trivia', 'tron'])
+    expect(completions).toEqual(['trivia', 'tron', 'typespeed'])
   })
 
   it('returns filtered games for partial "game b"', async () => {

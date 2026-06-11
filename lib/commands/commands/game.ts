@@ -1,7 +1,7 @@
 import type { CommandDefinition, GameType } from '../types'
 import { success, error } from '../types'
 
-const VALID_GAMES: GameType[] = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball']
+const VALID_GAMES: GameType[] = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball', 'typespeed']
 
 export const gameCommand: CommandDefinition = {
   name: 'game',
@@ -21,6 +21,7 @@ export const gameCommand: CommandDefinition = {
         '  game tron        Light Cycle Arcade Game',
         '  game pacman      Classic Maze Chase',
         '  game basketball  Arcade Hoops',
+        '  game typespeed   How fast can you type?',
         '',
       ])
     }

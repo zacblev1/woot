@@ -16,6 +16,7 @@ import { createDefaultRegistry, executeCommand, type ExecuteContext } from '@/li
 import type { CommandOutput } from '@/lib/types/terminal'
 import { useSound } from '@/lib/hooks/useSound'
 import { dailyWord, localDateString, emojiGrid, updateStreak, type StreakRecord } from '@/components/games/wordle-game/daily'
+import { pickSentences, wpm, accuracy, submittedScore, type RoundResult } from '@/components/games/typespeed-game'
 import { useIdleTimer } from '@/lib/hooks/useIdleTimer'
 import { Screensaver } from '@/components/screensaver'
 import { CommandPalette } from '@/components/command-palette'
@@ -34,7 +35,7 @@ const BasketballGame = dynamic(() => import("@/components/games/basketball-game"
 
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -193,7 +194,7 @@ export function Terminal() {
 
     // Populate games
     const gamesDir = fs.createDir("/home/zachary/games")
-    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron"]
+    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron", "pacman", "basketball", "typespeed", "snake"]
     games.forEach(g => {
       if (gamesDir.children) {
         gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
@@ -818,6 +819,95 @@ export function Terminal() {
     ]
   }
 
+  const startTypespeedGame = () => {
+    const sentences = pickSentences(Date.now())
+    setGameState({
+      active: true,
+      type: "typespeed",
+      data: { sentences, round: 0, results: [] as RoundResult[], startedAt: Date.now(), phase: "typing" },
+    })
+    return [
+      "",
+      "TYPESPEED",
+      "Type each sentence exactly, then press Enter. 3 rounds.",
+      "Type 'quit' to exit.",
+      "",
+      `[1/3] ${sentences[0]}`,
+      "",
+    ]
+  }
+
+  const handleTypespeedGame = (typed: string): string | string[] => {
+    const data = gameState.data as {
+      sentences: string[]
+      round: number
+      results: RoundResult[]
+      startedAt: number
+      phase: "typing" | "initials"
+    }
+
+    if (typed.toLowerCase().trim() === "quit") {
+      setGameState({ active: false, type: null })
+      return "Typespeed ended."
+    }
+
+    if (data.phase === "initials") {
+      const entry = typed.trim()
+      if (entry.toLowerCase() === "skip") {
+        setGameState({ active: false, type: null })
+        return ["Maybe next time.", ""]
+      }
+      if (!/^[a-zA-Z0-9]{1,3}$/.test(entry)) {
+        return "Initials must be 1-3 letters/digits (or 'skip')."
+      }
+      const score = submittedScore(data.results)
+      setGameState({ active: false, type: null })
+      fetch("/api/scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameType: "typespeed", initials: entry.toUpperCase(), score, level: 1 }),
+      })
+        .then((response) => {
+          setHistory((prev) => [
+            ...prev,
+            response.ok
+              ? { type: "success", content: "Score posted. See it with 'highscores typespeed'." }
+              : { type: "error", content: "Could not post the score (scoreboard offline?)." },
+          ])
+        })
+        .catch(() => {
+          setHistory((prev) => [...prev, { type: "error", content: "Could not post the score (network error)." }])
+        })
+      return ""
+    }
+
+    const target = data.sentences[data.round]
+    const elapsed = Date.now() - data.startedAt
+    const roundWpm = wpm(typed.length, elapsed)
+    const roundAcc = accuracy(target, typed)
+    const results = [...data.results, { wpm: roundWpm, accuracy: roundAcc }]
+    const lines = [
+      `  WPM ${roundWpm.toFixed(1)}  ·  accuracy ${(roundAcc * 100).toFixed(0)}%`,
+      "",
+    ]
+
+    const nextRound = data.round + 1
+    if (nextRound < data.sentences.length) {
+      setGameState({ ...gameState, data: { ...data, round: nextRound, results, startedAt: Date.now() } })
+      return [...lines, `[${nextRound + 1}/3] ${data.sentences[nextRound]}`, ""]
+    }
+
+    const score = submittedScore(results)
+    setGameState({ ...gameState, data: { ...data, results, phase: "initials" } })
+    return [
+      ...lines,
+      `FINAL SCORE: ${score.toLocaleString("en-US")}  (avg WPM × accuracy × 100)`,
+      "",
+      "Enter 1-3 initials to post it to the leaderboard, or 'skip':",
+      "",
+    ]
+  }
+
   const startSuggestCommand = () => {
     setGameState({ active: true, type: "suggest" })
     return [
@@ -913,6 +1003,7 @@ export function Terminal() {
         if (type === "trivia") return startTriviaGame()
         if (type === "blackjack") return startBlackjackGame()
         if (type === "rps") return startRPSGame()
+        if (type === "typespeed") return startTypespeedGame()
         // Canvas games: UI takes over
         setGameState({ active: true, type })
         return []
@@ -1172,6 +1263,8 @@ export function Terminal() {
         result = handleBlackjackGame(expandedCmd)
       } else if (gameState.type === "rps") {
         result = handleRPSGame(expandedCmd)
+      } else if (gameState.type === "typespeed") {
+        result = handleTypespeedGame(expandedCmd)
       } else {
         result = "Error: Unknown game state"
       }
