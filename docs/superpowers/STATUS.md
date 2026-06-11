@@ -52,6 +52,23 @@ live presence, wall approval queue.
   required context fields means sweeping every mock (a scripted pass — see
   Plan A Task 1 Step 2 for the pattern).
 
+## Follow-up queue (bugs noticed en route — fix after the A→D slate)
+
+- **Stale-state race in `&&` chains (suspected, untested):** deep links
+  (`/?cmd=cd books && search dune`) and the command palette both run chained
+  parts synchronously through one render's `handleCommand` closure, so part 2
+  sees a stale `currentDirectory`. This is the exact race the tour hit (fixed
+  there with `TOUR_REDUCED_STEP_MS = 50`); these two paths still have it.
+  VFS-backed commands (`pwd`, `ls`) are immune (the VFS object mutates
+  synchronously) — only `currentDirectory`-dependent ones (`search`, `genre`,
+  `format`, `type`) misbehave. Repro: load `/?cmd=cd%20books%20%26%26%20search%20dune`.
+- **Key bar ↑/↓/Tab during tour fight the typewriter (cosmetic):** they edit
+  the input mid-animation instead of aborting like Esc/Ctrl+C do. Either make
+  every key-bar button abort the tour, or no-op the editing ones while touring.
+- **Data typos surfaced by `stats`:** `data/books.json` has genre
+  `"Philosohpy"` (charted as its own bar); `data/hardware.json` Mac Mini M4
+  lists `"21GB"` memory (M4 Pro ships 24GB — likely a typo).
+
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
