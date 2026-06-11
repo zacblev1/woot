@@ -1,0 +1,60 @@
+# Terminal Enhancements — Status & Pick-Up Guide
+
+_Last updated: 2026-06-10_
+
+## Where things stand
+
+The approved design is **`specs/2026-06-09-terminal-enhancements-design.md`**
+(four sub-projects, A→D). Build order, conventions, and per-feature detail
+all live there.
+
+| Sub-project | Status | Plan | Commits |
+|---|---|---|---|
+| **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
+| **B — First-visit & mobile** (tour, mobile key bar, stats) | ⬜ Not started | _none yet_ | — |
+| **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ⬜ Not started | _none yet_ | — |
+| **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
+
+Deliberately deferred (see spec "Deferred / rejected"): the `ai` command,
+live presence, wall approval queue.
+
+## How to pick back up
+
+1. Read the spec section for the next sub-project (B is next: sections B1–B3).
+2. Write an implementation plan for it (superpowers:writing-plans) modeled on
+   `plans/2026-06-09-terminal-depth.md` — bite-sized TDD tasks with full code,
+   saved to `plans/`.
+3. Execute task-by-task (subagent-driven or inline), with the full gate before
+   every commit: `npm run lint` (0 errors / 0 warnings), `npm run typecheck`,
+   `npx vitest run`, `npm run build`.
+4. Finish each sub-project with a whole-range review pass (the Plan A final
+   review caught a real input-lock race — worth repeating).
+
+### Sequencing notes for B–D
+
+- **C0 (async executor)** is the enabler for `highscores` (C2) and `wall` (D):
+  widen `CommandDefinition.execute` to allow `Promise<CommandResult>`, make
+  `executeCommand` + `handleCommand` await. Do it first within C.
+- Adding `typespeed`/`snake` to `GAME_TYPES` in `lib/scores.ts` automatically
+  extends the scores API zod validation and GET validators.
+- The wall needs a new Drizzle table + committed migration; remember the
+  production caveat: the existing `drizzle/0000` migration CREATEs
+  `high_scores`, so baseline it before ever running `drizzle-kit migrate`
+  against a database that already has that table.
+
+### Harness notes (for Claude sessions)
+
+- Foreground subagents can run commands here; **background** ones get
+  permission-denied (so don't resume completed agents for fix rounds —
+  dispatch fresh foreground ones).
+- Test mocks for `ExecuteContext` live in `lib/commands/__tests__/*`; adding
+  required context fields means sweeping every mock (a scripted pass — see
+  Plan A Task 1 Step 2 for the pattern).
+
+## Repo state reminders
+
+- **Nothing is pushed** — all work since `d536c24` is local on `main`.
+- Tests: 836 passing · lint 0/0 · typecheck clean · build green (as of
+  `ceb32d0`).
+- Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).
+- `WALL_ADMIN_TOKEN` env var will be needed when sub-project D ships.

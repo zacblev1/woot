@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Ongoing Work
+
+Multi-part terminal-enhancement effort in progress — see
+`docs/superpowers/STATUS.md` for what's done and how to pick up the next
+sub-project (spec: `docs/superpowers/specs/2026-06-09-terminal-enhancements-design.md`).
+
 ## Build and Development Commands
 
 ```bash
