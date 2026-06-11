@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const GAME_TYPES = ['tron', 'pacman', 'basketball', 'typespeed'] as const
+export const GAME_TYPES = ['tron', 'pacman', 'basketball', 'typespeed', 'snake'] as const
 export type GameTypeName = (typeof GAME_TYPES)[number]
 
 export function isValidGameType(value: string): value is GameTypeName {

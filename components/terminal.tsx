@@ -33,9 +33,13 @@ const BasketballGame = dynamic(() => import("@/components/games/basketball-game"
   loading: () => <div className="p-4 text-orange-400 font-mono">Loading Arcade Hoops...</div>
 })
 
+const SnakeGame = dynamic(() => import("@/components/games/snake-game").then(mod => mod.SnakeGame), {
+  loading: () => <div className="p-4 text-green-400 font-mono">Loading Snake...</div>
+})
+
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "snake" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -1414,6 +1418,10 @@ export function Terminal() {
       ) : gameState.type === "basketball" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <BasketballGame onExit={() => setGameState({ active: false, type: null })} />
+        </div>
+      ) : gameState.type === "snake" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <SnakeGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>

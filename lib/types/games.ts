@@ -1,5 +1,5 @@
 // Game type discriminator
-export type GameType = 'number' | 'wordle' | 'trivia' | 'blackjack' | 'rps' | 'tron' | 'pacman' | 'basketball' | 'typespeed'
+export type GameType = 'number' | 'wordle' | 'trivia' | 'blackjack' | 'rps' | 'tron' | 'pacman' | 'basketball' | 'typespeed' | 'snake'
 
 // Individual game data types
 export interface NumberGameData {

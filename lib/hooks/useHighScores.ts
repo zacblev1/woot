@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { GameTypeName } from '@/lib/scores'
 
 export interface HighScore {
   id: number
@@ -18,7 +19,7 @@ interface UseHighScoresReturn {
   isHighScore: (score: number) => boolean
 }
 
-export function useHighScores(gameType: 'tron' | 'pacman' | 'basketball'): UseHighScoresReturn {
+export function useHighScores(gameType: GameTypeName): UseHighScoresReturn {
   const [scores, setScores] = useState<HighScore[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

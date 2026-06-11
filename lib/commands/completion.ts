@@ -1,7 +1,7 @@
 import type { ExecuteContext } from './types'
 import type { CommandRegistry } from './registry'
 
-const VALID_GAMES = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball', 'typespeed']
+const VALID_GAMES = ['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball', 'typespeed', 'snake']
 
 export function getCompletions(
   input: string,
