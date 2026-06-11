@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Play, RefreshCw, X, Trophy } from "lucide-react"
 import { useHighScores } from "@/lib/hooks/useHighScores"
+import { useSwipe } from "@/lib/hooks/useSwipe"
 import {
   MAZE_WIDTH, MAZE_HEIGHT, PACMAN_START, GHOST_START,
   cloneMaze, countPellets
@@ -309,6 +310,13 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [gameState, playerInitials, startGame, onExit, handleInitialsSubmit])
 
+  // Touch steering: swipes mirror the arrow keys
+  const swipeHandlers = useSwipe((dir) => {
+    if (gameState === "playing") {
+      pacmanNextDir.current = dir
+    }
+  })
+
   // Game loop
   useEffect(() => {
     if (gameState !== "playing") {
@@ -477,7 +485,7 @@ export function PacmanGame({ onExit }: PacmanGameProps) {
   }, [])
 
   return (
-    <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent">
+    <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent touch-none" {...swipeHandlers}>
       {/* HUD */}
       <div className="absolute top-4 left-0 right-0 flex justify-between px-8 text-mono pointer-events-none z-10">
         <div className="flex flex-col items-start gap-1 text-yellow-400">

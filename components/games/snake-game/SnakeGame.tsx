@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { RefreshCw, X, Trophy, Play } from "lucide-react"
 import { useHighScores } from "@/lib/hooks/useHighScores"
+import { useSwipe } from "@/lib/hooks/useSwipe"
 import { createState, enqueueDirection, step, tickMs, score as scoreFor, level as levelFor, type SnakeState, type Direction } from "./logic"
 
 interface SnakeGameProps {
@@ -89,6 +90,13 @@ export function SnakeGame({ onExit }: SnakeGameProps) {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [phase, playerInitials, startGame, onExit, handleInitialsSubmit])
 
+  // Touch steering: swipes mirror the arrow keys
+  const swipeHandlers = useSwipe((dir) => {
+    if (phase === "playing") {
+      stateRef.current = enqueueDirection(stateRef.current, dir)
+    }
+  })
+
   // Game loop: setTimeout chain so the cadence follows tickMs(foodEaten)
   useEffect(() => {
     if (phase !== "playing") return
@@ -146,7 +154,7 @@ export function SnakeGame({ onExit }: SnakeGameProps) {
   }, [phase])
 
   return (
-    <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent">
+    <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent touch-none" {...swipeHandlers}>
       <div className="absolute top-4 left-0 right-0 flex justify-between px-8 font-mono pointer-events-none z-10">
         <div className="flex flex-col items-start gap-1 text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">
           <span className="text-sm tracking-widest">SCORE</span>

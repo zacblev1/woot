@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Monitor, RefreshCw, X, Trophy } from "lucide-react"
 import { useHighScores } from "@/lib/hooks/useHighScores"
+import { useSwipe } from "@/lib/hooks/useSwipe"
 import { chooseCpuMove } from "./tron-game/ai"
 
 interface TronGameProps {
@@ -155,6 +156,15 @@ export function TronGame({ onExit }: TronGameProps) {
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [gameState, winner, playerInitials, startGame, onExit, handleInitialsSubmit])
+
+    // Touch steering: swipes mirror the arrow keys (no reversing)
+    const swipeHandlers = useSwipe((dir) => {
+        if (gameState !== "playing") return
+        if (dir === "UP" && playerDir.current !== "DOWN") playerNextDir.current = "UP"
+        if (dir === "DOWN" && playerDir.current !== "UP") playerNextDir.current = "DOWN"
+        if (dir === "LEFT" && playerDir.current !== "RIGHT") playerNextDir.current = "LEFT"
+        if (dir === "RIGHT" && playerDir.current !== "LEFT") playerNextDir.current = "RIGHT"
+    })
 
     const updateCpu = () => {
         // Build trail obstacle set (NOT current positions)
@@ -347,7 +357,7 @@ export function TronGame({ onExit }: TronGameProps) {
     }, [gameState])
 
     return (
-        <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent">
+        <div className="w-full h-full relative flex flex-col items-center justify-center bg-transparent touch-none" {...swipeHandlers}>
             {/* HUD */}
             <div className="absolute top-4 left-0 right-0 flex justify-between px-8 text-mono pointer-events-none z-10">
                 <div className="flex flex-col items-start gap-1 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]">
