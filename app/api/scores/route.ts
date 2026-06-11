@@ -6,6 +6,7 @@ import {
   isValidGameType,
   isScoreRateLimited,
   requestIp,
+  GAME_TYPES,
 } from '@/lib/scores'
 
 const CACHE_HEADERS = {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   if (game !== null && !isValidGameType(game)) {
     return NextResponse.json(
-      { error: 'Invalid game type. Must be "tron", "pacman", or "basketball"' },
+      { error: `Invalid game type. Must be one of: ${GAME_TYPES.join(', ')}` },
       { status: 400 }
     )
   }

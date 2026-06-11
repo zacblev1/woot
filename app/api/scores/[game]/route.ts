@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db, highScores } from '@/lib/db'
 import { desc, eq } from 'drizzle-orm'
-import { isValidGameType } from '@/lib/scores'
+import { isValidGameType, GAME_TYPES } from '@/lib/scores'
 
 const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
@@ -17,7 +17,7 @@ export async function GET(
 
   if (!isValidGameType(game)) {
     return NextResponse.json(
-      { error: 'Invalid game type. Must be "tron", "pacman", or "basketball"' },
+      { error: `Invalid game type. Must be one of: ${GAME_TYPES.join(', ')}` },
       { status: 400 }
     )
   }
