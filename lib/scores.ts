@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createRateLimiter } from '@/lib/rate-limit'
 
 export const GAME_TYPES = ['tron', 'pacman', 'basketball', 'typespeed', 'snake'] as const
 export type GameTypeName = (typeof GAME_TYPES)[number]
@@ -24,25 +25,11 @@ export const scoreSubmissionSchema = z.object({
 export type ScoreSubmission = z.infer<typeof scoreSubmissionSchema>
 
 // --- Rate limiting -----------------------------------------------------------
-// Simple in-memory sliding window per IP. State is per server instance, which
-// is acceptable for this portfolio (Fluid Compute reuses instances); a shared
-// store (e.g. Upstash) would be needed for strict global limits.
 
-const WINDOW_MS = 60_000
-const MAX_PER_WINDOW = 10
-
-const submissionLog = new Map<string, number[]>()
+const scoreLimiter = createRateLimiter({ windowMs: 60_000, max: 10 })
 
 export function isScoreRateLimited(ip: string, now = Date.now()): boolean {
-  const cutoff = now - WINDOW_MS
-  const recent = (submissionLog.get(ip) ?? []).filter((t) => t > cutoff)
-  if (recent.length >= MAX_PER_WINDOW) {
-    submissionLog.set(ip, recent)
-    return true
-  }
-  recent.push(now)
-  submissionLog.set(ip, recent)
-  return false
+  return scoreLimiter.isLimited(ip, now)
 }
 
 export function requestIp(request: Request): string {
@@ -52,5 +39,5 @@ export function requestIp(request: Request): string {
 
 /** Test-only: clear rate limiter state between tests. */
 export function _resetScoreRateLimiter(): void {
-  submissionLog.clear()
+  scoreLimiter.reset()
 }
