@@ -1105,12 +1105,20 @@ export function Terminal() {
     }
   }
 
-  // Any keypress while the tour is driving hands control back to the user
+  // Any keypress while the tour is driving hands control back to the user.
+  // Attached a task late: React flushes discrete-event effects synchronously,
+  // so the Enter keydown that launched the tour is STILL bubbling to window
+  // when this effect runs — attaching immediately would abort the tour with
+  // its own starting keystroke (reproduced in real Chrome; invisible in RTL,
+  // where act() flushes effects only after the event finishes dispatching).
   useEffect(() => {
     if (!isTouring) return
     const abort = () => stopTour(true)
-    window.addEventListener("keydown", abort)
-    return () => window.removeEventListener("keydown", abort)
+    const attach = setTimeout(() => window.addEventListener("keydown", abort), 0)
+    return () => {
+      clearTimeout(attach)
+      window.removeEventListener("keydown", abort)
+    }
   }, [isTouring])
 
   // Mirror handleCommand for one-shot consumers (deep links, the tour).
