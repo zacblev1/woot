@@ -11,7 +11,7 @@ all live there.
 | Sub-project | Status | Plan | Commits |
 |---|---|---|---|
 | **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
-| **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..32e6098` (6 commits) |
+| **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..cafd0af` (6 commits) |
 | **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ⬜ Not started | _none yet_ | — |
 | **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
 
