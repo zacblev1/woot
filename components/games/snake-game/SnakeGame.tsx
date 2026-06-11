@@ -257,7 +257,7 @@ export function SnakeGame({ onExit }: SnakeGameProps) {
           <div className="flex flex-col items-center gap-6 p-8 border border-white/10 rounded-xl bg-black/90">
             <h2 className="text-4xl font-bold tracking-widest text-rose-400">GAME OVER</h2>
             <p className="text-white font-mono">
-              {scoreFor(stateRef.current.foodEaten)} points · {stateRef.current.foodEaten} food
+              {scoreFor(foodEaten)} points · {foodEaten} food
             </p>
 
             {!scoresLoading && highScores.length > 0 && (

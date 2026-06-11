@@ -12,7 +12,7 @@ all live there.
 |---|---|---|---|
 | **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
 | **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..cafd0af` (6 commits) |
-| **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ⬜ Not started | _none yet_ | — |
+| **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ✅ **Done** | `plans/2026-06-11-games-competition.md` | `090b3fe..` (9 commits) |
 | **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
 
 Deliberately deferred (see spec "Deferred / rejected"): the `ai` command,
@@ -20,8 +20,10 @@ live presence, wall approval queue.
 
 ## How to pick back up
 
-1. Read the spec section for the next sub-project (C is next: sections C0–C4;
-   do C0, the async executor, first — it unblocks `highscores` and `wall`).
+1. Read the spec section for the next sub-project (D, the wall guestbook, is
+   the last one). C0's async executor already landed, so `wall` can be a
+   plain async registry command; generalize the `lib/scores.ts` rate limiter
+   into `lib/rate-limit.ts` per the spec.
 2. Write an implementation plan for it (superpowers:writing-plans) modeled on
    `plans/2026-06-09-terminal-depth.md` — bite-sized TDD tasks with full code,
    saved to `plans/`.
@@ -72,8 +74,10 @@ live presence, wall approval queue.
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 853 passing · lint 0/0 · typecheck clean · build green (as of
-  sub-project B completion).
+- Tests: 897+ passing · lint 0/0 · typecheck clean · build green (as of
+  sub-project C completion).
+- `useHighScores` now accepts any `GameTypeName` from `lib/scores.ts`
+  (GAME_TYPES: tron, pacman, basketball, typespeed, snake).
 - Tour note: the closing tour narration omits `wall` (ships in D) — add a
   `wall` line to `TOUR_STEPS` in `components/terminal.tsx` when D lands.
 - Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).

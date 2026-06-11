@@ -112,6 +112,7 @@ export const COMMAND_DESCRIPTIONS: Record<string, string> = {
   cowsay: 'A cow says things',
   stats: 'Collection statistics as bar charts',
   tour: 'Guided demo of the terminal',
+  highscores: 'Arcade leaderboards',
   ls: 'List directory contents',
   cd: 'Change directory',
   pwd: 'Print working directory',

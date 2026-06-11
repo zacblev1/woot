@@ -17,7 +17,7 @@ export const helpCommand: CommandDefinition = {
       '  Pipes          grep, head, tail, wc, sort (e.g. ls | grep dune)',
       '  Collections    search, genre, format, type, stats',
       '  Files          mkdir, touch, rm',
-      '  Games          game <type>, suggest',
+      '  Games          game <type>, highscores, suggest',
       '  Blog           notes',
       '  Style          theme, font, sound, neofetch',
       '  Info           about, contact, projects, whoami, date',
