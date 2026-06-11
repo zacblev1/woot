@@ -857,7 +857,9 @@ export function Terminal() {
 
     if (data.phase === "initials") {
       const entry = typed.trim()
-      if (entry.toLowerCase() === "skip") {
+      // 'q' is reserved as an exit alias — nobody loses their score to a
+      // reflexive quit keystroke; actual Q initials can use "QQ" etc.
+      if (entry.toLowerCase() === "skip" || entry.toLowerCase() === "q") {
         setGameState({ active: false, type: null })
         return ["Maybe next time.", ""]
       }
@@ -907,7 +909,7 @@ export function Terminal() {
       ...lines,
       `FINAL SCORE: ${score.toLocaleString("en-US")}  (avg WPM × accuracy × 100)`,
       "",
-      "Enter 1-3 initials to post it to the leaderboard, or 'skip':",
+      "Enter 1-3 initials to post it to the leaderboard, or 'skip' (q quits):",
       "",
     ]
   }

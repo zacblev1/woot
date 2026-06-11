@@ -95,6 +95,22 @@ describe('typespeed', () => {
     vi.unstubAllGlobals()
   })
 
+  it("a lone 'q' at the initials prompt quits instead of posting initials", async () => {
+    const posted: unknown[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === 'POST') posted.push(JSON.parse(String(init.body)))
+      return new Response(JSON.stringify({ scores: [] }), { status: 200 })
+    }))
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    await playThreeRounds(user)
+    await waitFor(() => expect(screen.getByText(/Enter 1-3 initials/)).toBeInTheDocument())
+    await user.type(screen.getByRole('textbox'), 'q{Enter}')
+    await waitFor(() => expect(screen.getByText(/Maybe next time/)).toBeInTheDocument())
+    expect(posted).toHaveLength(0)
+    vi.unstubAllGlobals()
+  })
+
   it('quit exits mid-game', async () => {
     const user = userEvent.setup()
     render(<WrappedTerminal />)
