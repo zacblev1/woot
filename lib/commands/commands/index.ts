@@ -23,6 +23,9 @@ export {
   statsCommand,
 } from './collection'
 
+// Highscores
+export { highscoresCommand } from './highscores'
+
 // Info commands
 export {
   notesCommand,

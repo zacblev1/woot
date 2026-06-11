@@ -80,6 +80,7 @@ export function createDefaultRegistry(): CommandRegistry {
 
   // Game
   registry.register(commands.gameCommand)
+  registry.register(commands.highscoresCommand)
 
   return registry
 }
