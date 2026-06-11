@@ -110,6 +110,8 @@ export const COMMAND_DESCRIPTIONS: Record<string, string> = {
   sort: 'Sort piped lines',
   history: 'Show command history',
   cowsay: 'A cow says things',
+  stats: 'Collection statistics as bar charts',
+  tour: 'Guided demo of the terminal',
   ls: 'List directory contents',
   cd: 'Change directory',
   pwd: 'Print working directory',

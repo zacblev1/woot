@@ -947,7 +947,47 @@ export function Terminal() {
     const abort = () => stopTour(true)
     window.addEventListener("keydown", abort)
     return () => window.removeEventListener("keydown", abort)
-  }, [isTouring]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isTouring])
+
+  // Mirror handleCommand for one-shot consumers (deep links, the tour).
+  // Declared before its dependents; reassigned to the fresh closure each
+  // render by an effect below handleCommand.
+  const handleCommandRef = useRef<(cmd: string, opts?: { fromTour?: boolean }) => void>(() => {})
+
+  const startTour = async () => {
+    if (tourActive.current) return
+    tourActive.current = true
+    setIsTouring(true)
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    for (const step of TOUR_STEPS) {
+      if (!tourActive.current) return
+      for (const line of step.narrate ?? []) {
+        setHistory((prev) => [...prev, { type: "success", content: line }])
+      }
+      if (step.type) {
+        const command = step.type
+        if (reduced) {
+          await tourDelay(TOUR_REDUCED_STEP_MS) // let the previous command's state land
+          if (!tourActive.current) return
+          handleCommandRef.current(command, { fromTour: true })
+        } else {
+          await tourDelay(TOUR_PRE_TYPE_MS)
+          for (let i = 1; i <= command.length; i++) {
+            if (!tourActive.current) return
+            setInput(command.slice(0, i))
+            await tourDelay(TOUR_TYPE_MS)
+          }
+          if (!tourActive.current) return
+          await tourDelay(TOUR_POST_TYPE_MS)
+          if (!tourActive.current) return
+          handleCommandRef.current(command, { fromTour: true })
+        }
+      }
+      if (!reduced) await tourDelay(TOUR_STEP_PAUSE_MS)
+    }
+    tourActive.current = false
+    setIsTouring(false)
+  }
 
   const handleCommand = (cmd: string, opts?: { fromTour?: boolean }) => {
     const trimmedCmd = cmd.trim()
@@ -1116,46 +1156,10 @@ export function Terminal() {
     terminalCtx.registerCommandHandler(handleCommand)
   })
 
-  // Mirror handleCommand for one-shot consumers (deep links)
-  const handleCommandRef = useRef(handleCommand)
+  // Keep the command ref pointing at the freshest closure
   useEffect(() => {
     handleCommandRef.current = handleCommand
   })
-
-  const startTour = async () => {
-    if (tourActive.current) return
-    tourActive.current = true
-    setIsTouring(true)
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
-    for (const step of TOUR_STEPS) {
-      if (!tourActive.current) return
-      for (const line of step.narrate ?? []) {
-        setHistory((prev) => [...prev, { type: "success", content: line }])
-      }
-      if (step.type) {
-        const command = step.type
-        if (reduced) {
-          await tourDelay(TOUR_REDUCED_STEP_MS) // let the previous command's state land
-          if (!tourActive.current) return
-          handleCommandRef.current(command, { fromTour: true })
-        } else {
-          await tourDelay(TOUR_PRE_TYPE_MS)
-          for (let i = 1; i <= command.length; i++) {
-            if (!tourActive.current) return
-            setInput(command.slice(0, i))
-            await tourDelay(TOUR_TYPE_MS)
-          }
-          if (!tourActive.current) return
-          await tourDelay(TOUR_POST_TYPE_MS)
-          if (!tourActive.current) return
-          handleCommandRef.current(command, { fromTour: true })
-        }
-      }
-      if (!reduced) await tourDelay(TOUR_STEP_PAUSE_MS)
-    }
-    tourActive.current = false
-    setIsTouring(false)
-  }
 
   // Shareable deep links: /?cmd=ls%20~/books runs the command(s) on load.
   // Deferred to a macrotask so execution happens outside the effect body and

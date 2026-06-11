@@ -1,5 +1,12 @@
 # First-Visit & Mobile (Sub-project B) Implementation Plan
 
+> ✅ **COMPLETED 2026-06-11** — all 5 tasks shipped. Execution deviations:
+> the reduced-motion tour step delay is `TOUR_REDUCED_STEP_MS = 50` (not 0ms:
+> a 0ms timer races React's render + ref-update effect, so a command could
+> see the previous command's stale `currentDirectory`), and the tour test
+> asserts `getAllByText(/Bukowski/)` because `ls` in ~/books also prints
+> author names.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **Repo note:** background subagents get permission-denied in this repo; use inline execution (superpowers:executing-plans) or foreground subagents only.
 

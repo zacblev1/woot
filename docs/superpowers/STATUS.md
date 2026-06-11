@@ -1,6 +1,6 @@
 # Terminal Enhancements — Status & Pick-Up Guide
 
-_Last updated: 2026-06-10_
+_Last updated: 2026-06-11_
 
 ## Where things stand
 
@@ -11,7 +11,7 @@ all live there.
 | Sub-project | Status | Plan | Commits |
 |---|---|---|---|
 | **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
-| **B — First-visit & mobile** (tour, mobile key bar, stats) | ⬜ Not started | _none yet_ | — |
+| **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..` (5 commits) |
 | **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ⬜ Not started | _none yet_ | — |
 | **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
 
@@ -20,7 +20,8 @@ live presence, wall approval queue.
 
 ## How to pick back up
 
-1. Read the spec section for the next sub-project (B is next: sections B1–B3).
+1. Read the spec section for the next sub-project (C is next: sections C0–C4;
+   do C0, the async executor, first — it unblocks `highscores` and `wall`).
 2. Write an implementation plan for it (superpowers:writing-plans) modeled on
    `plans/2026-06-09-terminal-depth.md` — bite-sized TDD tasks with full code,
    saved to `plans/`.
@@ -54,7 +55,9 @@ live presence, wall approval queue.
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 836 passing · lint 0/0 · typecheck clean · build green (as of
-  `ceb32d0`).
+- Tests: 852 passing · lint 0/0 · typecheck clean · build green (as of
+  sub-project B completion).
+- Tour note: the closing tour narration omits `wall` (ships in D) — add a
+  `wall` line to `TOUR_STEPS` in `components/terminal.tsx` when D lands.
 - Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).
 - `WALL_ADMIN_TOKEN` env var will be needed when sub-project D ships.

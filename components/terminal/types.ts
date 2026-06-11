@@ -61,6 +61,8 @@ export const VALID_COMMANDS = [
   'sort',
   'history',
   'cowsay',
+  'stats',
+  'tour',
 ] as const
 
 // Header keywords for highlightLine
