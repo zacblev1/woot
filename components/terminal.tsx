@@ -1396,6 +1396,16 @@ export function Terminal() {
     }
   }
 
+  // Touch devices have no keydowns, so every key-bar button doubles as the
+  // "user takes over" signal while the tour is driving.
+  const withTourGuard = (action: () => void) => () => {
+    if (tourActive.current) {
+      stopTour(true)
+      return
+    }
+    action()
+  }
+
   const prompt = gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`
 
   // Fish-style ghost suggestion: most recent history entry extending the input
@@ -1429,32 +1439,21 @@ export function Terminal() {
         <>
           <HistoryDisplay history={history} />
           <MobileKeyBar
-            onTab={() => handleTabComplete(input)}
-            onHistoryUp={() => {
+            onTab={withTourGuard(() => handleTabComplete(input))}
+            onHistoryUp={withTourGuard(() => {
               const cmd = handleHistoryUp()
               if (cmd !== null) setInput(cmd)
-            }}
-            onHistoryDown={() => {
+            })}
+            onHistoryDown={withTourGuard(() => {
               const cmd = handleHistoryDown()
               setInput(cmd ?? "")
-            }}
-            onInterrupt={() => {
-              // Touch devices have no keydowns, so the bar must also abort the tour
-              if (tourActive.current) {
-                stopTour(true)
-                return
-              }
-              handleInterrupt()
-            }}
-            onEscape={() => {
-              if (tourActive.current) {
-                stopTour(true)
-                return
-              }
+            })}
+            onInterrupt={withTourGuard(handleInterrupt)}
+            onEscape={withTourGuard(() => {
               setShowPalette(false)
               setInput("")
-            }}
-            onCommandPalette={handleCommandPalette}
+            })}
+            onCommandPalette={withTourGuard(handleCommandPalette)}
           />
           <InputLine
             ref={inputRef}

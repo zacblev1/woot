@@ -72,6 +72,18 @@ describe('Terminal mobile key bar', () => {
     expect(input).toHaveValue('')
   })
 
+  it('history/tab buttons also abort a running tour instead of editing the typewriter', async () => {
+    mockMatchMedia({ '(pointer: coarse)': true })
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    await user.type(screen.getByRole('textbox'), 'tour{Enter}')
+    await waitFor(() => expect(screen.getByText(/GUIDED TOUR/)).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'History up' }))
+    await waitFor(() => expect(screen.getByText(/tour ended/)).toBeInTheDocument())
+    // taking over does not also recall a history entry into the input
+    expect(screen.getByRole('textbox')).toHaveValue('')
+  })
+
   it('escape button aborts a running tour (touch devices have no keydowns)', async () => {
     mockMatchMedia({ '(pointer: coarse)': true })
     const user = userEvent.setup()
