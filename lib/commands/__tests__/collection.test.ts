@@ -4,6 +4,7 @@ import {
   genreCommand,
   formatCommand,
   typeCommand,
+  statsCommand,
 } from '../commands/collection'
 import type { ExecuteContext } from '../types'
 import type { ThemeName, FontName } from '@/lib/types/terminal'
@@ -474,5 +475,72 @@ describe('typeCommand', () => {
       const ipadLine = outputLines.find(line => line.includes('iPad'))
       expect(ipadLine).toContain('  3  ') // iPad is 3rd in the array
     })
+  })
+})
+
+describe('statsCommand', () => {
+  function book(genre: string, format = 'Paperback') {
+    return { title: 't', author: 'a', genre, format }
+  }
+  function record(genre: string, format = 'LP') {
+    return { title: 't', artist: 'a', genre, format, label: 'l' }
+  }
+  function device(status: string) {
+    return { name: 'n', type: 'Laptop', processor: 'p', memory: 'm', storage: 's', status }
+  }
+  function statsCtx(collections: Partial<ExecuteContext['collections']>): ExecuteContext {
+    const context = createMockContext()
+    context.collections = { books: [], vinyl: [], hardware: [], notes: [], ...collections }
+    return context
+  }
+  function output(context: ExecuteContext): string[] {
+    const result = statsCommand.execute([], context)
+    expect(result.success).toBe(true)
+    return (result as { success: true; output: string[] }).output
+  }
+
+  it('scales bars to a 24-column max and appends counts', () => {
+    const books = [...Array(4).fill(book('Fiction')), ...Array(2).fill(book('Sci-Fi')), book('Essays')]
+    const out = output(statsCtx({ books }))
+    expect(out).toContain('BOOK GENRES')
+    expect(out).toContain(`  Fiction  ${'█'.repeat(24)} 4`)
+    expect(out).toContain(`  Sci-Fi   ${'█'.repeat(12)} 2`)
+    expect(out).toContain(`  Essays   ${'█'.repeat(6)} 1`)
+  })
+
+  it('orders by count desc, then alphabetically', () => {
+    const books = [book('Zeta'), book('Alpha'), book('Mid'), book('Mid')]
+    const out = output(statsCtx({ books }))
+    const rows = out.filter((l) => l.startsWith('  ') && l.includes('█'))
+    // Two sections (genres + formats); genre rows come first
+    expect(rows[0]).toContain('Mid')
+    expect(rows[1]).toContain('Alpha')
+    expect(rows[2]).toContain('Zeta')
+  })
+
+  it('shows at most 8 rows per section', () => {
+    const books = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].map((g) => book(g, 'Paperback'))
+    const out = output(statsCtx({ books }))
+    const genreStart = out.indexOf('BOOK GENRES')
+    const formatStart = out.indexOf('BOOK FORMATS')
+    const genreRows = out.slice(genreStart, formatStart).filter((l) => l.includes('█'))
+    expect(genreRows).toHaveLength(8)
+    expect(genreRows.some((l) => l.includes(' i '))).toBe(false)
+  })
+
+  it('renders all five sections when data exists', () => {
+    const context = statsCtx({
+      books: [book('Fiction')],
+      vinyl: [record('Rock')],
+      hardware: [device('Active')],
+    })
+    const out = output(context)
+    for (const header of ['BOOK GENRES', 'VINYL GENRES', 'BOOK FORMATS', 'VINYL FORMATS', 'HARDWARE STATUS']) {
+      expect(out).toContain(header)
+    }
+  })
+
+  it('omits sections with no data and survives empty collections', () => {
+    expect(output(statsCtx({}))).toEqual([''])
   })
 })

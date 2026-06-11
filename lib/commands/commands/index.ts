@@ -20,6 +20,7 @@ export {
   genreCommand,
   formatCommand,
   typeCommand,
+  statsCommand,
 } from './collection'
 
 // Info commands

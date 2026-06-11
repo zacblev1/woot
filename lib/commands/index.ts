@@ -43,6 +43,7 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.genreCommand)
   registry.register(commands.formatCommand)
   registry.register(commands.typeCommand)
+  registry.register(commands.statsCommand)
 
   // Info
   registry.register(commands.aboutCommand)
