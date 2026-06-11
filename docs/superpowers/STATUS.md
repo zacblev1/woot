@@ -11,7 +11,7 @@ all live there.
 | Sub-project | Status | Plan | Commits |
 |---|---|---|---|
 | **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
-| **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..` (5 commits) |
+| **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..32e6098` (6 commits) |
 | **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ⬜ Not started | _none yet_ | — |
 | **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
 
@@ -55,7 +55,7 @@ live presence, wall approval queue.
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 852 passing · lint 0/0 · typecheck clean · build green (as of
+- Tests: 853 passing · lint 0/0 · typecheck clean · build green (as of
   sub-project B completion).
 - Tour note: the closing tour narration omits `wall` (ships in D) — add a
   `wall` line to `TOUR_STEPS` in `components/terminal.tsx` when D lands.

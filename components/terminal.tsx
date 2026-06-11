@@ -1268,8 +1268,19 @@ export function Terminal() {
               const cmd = handleHistoryDown()
               setInput(cmd ?? "")
             }}
-            onInterrupt={handleInterrupt}
+            onInterrupt={() => {
+              // Touch devices have no keydowns, so the bar must also abort the tour
+              if (tourActive.current) {
+                stopTour(true)
+                return
+              }
+              handleInterrupt()
+            }}
             onEscape={() => {
+              if (tourActive.current) {
+                stopTour(true)
+                return
+              }
               setShowPalette(false)
               setInput("")
             }}

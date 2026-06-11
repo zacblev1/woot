@@ -72,6 +72,16 @@ describe('Terminal mobile key bar', () => {
     expect(input).toHaveValue('')
   })
 
+  it('escape button aborts a running tour (touch devices have no keydowns)', async () => {
+    mockMatchMedia({ '(pointer: coarse)': true })
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    await user.type(screen.getByRole('textbox'), 'tour{Enter}')
+    await waitFor(() => expect(screen.getByText(/GUIDED TOUR/)).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Escape' }))
+    await waitFor(() => expect(screen.getByText(/tour ended/)).toBeInTheDocument())
+  })
+
   it('tab button completes an unambiguous command', async () => {
     mockMatchMedia({ '(pointer: coarse)': true })
     const user = userEvent.setup()
