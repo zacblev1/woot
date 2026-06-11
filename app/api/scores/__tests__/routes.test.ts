@@ -23,7 +23,7 @@ beforeEach(() => {
 
 describe('POST /api/scores validation', () => {
   it('rejects an unknown gameType with 400', async () => {
-    const res = await POST(postRequest({ ...VALID_BODY, gameType: 'doom' }))
+    const res = await POST(postRequest({ ...VALID_BODY, gameType: 'quake' }))
     expect(res.status).toBe(400)
   })
 
@@ -91,7 +91,7 @@ describe('POST /api/scores rate limiting', () => {
 
 describe('GET /api/scores', () => {
   it('rejects an invalid game query param with 400', async () => {
-    const res = await GET(new NextRequest('http://localhost/api/scores?game=doom'))
+    const res = await GET(new NextRequest('http://localhost/api/scores?game=quake'))
     expect(res.status).toBe(400)
   })
 
@@ -117,8 +117,8 @@ describe('GET /api/scores/[game]', () => {
 
   it('rejects unknown games with 400', async () => {
     const res = await GET_BY_GAME(
-      new NextRequest('http://localhost/api/scores/doom'),
-      makeParams('doom')
+      new NextRequest('http://localhost/api/scores/quake'),
+      makeParams('quake')
     )
     expect(res.status).toBe(400)
   })

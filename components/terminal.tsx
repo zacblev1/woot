@@ -37,9 +37,13 @@ const SnakeGame = dynamic(() => import("@/components/games/snake-game").then(mod
   loading: () => <div className="p-4 text-green-400 font-mono">Loading Snake...</div>
 })
 
+const DoomGame = dynamic(() => import("@/components/games/doom-game").then(mod => mod.DoomGame), {
+  loading: () => <div className="p-4 text-red-500 font-mono">Loading DOOM... rip and tear</div>
+})
+
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "snake" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "snake" | "doom" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -198,7 +202,7 @@ export function Terminal() {
 
     // Populate games
     const gamesDir = fs.createDir("/home/zachary/games")
-    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron", "pacman", "basketball", "typespeed", "snake"]
+    const games = ["number", "wordle", "trivia", "blackjack", "rps", "tron", "pacman", "basketball", "typespeed", "snake", "doom"]
     games.forEach(g => {
       if (gamesDir.children) {
         gamesDir.children[g] = { name: g, type: "file", parent: gamesDir, content: "game" }
@@ -1460,6 +1464,10 @@ export function Terminal() {
       ) : gameState.type === "snake" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <SnakeGame onExit={() => setGameState({ active: false, type: null })} />
+        </div>
+      ) : gameState.type === "doom" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <DoomGame onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>

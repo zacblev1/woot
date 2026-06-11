@@ -421,6 +421,7 @@ export const manPages: Record<string, string[]> = {
     "    basketball  Arcade Hoops",
     "    typespeed   Typing speed test (posts to the leaderboard)",
     "    snake       Eat, grow, repeat",
+    "    doom        Raycast FPS: clear the demons, find the exit",
     "",
     "EXAMPLES",
     "    game wordle",
