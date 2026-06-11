@@ -19,19 +19,19 @@ function ctx(): ExecuteContext {
 }
 
 describe('cowsay', () => {
-  it('errors without text', () => {
-    expect(cowsayCommand.execute([], ctx())).toEqual({ success: false, error: 'Usage: cowsay <text>' })
+  it('errors without text', async () => {
+    expect(await cowsayCommand.execute([], ctx())).toEqual({ success: false, error: 'Usage: cowsay <text>' })
   })
-  it('wraps text in a bubble with the cow', () => {
-    const result = cowsayCommand.execute(['moo'], ctx())
+  it('wraps text in a bubble with the cow', async () => {
+    const result = await cowsayCommand.execute(['moo'], ctx())
     expect(result.success).toBe(true)
     const out = (result as { success: true; output: string[] }).output
     expect(out).toContain(' < moo >')
     expect(out.join('\n')).toContain('(oo)')
   })
-  it('wraps long text at 40 columns into multiple bubble lines', () => {
+  it('wraps long text at 40 columns into multiple bubble lines', async () => {
     const text = 'a'.repeat(50) + ' ' + 'b'.repeat(20)
-    const result = cowsayCommand.execute(text.split(' '), ctx())
+    const result = await cowsayCommand.execute(text.split(' '), ctx())
     expect(result.success).toBe(true)
     const out = (result as { success: true; output: string[] }).output
     expect(out.filter((l: string) => l.startsWith(' | ') || l.startsWith(' / ') || l.startsWith(' \\ ')).length).toBeGreaterThanOrEqual(2)

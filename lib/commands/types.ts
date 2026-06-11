@@ -118,7 +118,10 @@ export interface CommandDefinition {
   usage: string
   /** Filter commands consume context.stdin and may appear after a `|`. */
   filter?: boolean
-  execute: (args: string[], context: ExecuteContext) => import('@/lib/types/terminal').CommandResult
+  execute: (
+    args: string[],
+    context: ExecuteContext
+  ) => import('@/lib/types/terminal').CommandResult | Promise<import('@/lib/types/terminal').CommandResult>
 }
 
 /**

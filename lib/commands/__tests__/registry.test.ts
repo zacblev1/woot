@@ -14,7 +14,7 @@ function createMockCommand(name: string, description = 'Test command'): CommandD
 
 describe('CommandRegistry', () => {
   describe('register', () => {
-    it('adds command to registry', () => {
+    it('adds command to registry', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('test')
 
@@ -23,7 +23,7 @@ describe('CommandRegistry', () => {
       expect(registry.has('test')).toBe(true)
     })
 
-    it('stores command name in lowercase', () => {
+    it('stores command name in lowercase', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('TEST')
 
@@ -33,7 +33,7 @@ describe('CommandRegistry', () => {
       expect(registry.has('TEST')).toBe(true)
     })
 
-    it('allows registering multiple commands', () => {
+    it('allows registering multiple commands', async () => {
       const registry = new CommandRegistry()
 
       registry.register(createMockCommand('ls'))
@@ -45,7 +45,7 @@ describe('CommandRegistry', () => {
       expect(registry.has('pwd')).toBe(true)
     })
 
-    it('overwrites existing command with same name', () => {
+    it('overwrites existing command with same name', async () => {
       const registry = new CommandRegistry()
       const cmd1 = createMockCommand('test', 'first')
       const cmd2 = createMockCommand('test', 'second')
@@ -59,7 +59,7 @@ describe('CommandRegistry', () => {
   })
 
   describe('get', () => {
-    it('retrieves command by name', () => {
+    it('retrieves command by name', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
 
@@ -69,7 +69,7 @@ describe('CommandRegistry', () => {
       expect(retrieved).toBe(cmd)
     })
 
-    it('retrieves command case-insensitively', () => {
+    it('retrieves command case-insensitively', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
 
@@ -80,7 +80,7 @@ describe('CommandRegistry', () => {
       expect(registry.get('lS')).toBe(cmd)
     })
 
-    it('returns undefined for unknown command', () => {
+    it('returns undefined for unknown command', async () => {
       const registry = new CommandRegistry()
 
       const retrieved = registry.get('unknown')
@@ -90,20 +90,20 @@ describe('CommandRegistry', () => {
   })
 
   describe('has', () => {
-    it('returns true for registered commands', () => {
+    it('returns true for registered commands', async () => {
       const registry = new CommandRegistry()
       registry.register(createMockCommand('ls'))
 
       expect(registry.has('ls')).toBe(true)
     })
 
-    it('returns false for unknown commands', () => {
+    it('returns false for unknown commands', async () => {
       const registry = new CommandRegistry()
 
       expect(registry.has('unknown')).toBe(false)
     })
 
-    it('checks case-insensitively', () => {
+    it('checks case-insensitively', async () => {
       const registry = new CommandRegistry()
       registry.register(createMockCommand('ls'))
 
@@ -113,13 +113,13 @@ describe('CommandRegistry', () => {
   })
 
   describe('list', () => {
-    it('returns empty array for empty registry', () => {
+    it('returns empty array for empty registry', async () => {
       const registry = new CommandRegistry()
 
       expect(registry.list()).toEqual([])
     })
 
-    it('returns sorted command names', () => {
+    it('returns sorted command names', async () => {
       const registry = new CommandRegistry()
 
       registry.register(createMockCommand('pwd'))
@@ -129,7 +129,7 @@ describe('CommandRegistry', () => {
       expect(registry.list()).toEqual(['cd', 'ls', 'pwd'])
     })
 
-    it('returns names in lowercase', () => {
+    it('returns names in lowercase', async () => {
       const registry = new CommandRegistry()
       registry.register(createMockCommand('LS'))
       registry.register(createMockCommand('CD'))
@@ -139,13 +139,13 @@ describe('CommandRegistry', () => {
   })
 
   describe('getAll', () => {
-    it('returns empty array for empty registry', () => {
+    it('returns empty array for empty registry', async () => {
       const registry = new CommandRegistry()
 
       expect(registry.getAll()).toEqual([])
     })
 
-    it('returns all command definitions', () => {
+    it('returns all command definitions', async () => {
       const registry = new CommandRegistry()
       const cmd1 = createMockCommand('ls')
       const cmd2 = createMockCommand('cd')
@@ -163,13 +163,13 @@ describe('CommandRegistry', () => {
 })
 
 describe('createRegistry', () => {
-  it('returns a new CommandRegistry instance', () => {
+  it('returns a new CommandRegistry instance', async () => {
     const registry = createRegistry()
 
     expect(registry).toBeInstanceOf(CommandRegistry)
   })
 
-  it('returns an empty registry', () => {
+  it('returns an empty registry', async () => {
     const registry = createRegistry()
 
     expect(registry.list()).toEqual([])

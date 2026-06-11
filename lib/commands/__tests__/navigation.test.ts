@@ -76,13 +76,13 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
 }
 
 describe('lsCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(lsCommand.name).toBe('ls')
     expect(lsCommand.description).toBe('List directory contents')
     expect(lsCommand.usage).toBe('ls [path]')
   })
 
-  it('returns empty string for empty directory', () => {
+  it('returns empty string for empty directory', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -90,12 +90,12 @@ describe('lsCommand', () => {
       },
     })
 
-    const result = lsCommand.execute([], context)
+    const result = await lsCommand.execute([], context)
 
     expect(result).toEqual({ success: true, output: '' })
   })
 
-  it('returns formatted list with blank lines for files', () => {
+  it('returns formatted list with blank lines for files', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -103,7 +103,7 @@ describe('lsCommand', () => {
       },
     })
 
-    const result = lsCommand.execute([], context)
+    const result = await lsCommand.execute([], context)
 
     expect(result).toEqual({
       success: true,
@@ -111,7 +111,7 @@ describe('lsCommand', () => {
     })
   })
 
-  it('accepts path argument', () => {
+  it('accepts path argument', async () => {
     const lsFn = vi.fn(() => ['subfile.txt'])
     const context = createMockContext({
       vfs: {
@@ -120,7 +120,7 @@ describe('lsCommand', () => {
       },
     })
 
-    const result = lsCommand.execute(['/some/path'], context)
+    const result = await lsCommand.execute(['/some/path'], context)
 
     expect(lsFn).toHaveBeenCalledWith('/some/path')
     expect(result).toEqual({
@@ -129,7 +129,7 @@ describe('lsCommand', () => {
     })
   })
 
-  it('handles directory with many entries', () => {
+  it('handles directory with many entries', async () => {
     const entries = ['a', 'b', 'c', 'd', 'e']
     const context = createMockContext({
       vfs: {
@@ -138,7 +138,7 @@ describe('lsCommand', () => {
       },
     })
 
-    const result = lsCommand.execute([], context)
+    const result = await lsCommand.execute([], context)
 
     expect(result).toEqual({
       success: true,
@@ -146,7 +146,7 @@ describe('lsCommand', () => {
     })
   })
 
-  it('returns ls error message directly', () => {
+  it('returns ls error message directly', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -154,7 +154,7 @@ describe('lsCommand', () => {
       },
     })
 
-    const result = lsCommand.execute(['/nonexistent'], context)
+    const result = await lsCommand.execute(['/nonexistent'], context)
 
     expect(result).toEqual({
       success: true,
@@ -163,7 +163,7 @@ describe('lsCommand', () => {
   })
 
   describe('collection directory display names', () => {
-    it('shows book titles instead of slugs in ~/books', () => {
+    it('shows book titles instead of slugs in ~/books', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -181,7 +181,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -194,7 +194,7 @@ describe('lsCommand', () => {
       ])
     })
 
-    it('shows vinyl titles instead of slugs in ~/vinyl', () => {
+    it('shows vinyl titles instead of slugs in ~/vinyl', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -212,7 +212,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -225,7 +225,7 @@ describe('lsCommand', () => {
       ])
     })
 
-    it('shows hardware names instead of slugs in ~/hardware', () => {
+    it('shows hardware names instead of slugs in ~/hardware', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -243,7 +243,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -256,7 +256,7 @@ describe('lsCommand', () => {
       ])
     })
 
-    it('falls back to filename when content has no title/name', () => {
+    it('falls back to filename when content has no title/name', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -271,7 +271,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -281,7 +281,7 @@ describe('lsCommand', () => {
       ])
     })
 
-    it('falls back to filename when resolve returns null', () => {
+    it('falls back to filename when resolve returns null', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -291,7 +291,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -301,7 +301,7 @@ describe('lsCommand', () => {
       ])
     })
 
-    it('does not show display names for non-collection directories', () => {
+    it('does not show display names for non-collection directories', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -311,7 +311,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute([], context)
+      const result = await lsCommand.execute([], context)
 
       expect(result).toEqual({
         success: true,
@@ -319,7 +319,7 @@ describe('lsCommand', () => {
       })
     })
 
-    it('shows raw slugs when ls is given a path argument (detailed view is pwd-only)', () => {
+    it('shows raw slugs when ls is given a path argument (detailed view is pwd-only)', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -345,7 +345,7 @@ describe('lsCommand', () => {
         },
       })
 
-      const result = lsCommand.execute(['books'], context)
+      const result = await lsCommand.execute(['books'], context)
 
       expect(result).toEqual({
         success: true,
@@ -356,13 +356,13 @@ describe('lsCommand', () => {
 })
 
 describe('cdCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(cdCommand.name).toBe('cd')
     expect(cdCommand.description).toBe('Change directory')
     expect(cdCommand.usage).toBe('cd [path]')
   })
 
-  it('changes to home with no args', () => {
+  it('changes to home with no args', async () => {
     const cdFn = vi.fn(() => null)
     const context = createMockContext({
       vfs: {
@@ -371,13 +371,13 @@ describe('cdCommand', () => {
       },
     })
 
-    const result = cdCommand.execute([], context)
+    const result = await cdCommand.execute([], context)
 
     expect(cdFn).toHaveBeenCalledWith('~')
     expect(result).toEqual({ success: true, output: '' })
   })
 
-  it('changes to specified path', () => {
+  it('changes to specified path', async () => {
     const cdFn = vi.fn(() => null)
     const context = createMockContext({
       vfs: {
@@ -387,13 +387,13 @@ describe('cdCommand', () => {
       },
     })
 
-    const result = cdCommand.execute(['/home/zachary/books'], context)
+    const result = await cdCommand.execute(['/home/zachary/books'], context)
 
     expect(cdFn).toHaveBeenCalledWith('/home/zachary/books')
     expect(result).toEqual({ success: true, output: '' })
   })
 
-  it('returns error for invalid path', () => {
+  it('returns error for invalid path', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -401,7 +401,7 @@ describe('cdCommand', () => {
       },
     })
 
-    const result = cdCommand.execute(['/nonexistent'], context)
+    const result = await cdCommand.execute(['/nonexistent'], context)
 
     expect(result).toEqual({
       success: false,
@@ -409,7 +409,7 @@ describe('cdCommand', () => {
     })
   })
 
-  it('updates currentDirectory display format with ~ prefix', () => {
+  it('updates currentDirectory display format with ~ prefix', async () => {
     const setCurrentDirectory = vi.fn()
     const context = createMockContext({
       vfs: {
@@ -420,12 +420,12 @@ describe('cdCommand', () => {
       setCurrentDirectory,
     })
 
-    cdCommand.execute(['books'], context)
+    await cdCommand.execute(['books'], context)
 
     expect(setCurrentDirectory).toHaveBeenCalledWith('~/books')
   })
 
-  it('updates currentDirectory for home directory as ~', () => {
+  it('updates currentDirectory for home directory as ~', async () => {
     const setCurrentDirectory = vi.fn()
     const context = createMockContext({
       vfs: {
@@ -436,12 +436,12 @@ describe('cdCommand', () => {
       setCurrentDirectory,
     })
 
-    cdCommand.execute([], context)
+    await cdCommand.execute([], context)
 
     expect(setCurrentDirectory).toHaveBeenCalledWith('~')
   })
 
-  it('preserves full path for directories outside home', () => {
+  it('preserves full path for directories outside home', async () => {
     const setCurrentDirectory = vi.fn()
     const context = createMockContext({
       vfs: {
@@ -452,20 +452,20 @@ describe('cdCommand', () => {
       setCurrentDirectory,
     })
 
-    cdCommand.execute(['/var/log'], context)
+    await cdCommand.execute(['/var/log'], context)
 
     expect(setCurrentDirectory).toHaveBeenCalledWith('/var/log')
   })
 })
 
 describe('pwdCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(pwdCommand.name).toBe('pwd')
     expect(pwdCommand.description).toBe('Print working directory')
     expect(pwdCommand.usage).toBe('pwd')
   })
 
-  it('returns current working directory', () => {
+  it('returns current working directory', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -473,7 +473,7 @@ describe('pwdCommand', () => {
       },
     })
 
-    const result = pwdCommand.execute([], context)
+    const result = await pwdCommand.execute([], context)
 
     expect(result).toEqual({
       success: true,
@@ -481,7 +481,7 @@ describe('pwdCommand', () => {
     })
   })
 
-  it('ignores any arguments', () => {
+  it('ignores any arguments', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -489,7 +489,7 @@ describe('pwdCommand', () => {
       },
     })
 
-    const result = pwdCommand.execute(['ignored', 'args'], context)
+    const result = await pwdCommand.execute(['ignored', 'args'], context)
 
     expect(result).toEqual({
       success: true,
@@ -499,16 +499,16 @@ describe('pwdCommand', () => {
 })
 
 describe('catCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(catCommand.name).toBe('cat')
     expect(catCommand.description).toBe('Display file contents')
     expect(catCommand.usage).toBe('cat <file>')
   })
 
-  it('returns error without path argument', () => {
+  it('returns error without path argument', async () => {
     const context = createMockContext()
 
-    const result = catCommand.execute([], context)
+    const result = await catCommand.execute([], context)
 
     expect(result).toEqual({
       success: false,
@@ -516,7 +516,7 @@ describe('catCommand', () => {
     })
   })
 
-  it('returns error for non-existent file', () => {
+  it('returns error for non-existent file', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -524,7 +524,7 @@ describe('catCommand', () => {
       },
     })
 
-    const result = catCommand.execute(['missing.txt'], context)
+    const result = await catCommand.execute(['missing.txt'], context)
 
     expect(result).toEqual({
       success: false,
@@ -532,7 +532,7 @@ describe('catCommand', () => {
     })
   })
 
-  it('returns error for directory', () => {
+  it('returns error for directory', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -540,7 +540,7 @@ describe('catCommand', () => {
       },
     })
 
-    const result = catCommand.execute(['books'], context)
+    const result = await catCommand.execute(['books'], context)
 
     expect(result).toEqual({
       success: false,
@@ -548,7 +548,7 @@ describe('catCommand', () => {
     })
   })
 
-  it('returns string content directly', () => {
+  it('returns string content directly', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -560,7 +560,7 @@ describe('catCommand', () => {
       },
     })
 
-    const result = catCommand.execute(['readme.txt'], context)
+    const result = await catCommand.execute(['readme.txt'], context)
 
     expect(result).toEqual({
       success: true,
@@ -568,7 +568,7 @@ describe('catCommand', () => {
     })
   })
 
-  it('returns JSON-stringified object content', () => {
+  it('returns JSON-stringified object content', async () => {
     const objectContent = { title: 'Test', author: 'Author' }
     const context = createMockContext({
       vfs: {
@@ -581,7 +581,7 @@ describe('catCommand', () => {
       },
     })
 
-    const result = catCommand.execute(['book.json'], context)
+    const result = await catCommand.execute(['book.json'], context)
 
     expect(result).toEqual({
       success: true,
@@ -591,16 +591,16 @@ describe('catCommand', () => {
 })
 
 describe('viewCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(viewCommand.name).toBe('view')
     expect(viewCommand.description).toBe('Display formatted file contents')
     expect(viewCommand.usage).toBe('view <file>')
   })
 
-  it('returns error without path argument', () => {
+  it('returns error without path argument', async () => {
     const context = createMockContext()
 
-    const result = viewCommand.execute([], context)
+    const result = await viewCommand.execute([], context)
 
     expect(result).toEqual({
       success: false,
@@ -608,7 +608,7 @@ describe('viewCommand', () => {
     })
   })
 
-  it('returns error for non-existent file', () => {
+  it('returns error for non-existent file', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -616,7 +616,7 @@ describe('viewCommand', () => {
       },
     })
 
-    const result = viewCommand.execute(['missing.txt'], context)
+    const result = await viewCommand.execute(['missing.txt'], context)
 
     expect(result).toEqual({
       success: false,
@@ -624,7 +624,7 @@ describe('viewCommand', () => {
     })
   })
 
-  it('returns error for directory', () => {
+  it('returns error for directory', async () => {
     const context = createMockContext({
       vfs: {
         ...createMockContext().vfs,
@@ -632,7 +632,7 @@ describe('viewCommand', () => {
       },
     })
 
-    const result = viewCommand.execute(['books'], context)
+    const result = await viewCommand.execute(['books'], context)
 
     expect(result).toEqual({
       success: false,
@@ -641,7 +641,7 @@ describe('viewCommand', () => {
   })
 
   describe('book formatting', () => {
-    it('formats book content with title, author, genre, format', () => {
+    it('formats book content with title, author, genre, format', async () => {
       const book = {
         title: 'The Pragmatic Programmer',
         author: 'David Thomas',
@@ -656,7 +656,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['book.json'], context)
+      const result = await viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
       expect(lineContents(result)).toEqual([
@@ -669,7 +669,7 @@ describe('viewCommand', () => {
       ])
     })
 
-    it('formats book with multiple authors', () => {
+    it('formats book with multiple authors', async () => {
       const book = {
         title: 'The Pragmatic Programmer',
         author: ['David Thomas', 'Andrew Hunt'],
@@ -684,13 +684,13 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['book.json'], context)
+      const result = await viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
       expect(lineContents(result)).toContain('  Author:  David Thomas, Andrew Hunt')
     })
 
-    it('includes pages when available', () => {
+    it('includes pages when available', async () => {
       const book = {
         title: 'Test Book',
         author: 'Author',
@@ -706,7 +706,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['book.json'], context)
+      const result = await viewCommand.execute(['book.json'], context)
 
       expect(result.success).toBe(true)
       expect(lineContents(result)).toContain('  Pages:   350')
@@ -714,7 +714,7 @@ describe('viewCommand', () => {
   })
 
   describe('vinyl formatting', () => {
-    it('formats vinyl content with title, artist, genre, format, label', () => {
+    it('formats vinyl content with title, artist, genre, format, label', async () => {
       const record = {
         title: 'Abbey Road',
         artist: 'The Beatles',
@@ -730,7 +730,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['record.json'], context)
+      const result = await viewCommand.execute(['record.json'], context)
 
       expect(result.success).toBe(true)
       expect(lineContents(result)).toEqual([
@@ -746,7 +746,7 @@ describe('viewCommand', () => {
   })
 
   describe('hardware formatting', () => {
-    it('formats hardware content with all fields', () => {
+    it('formats hardware content with all fields', async () => {
       const device = {
         name: 'MacBook Pro',
         type: 'Laptop',
@@ -765,7 +765,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['device.json'], context)
+      const result = await viewCommand.execute(['device.json'], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -782,7 +782,7 @@ describe('viewCommand', () => {
       ])
     })
 
-    it('omits optional fields when not present', () => {
+    it('omits optional fields when not present', async () => {
       const device = {
         name: 'Raspberry Pi',
         type: 'SBC',
@@ -799,7 +799,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['device.json'], context)
+      const result = await viewCommand.execute(['device.json'], context)
 
       expect(result.success).toBe(true)
       expect(getOutput(result)).toEqual([
@@ -816,7 +816,7 @@ describe('viewCommand', () => {
   })
 
   describe('fallback formatting', () => {
-    it('falls back to raw string content for unknown types', () => {
+    it('falls back to raw string content for unknown types', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -829,7 +829,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['readme.txt'], context)
+      const result = await viewCommand.execute(['readme.txt'], context)
 
       expect(result).toEqual({
         success: true,
@@ -837,7 +837,7 @@ describe('viewCommand', () => {
       })
     })
 
-    it('falls back to JSON-stringified content for unknown object types', () => {
+    it('falls back to JSON-stringified content for unknown object types', async () => {
       const content = { unknown: 'format', data: 123 }
       const context = createMockContext({
         vfs: {
@@ -851,7 +851,7 @@ describe('viewCommand', () => {
         },
       })
 
-      const result = viewCommand.execute(['data.json'], context)
+      const result = await viewCommand.execute(['data.json'], context)
 
       expect(result).toEqual({
         success: true,

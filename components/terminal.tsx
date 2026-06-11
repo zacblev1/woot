@@ -989,7 +989,7 @@ export function Terminal() {
     setIsTouring(false)
   }
 
-  const handleCommand = (cmd: string, opts?: { fromTour?: boolean }) => {
+  const handleCommand = async (cmd: string, opts?: { fromTour?: boolean }) => {
     const trimmedCmd = cmd.trim()
     if (!trimmedCmd) return
 
@@ -1123,6 +1123,8 @@ export function Terminal() {
 
     setCommandHistory((prev) => [...prev, expandedCmd])
     setHistoryIndex(-1)
+    // Clear before dispatch: async commands (fetches) must not freeze the input
+    setInput("")
 
     const [command] = expandedCmd.split(" ")
     const cmd_lower = command.toLowerCase()
@@ -1133,15 +1135,13 @@ export function Terminal() {
     } else if (cmd_lower === "tour") {
       void startTour()
     } else {
-      const result = executeCommand(expandedCmd, buildExecuteContext(), commandRegistry)
+      const result = await executeCommand(expandedCmd, buildExecuteContext(), commandRegistry)
       if (result.success) {
         appendCommandOutput(result.output)
       } else {
         setHistory((prev) => [...prev, { type: classifyLine(result.error), content: result.error }])
       }
     }
-
-    setInput("")
   }
 
   const handlePaletteExecute = (command: string) => {

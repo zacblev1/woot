@@ -55,15 +55,15 @@ function createMockContext(): ExecuteContext {
 }
 
 describe('gameCommand', () => {
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(gameCommand.name).toBe('game')
     expect(gameCommand.description).toBe('Play terminal games')
     expect(gameCommand.usage).toBe('game <type>')
   })
 
-  it('lists available games without argument', () => {
+  it('lists available games without argument', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute([], context)
+    const result = await gameCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -78,9 +78,9 @@ describe('gameCommand', () => {
     }
   })
 
-  it('shows game descriptions in list', () => {
+  it('shows game descriptions in list', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute([], context)
+    const result = await gameCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -91,58 +91,58 @@ describe('gameCommand', () => {
     }
   })
 
-  it('starts number game via context.game.start()', () => {
+  it('starts number game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['number'], context)
+    await gameCommand.execute(['number'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('number')
   })
 
-  it('starts wordle game via context.game.start()', () => {
+  it('starts wordle game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['wordle'], context)
+    await gameCommand.execute(['wordle'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('wordle')
   })
 
-  it('starts trivia game via context.game.start()', () => {
+  it('starts trivia game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['trivia'], context)
+    await gameCommand.execute(['trivia'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('trivia')
   })
 
-  it('starts blackjack game via context.game.start()', () => {
+  it('starts blackjack game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['blackjack'], context)
+    await gameCommand.execute(['blackjack'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('blackjack')
   })
 
-  it('starts rps game via context.game.start()', () => {
+  it('starts rps game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['rps'], context)
+    await gameCommand.execute(['rps'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('rps')
   })
 
-  it('starts tron game via context.game.start()', () => {
+  it('starts tron game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['tron'], context)
+    await gameCommand.execute(['tron'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('tron')
   })
 
-  it('starts pacman game via context.game.start()', () => {
+  it('starts pacman game via context.game.start()', async () => {
     const context = createMockContext()
-    gameCommand.execute(['pacman'], context)
+    await gameCommand.execute(['pacman'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('pacman')
   })
 
-  it('returns error for unknown game type', () => {
+  it('returns error for unknown game type', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute(['invalid'], context)
+    const result = await gameCommand.execute(['invalid'], context)
 
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -151,9 +151,9 @@ describe('gameCommand', () => {
     }
   })
 
-  it('returns empty array for tron (UI takes over)', () => {
+  it('returns empty array for tron (UI takes over)', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute(['tron'], context)
+    const result = await gameCommand.execute(['tron'], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -161,9 +161,9 @@ describe('gameCommand', () => {
     }
   })
 
-  it('returns empty array for pacman (UI takes over)', () => {
+  it('returns empty array for pacman (UI takes over)', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute(['pacman'], context)
+    const result = await gameCommand.execute(['pacman'], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -171,9 +171,9 @@ describe('gameCommand', () => {
     }
   })
 
-  it('returns empty string for non-tron games (GameController handles start message)', () => {
+  it('returns empty string for non-tron games (GameController handles start message)', async () => {
     const context = createMockContext()
-    const result = gameCommand.execute(['number'], context)
+    const result = await gameCommand.execute(['number'], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -181,21 +181,21 @@ describe('gameCommand', () => {
     }
   })
 
-  it('handles case-insensitive game names', () => {
+  it('handles case-insensitive game names', async () => {
     const context = createMockContext()
-    gameCommand.execute(['NUMBER'], context)
+    await gameCommand.execute(['NUMBER'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('number')
   })
 
-  it('handles mixed case game names', () => {
+  it('handles mixed case game names', async () => {
     const context = createMockContext()
-    gameCommand.execute(['Wordle'], context)
+    await gameCommand.execute(['Wordle'], context)
 
     expect(context.game.start).toHaveBeenCalledWith('wordle')
   })
 
-  it('exports VALID_GAMES array', () => {
+  it('exports VALID_GAMES array', async () => {
     expect(VALID_GAMES).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'])
   })
 })

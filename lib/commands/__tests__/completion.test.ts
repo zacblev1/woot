@@ -76,7 +76,7 @@ function createMockRegistry(): CommandRegistry {
 }
 
 describe('getCompletions - command name completion', () => {
-  it('returns all commands for empty input', () => {
+  it('returns all commands for empty input', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -86,7 +86,7 @@ describe('getCompletions - command name completion', () => {
     expect(completions.length).toBe(27)
   })
 
-  it('returns filtered commands for partial input "c"', () => {
+  it('returns filtered commands for partial input "c"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -99,7 +99,7 @@ describe('getCompletions - command name completion', () => {
     expect(completions).not.toContain('about')
   })
 
-  it('returns filtered commands for partial input "th"', () => {
+  it('returns filtered commands for partial input "th"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -108,7 +108,7 @@ describe('getCompletions - command name completion', () => {
     expect(completions).toEqual(['theme'])
   })
 
-  it('returns exact match for full command name', () => {
+  it('returns exact match for full command name', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -117,7 +117,7 @@ describe('getCompletions - command name completion', () => {
     expect(completions).toEqual(['help'])
   })
 
-  it('returns empty array for unknown partial', () => {
+  it('returns empty array for unknown partial', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -128,7 +128,7 @@ describe('getCompletions - command name completion', () => {
 })
 
 describe('getCompletions - path completion', () => {
-  it('returns all files when no partial for cd', () => {
+  it('returns all files when no partial for cd', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -137,7 +137,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books', 'vinyl', 'hardware', 'notes.txt'])
   })
 
-  it('returns filtered files for partial path on cd', () => {
+  it('returns filtered files for partial path on cd', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -146,7 +146,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books'])
   })
 
-  it('returns all files for cat command', () => {
+  it('returns all files for cat command', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -155,7 +155,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books', 'vinyl', 'hardware', 'notes.txt'])
   })
 
-  it('returns filtered files for cat command', () => {
+  it('returns filtered files for cat command', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -164,7 +164,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['notes.txt'])
   })
 
-  it('returns all files for view command', () => {
+  it('returns all files for view command', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -173,7 +173,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books', 'vinyl', 'hardware', 'notes.txt'])
   })
 
-  it('returns all files for ls command', () => {
+  it('returns all files for ls command', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -182,7 +182,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books', 'vinyl', 'hardware', 'notes.txt'])
   })
 
-  it('returns all files for rm command', () => {
+  it('returns all files for rm command', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -191,7 +191,7 @@ describe('getCompletions - path completion', () => {
     expect(completions).toEqual(['books', 'vinyl', 'hardware', 'notes.txt'])
   })
 
-  it('returns filtered files with partial for rm', () => {
+  it('returns filtered files with partial for rm', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -202,7 +202,7 @@ describe('getCompletions - path completion', () => {
 })
 
 describe('getCompletions - theme completion', () => {
-  it('returns all themes for "theme "', () => {
+  it('returns all themes for "theme "', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -211,7 +211,7 @@ describe('getCompletions - theme completion', () => {
     expect(completions).toEqual(['midnight', 'dracula', 'gruvbox'])
   })
 
-  it('returns filtered themes for partial "theme d"', () => {
+  it('returns filtered themes for partial "theme d"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -220,7 +220,7 @@ describe('getCompletions - theme completion', () => {
     expect(completions).toEqual(['dracula'])
   })
 
-  it('returns filtered themes for partial "theme g"', () => {
+  it('returns filtered themes for partial "theme g"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -231,7 +231,7 @@ describe('getCompletions - theme completion', () => {
 })
 
 describe('getCompletions - font completion', () => {
-  it('returns all fonts for "font "', () => {
+  it('returns all fonts for "font "', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -240,7 +240,7 @@ describe('getCompletions - font completion', () => {
     expect(completions).toEqual(['jetbrains', 'fira', 'mono'])
   })
 
-  it('returns filtered fonts for partial "font j"', () => {
+  it('returns filtered fonts for partial "font j"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -249,7 +249,7 @@ describe('getCompletions - font completion', () => {
     expect(completions).toEqual(['jetbrains'])
   })
 
-  it('returns filtered fonts for partial "font f"', () => {
+  it('returns filtered fonts for partial "font f"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -260,7 +260,7 @@ describe('getCompletions - font completion', () => {
 })
 
 describe('getCompletions - game completion', () => {
-  it('returns all games for "game "', () => {
+  it('returns all games for "game "', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -269,7 +269,7 @@ describe('getCompletions - game completion', () => {
     expect(completions).toEqual(['number', 'wordle', 'trivia', 'blackjack', 'rps', 'tron', 'pacman', 'basketball'])
   })
 
-  it('returns filtered games for partial "game w"', () => {
+  it('returns filtered games for partial "game w"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -278,7 +278,7 @@ describe('getCompletions - game completion', () => {
     expect(completions).toEqual(['wordle'])
   })
 
-  it('returns filtered games for partial "game t"', () => {
+  it('returns filtered games for partial "game t"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -287,7 +287,7 @@ describe('getCompletions - game completion', () => {
     expect(completions).toEqual(['trivia', 'tron'])
   })
 
-  it('returns filtered games for partial "game b"', () => {
+  it('returns filtered games for partial "game b"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -298,7 +298,7 @@ describe('getCompletions - game completion', () => {
 })
 
 describe('getCompletions - man completion', () => {
-  it('returns all commands for "man "', () => {
+  it('returns all commands for "man "', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -307,7 +307,7 @@ describe('getCompletions - man completion', () => {
     expect(completions).toEqual(registry.list())
   })
 
-  it('returns filtered commands for partial "man c"', () => {
+  it('returns filtered commands for partial "man c"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -319,7 +319,7 @@ describe('getCompletions - man completion', () => {
     expect(completions).not.toContain('about')
   })
 
-  it('returns filtered commands for partial "man th"', () => {
+  it('returns filtered commands for partial "man th"', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -330,7 +330,7 @@ describe('getCompletions - man completion', () => {
 })
 
 describe('getCompletions - no completion', () => {
-  it('returns empty array for unknown command arguments', () => {
+  it('returns empty array for unknown command arguments', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 
@@ -339,7 +339,7 @@ describe('getCompletions - no completion', () => {
     expect(completions).toEqual([])
   })
 
-  it('returns empty array for about command arguments', () => {
+  it('returns empty array for about command arguments', async () => {
     const registry = createMockRegistry()
     const context = createMockContext()
 

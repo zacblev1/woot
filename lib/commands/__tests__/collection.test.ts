@@ -112,60 +112,60 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
 
 describe('searchCommand', () => {
   describe('error handling', () => {
-    it('returns error without search term', () => {
+    it('returns error without search term', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute([], context)
+      const result = await searchCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'Usage: search <term>' })
     })
 
-    it('returns error when not in a collection directory', () => {
+    it('returns error when not in a collection directory', async () => {
       const context = createMockContext({ currentDirectory: '~' })
-      const result = searchCommand.execute(['test'], context)
+      const result = await searchCommand.execute(['test'], context)
       expect(result).toEqual({ success: false, error: 'search: not in a collection directory' })
     })
   })
 
   describe('books search', () => {
-    it('searches books by title', () => {
+    it('searches books by title', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['dune'], context)
+      const result = await searchCommand.execute(['dune'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '1 results')).toBe(true)
       expect(outputContains(getOutput(result), 'Dune')).toBe(true)
     })
 
-    it('searches books by author', () => {
+    it('searches books by author', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['asimov'], context)
+      const result = await searchCommand.execute(['asimov'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '1 results')).toBe(true)
       expect(outputContains(getOutput(result), 'Foundation')).toBe(true)
     })
 
-    it('handles array author in books', () => {
+    it('handles array author in books', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['gaiman'], context)
+      const result = await searchCommand.execute(['gaiman'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'Good Omens')).toBe(true)
     })
 
-    it('searches case-insensitively', () => {
+    it('searches case-insensitively', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['DUNE'], context)
+      const result = await searchCommand.execute(['DUNE'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'Dune')).toBe(true)
     })
 
-    it('returns "No results" message when no matches', () => {
+    it('returns "No results" message when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['xyz123'], context)
+      const result = await searchCommand.execute(['xyz123'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No results for "xyz123"')
     })
 
-    it('includes index in results', () => {
+    it('includes index in results', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = searchCommand.execute(['dune'], context)
+      const result = await searchCommand.execute(['dune'], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const duneLine = outputLines.find(line => line.includes('Dune'))
@@ -174,55 +174,55 @@ describe('searchCommand', () => {
   })
 
   describe('vinyl search', () => {
-    it('searches vinyl by title', () => {
+    it('searches vinyl by title', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = searchCommand.execute(['random'], context)
+      const result = await searchCommand.execute(['random'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'Random Access Memories')).toBe(true)
     })
 
-    it('searches vinyl by artist', () => {
+    it('searches vinyl by artist', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = searchCommand.execute(['daft'], context)
+      const result = await searchCommand.execute(['daft'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
-    it('returns "No results" message for vinyl when no matches', () => {
+    it('returns "No results" message for vinyl when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = searchCommand.execute(['unknown123'], context)
+      const result = await searchCommand.execute(['unknown123'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No results for "unknown123"')
     })
   })
 
   describe('hardware search', () => {
-    it('searches hardware by name', () => {
+    it('searches hardware by name', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = searchCommand.execute(['macbook'], context)
+      const result = await searchCommand.execute(['macbook'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'MacBook Pro')).toBe(true)
     })
 
-    it('searches hardware by type', () => {
+    it('searches hardware by type', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = searchCommand.execute(['laptop'], context)
+      const result = await searchCommand.execute(['laptop'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
-    it('formats hardware results with type in parentheses', () => {
+    it('formats hardware results with type in parentheses', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = searchCommand.execute(['iphone'], context)
+      const result = await searchCommand.execute(['iphone'], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const iphoneLine = outputLines.find(line => line.includes('iPhone'))
       expect(iphoneLine).toContain('(Phone)')
     })
 
-    it('returns "No results" message for hardware when no matches', () => {
+    it('returns "No results" message for hardware when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = searchCommand.execute(['xyz987'], context)
+      const result = await searchCommand.execute(['xyz987'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No results for "xyz987"')
     })
@@ -231,23 +231,23 @@ describe('searchCommand', () => {
 
 describe('genreCommand', () => {
   describe('error handling', () => {
-    it('returns error when not in ~/books or ~/vinyl', () => {
+    it('returns error when not in ~/books or ~/vinyl', async () => {
       const context = createMockContext({ currentDirectory: '~' })
-      const result = genreCommand.execute([], context)
+      const result = await genreCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'genre: only available in ~/books or ~/vinyl' })
     })
 
-    it('returns error when in ~/hardware', () => {
+    it('returns error when in ~/hardware', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = genreCommand.execute([], context)
+      const result = await genreCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'genre: only available in ~/books or ~/vinyl' })
     })
   })
 
   describe('vinyl genre', () => {
-    it('lists all genres without argument', () => {
+    it('lists all genres without argument', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = genreCommand.execute([], context)
+      const result = await genreCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Electronic')
@@ -255,9 +255,9 @@ describe('genreCommand', () => {
       expect(outputLines).toContain('  Pop')
     })
 
-    it('lists genres sorted alphabetically', () => {
+    it('lists genres sorted alphabetically', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = genreCommand.execute([], context)
+      const result = await genreCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const genres = outputLines.filter(line => line.trim() && !line.includes('results'))
@@ -267,58 +267,58 @@ describe('genreCommand', () => {
       expect(genres[2]).toContain('Pop')
     })
 
-    it('filters by genre name', () => {
+    it('filters by genre name', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = genreCommand.execute(['electronic'], context)
+      const result = await genreCommand.execute(['electronic'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
       expect(outputContains(getOutput(result), 'Random Access Memories')).toBe(true)
       expect(outputContains(getOutput(result), 'Discovery')).toBe(true)
     })
 
-    it('returns "No records in genre" when no matches', () => {
+    it('returns "No records in genre" when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = genreCommand.execute(['country'], context)
+      const result = await genreCommand.execute(['country'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No records in genre "country"')
     })
   })
 
   describe('books genre', () => {
-    it('lists all genres without argument', () => {
+    it('lists all genres without argument', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = genreCommand.execute([], context)
+      const result = await genreCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Fantasy')
       expect(outputLines).toContain('  Science Fiction')
     })
 
-    it('filters by genre name', () => {
+    it('filters by genre name', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = genreCommand.execute(['fantasy'], context)
+      const result = await genreCommand.execute(['fantasy'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
-    it('handles partial genre match', () => {
+    it('handles partial genre match', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = genreCommand.execute(['science'], context)
+      const result = await genreCommand.execute(['science'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'Dune')).toBe(true)
       expect(outputContains(getOutput(result), 'Foundation')).toBe(true)
     })
 
-    it('returns "No books in genre" when no matches', () => {
+    it('returns "No books in genre" when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = genreCommand.execute(['horror'], context)
+      const result = await genreCommand.execute(['horror'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No books in genre "horror"')
     })
 
-    it('formats results with author', () => {
+    it('formats results with author', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = genreCommand.execute(['fantasy'], context)
+      const result = await genreCommand.execute(['fantasy'], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const hobbitLine = outputLines.find(line => line.includes('Hobbit'))
@@ -329,71 +329,71 @@ describe('genreCommand', () => {
 
 describe('formatCommand', () => {
   describe('error handling', () => {
-    it('returns error when not in ~/books or ~/vinyl', () => {
+    it('returns error when not in ~/books or ~/vinyl', async () => {
       const context = createMockContext({ currentDirectory: '~' })
-      const result = formatCommand.execute([], context)
+      const result = await formatCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'format: only available in ~/books or ~/vinyl' })
     })
 
-    it('returns error when in ~/hardware', () => {
+    it('returns error when in ~/hardware', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = formatCommand.execute([], context)
+      const result = await formatCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'format: only available in ~/books or ~/vinyl' })
     })
   })
 
   describe('vinyl format', () => {
-    it('lists all formats without argument', () => {
+    it('lists all formats without argument', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = formatCommand.execute([], context)
+      const result = await formatCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  7"')
       expect(outputLines).toContain('  LP')
     })
 
-    it('filters by format type', () => {
+    it('filters by format type', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = formatCommand.execute(['lp'], context)
+      const result = await formatCommand.execute(['lp'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '3 results')).toBe(true)
     })
 
-    it('returns "No records in format" when no matches', () => {
+    it('returns "No records in format" when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = formatCommand.execute(['cassette'], context)
+      const result = await formatCommand.execute(['cassette'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No records in format "cassette"')
     })
   })
 
   describe('books format', () => {
-    it('lists all formats without argument', () => {
+    it('lists all formats without argument', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = formatCommand.execute([], context)
+      const result = await formatCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Hardcover')
       expect(outputLines).toContain('  Paperback')
     })
 
-    it('filters by format type', () => {
+    it('filters by format type', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = formatCommand.execute(['hardcover'], context)
+      const result = await formatCommand.execute(['hardcover'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
 
-    it('returns "No books in format" when no matches', () => {
+    it('returns "No books in format" when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = formatCommand.execute(['audiobook'], context)
+      const result = await formatCommand.execute(['audiobook'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No books in format "audiobook"')
     })
 
-    it('handles case-insensitive matching', () => {
+    it('handles case-insensitive matching', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = formatCommand.execute(['PAPERBACK'], context)
+      const result = await formatCommand.execute(['PAPERBACK'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
     })
@@ -402,29 +402,29 @@ describe('formatCommand', () => {
 
 describe('typeCommand', () => {
   describe('error handling', () => {
-    it('returns error when not in ~/hardware', () => {
+    it('returns error when not in ~/hardware', async () => {
       const context = createMockContext({ currentDirectory: '~' })
-      const result = typeCommand.execute([], context)
+      const result = await typeCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'type: only available in ~/hardware' })
     })
 
-    it('returns error when in ~/books', () => {
+    it('returns error when in ~/books', async () => {
       const context = createMockContext({ currentDirectory: '~/books' })
-      const result = typeCommand.execute([], context)
+      const result = await typeCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'type: only available in ~/hardware' })
     })
 
-    it('returns error when in ~/vinyl', () => {
+    it('returns error when in ~/vinyl', async () => {
       const context = createMockContext({ currentDirectory: '~/vinyl' })
-      const result = typeCommand.execute([], context)
+      const result = await typeCommand.execute([], context)
       expect(result).toEqual({ success: false, error: 'type: only available in ~/hardware' })
     })
   })
 
   describe('hardware type operations', () => {
-    it('lists all types without argument', () => {
+    it('lists all types without argument', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute([], context)
+      const result = await typeCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       expect(outputLines).toContain('  Laptop')
@@ -432,9 +432,9 @@ describe('typeCommand', () => {
       expect(outputLines).toContain('  Tablet')
     })
 
-    it('lists types sorted alphabetically', () => {
+    it('lists types sorted alphabetically', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute([], context)
+      const result = await typeCommand.execute([], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const types = outputLines.filter(line => line.trim() && !line.includes('results'))
@@ -444,32 +444,32 @@ describe('typeCommand', () => {
       expect(types[2]).toContain('Tablet')
     })
 
-    it('filters by type name', () => {
+    it('filters by type name', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute(['laptop'], context)
+      const result = await typeCommand.execute(['laptop'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), '2 results')).toBe(true)
       expect(outputContains(getOutput(result), 'MacBook Pro')).toBe(true)
       expect(outputContains(getOutput(result), 'Dell XPS')).toBe(true)
     })
 
-    it('returns "No devices of type" when no matches', () => {
+    it('returns "No devices of type" when no matches', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute(['watch'], context)
+      const result = await typeCommand.execute(['watch'], context)
       expect(result.success).toBe(true)
       expect(getOutput(result)).toBe('No devices of type "watch"')
     })
 
-    it('handles case-insensitive matching', () => {
+    it('handles case-insensitive matching', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute(['PHONE'], context)
+      const result = await typeCommand.execute(['PHONE'], context)
       expect(result.success).toBe(true)
       expect(outputContains(getOutput(result), 'iPhone 15')).toBe(true)
     })
 
-    it('includes index in results', () => {
+    it('includes index in results', async () => {
       const context = createMockContext({ currentDirectory: '~/hardware' })
-      const result = typeCommand.execute(['tablet'], context)
+      const result = await typeCommand.execute(['tablet'], context)
       expect(result.success).toBe(true)
       const outputLines = getOutput(result) as string[]
       const ipadLine = outputLines.find(line => line.includes('iPad'))
@@ -493,24 +493,24 @@ describe('statsCommand', () => {
     context.collections = { books: [], vinyl: [], hardware: [], notes: [], ...collections }
     return context
   }
-  function output(context: ExecuteContext): string[] {
-    const result = statsCommand.execute([], context)
+  async function output(context: ExecuteContext): Promise<string[]> {
+    const result = await statsCommand.execute([], context)
     expect(result.success).toBe(true)
     return (result as { success: true; output: string[] }).output
   }
 
-  it('scales bars to a 24-column max and appends counts', () => {
+  it('scales bars to a 24-column max and appends counts', async () => {
     const books = [...Array(4).fill(book('Fiction')), ...Array(2).fill(book('Sci-Fi')), book('Essays')]
-    const out = output(statsCtx({ books }))
+    const out = await output(statsCtx({ books }))
     expect(out).toContain('BOOK GENRES')
     expect(out).toContain(`  Fiction  ${'█'.repeat(24)} 4`)
     expect(out).toContain(`  Sci-Fi   ${'█'.repeat(12)} 2`)
     expect(out).toContain(`  Essays   ${'█'.repeat(6)} 1`)
   })
 
-  it('orders by count desc, then alphabetically', () => {
+  it('orders by count desc, then alphabetically', async () => {
     const books = [book('Zeta'), book('Alpha'), book('Mid'), book('Mid')]
-    const out = output(statsCtx({ books }))
+    const out = await output(statsCtx({ books }))
     const rows = out.filter((l) => l.startsWith('  ') && l.includes('█'))
     // Two sections (genres + formats); genre rows come first
     expect(rows[0]).toContain('Mid')
@@ -518,9 +518,9 @@ describe('statsCommand', () => {
     expect(rows[2]).toContain('Zeta')
   })
 
-  it('shows at most 8 rows per section', () => {
+  it('shows at most 8 rows per section', async () => {
     const books = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].map((g) => book(g, 'Paperback'))
-    const out = output(statsCtx({ books }))
+    const out = await output(statsCtx({ books }))
     const genreStart = out.indexOf('BOOK GENRES')
     const formatStart = out.indexOf('BOOK FORMATS')
     const genreRows = out.slice(genreStart, formatStart).filter((l) => l.includes('█'))
@@ -528,19 +528,19 @@ describe('statsCommand', () => {
     expect(genreRows.some((l) => l.includes(' i '))).toBe(false)
   })
 
-  it('renders all five sections when data exists', () => {
+  it('renders all five sections when data exists', async () => {
     const context = statsCtx({
       books: [book('Fiction')],
       vinyl: [record('Rock')],
       hardware: [device('Active')],
     })
-    const out = output(context)
+    const out = await output(context)
     for (const header of ['BOOK GENRES', 'VINYL GENRES', 'BOOK FORMATS', 'VINYL FORMATS', 'HARDWARE STATUS']) {
       expect(out).toContain(header)
     }
   })
 
-  it('omits sections with no data and survives empty collections', () => {
-    expect(output(statsCtx({}))).toEqual([''])
+  it('omits sections with no data and survives empty collections', async () => {
+    expect(await output(statsCtx({}))).toEqual([''])
   })
 })

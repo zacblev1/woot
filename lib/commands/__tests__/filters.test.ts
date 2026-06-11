@@ -22,71 +22,71 @@ function ctx(stdin?: string[]): ExecuteContext {
 const LINES = ['alpha', 'Bravo', 'charlie', '', 'bravo two']
 
 describe('grep', () => {
-  it('errors without stdin', () => {
-    expect(grepCommand.execute(['x'], ctx())).toEqual({ success: false, error: 'grep: missing input — use in a pipeline (e.g. ls | grep books)' })
+  it('errors without stdin', async () => {
+    expect(await grepCommand.execute(['x'], ctx())).toEqual({ success: false, error: 'grep: missing input — use in a pipeline (e.g. ls | grep books)' })
   })
-  it('errors without a pattern', () => {
-    expect(grepCommand.execute([], ctx(LINES))).toEqual({ success: false, error: 'Usage: grep <pattern>' })
+  it('errors without a pattern', async () => {
+    expect(await grepCommand.execute([], ctx(LINES))).toEqual({ success: false, error: 'Usage: grep <pattern>' })
   })
-  it('matches case-insensitively', () => {
-    expect(grepCommand.execute(['bravo'], ctx(LINES))).toEqual({ success: true, output: ['Bravo', 'bravo two'] })
+  it('matches case-insensitively', async () => {
+    expect(await grepCommand.execute(['bravo'], ctx(LINES))).toEqual({ success: true, output: ['Bravo', 'bravo two'] })
   })
-  it('-v inverts the match', () => {
-    expect(grepCommand.execute(['-v', 'bravo'], ctx(LINES))).toEqual({ success: true, output: ['alpha', 'charlie', ''] })
+  it('-v inverts the match', async () => {
+    expect(await grepCommand.execute(['-v', 'bravo'], ctx(LINES))).toEqual({ success: true, output: ['alpha', 'charlie', ''] })
   })
-  it('returns empty output on no matches (pipeline-safe, like real grep)', () => {
-    expect(grepCommand.execute(['zz'], ctx(LINES))).toEqual({ success: true, output: [] })
+  it('returns empty output on no matches (pipeline-safe, like real grep)', async () => {
+    expect(await grepCommand.execute(['zz'], ctx(LINES))).toEqual({ success: true, output: [] })
   })
-  it('grep handles empty stdin', () => {
-    expect(grepCommand.execute(['x'], ctx([]))).toEqual({ success: true, output: [] })
+  it('grep handles empty stdin', async () => {
+    expect(await grepCommand.execute(['x'], ctx([]))).toEqual({ success: true, output: [] })
   })
-  it('is marked as a filter', () => {
+  it('is marked as a filter', async () => {
     expect(grepCommand.filter).toBe(true)
   })
 })
 
 describe('head/tail', () => {
-  it('head defaults to 10', () => {
+  it('head defaults to 10', async () => {
     const many = Array.from({ length: 15 }, (_, i) => `l${i}`)
-    expect(headCommand.execute([], ctx(many))).toEqual({ success: true, output: many.slice(0, 10) })
+    expect(await headCommand.execute([], ctx(many))).toEqual({ success: true, output: many.slice(0, 10) })
   })
-  it('head takes a count', () => {
-    expect(headCommand.execute(['2'], ctx(LINES))).toEqual({ success: true, output: ['alpha', 'Bravo'] })
+  it('head takes a count', async () => {
+    expect(await headCommand.execute(['2'], ctx(LINES))).toEqual({ success: true, output: ['alpha', 'Bravo'] })
   })
-  it('tail takes a count from the end', () => {
-    expect(tailCommand.execute(['2'], ctx(LINES))).toEqual({ success: true, output: ['', 'bravo two'] })
+  it('tail takes a count from the end', async () => {
+    expect(await tailCommand.execute(['2'], ctx(LINES))).toEqual({ success: true, output: ['', 'bravo two'] })
   })
-  it('head rejects a non-numeric count', () => {
-    expect(headCommand.execute(['x'], ctx(LINES))).toEqual({ success: false, error: 'head: invalid count: x' })
+  it('head rejects a non-numeric count', async () => {
+    expect(await headCommand.execute(['x'], ctx(LINES))).toEqual({ success: false, error: 'head: invalid count: x' })
   })
-  it('head rejects a trailing-garbage count', () => {
-    expect(headCommand.execute(['5x'], ctx(LINES))).toEqual({ success: false, error: 'head: invalid count: 5x' })
+  it('head rejects a trailing-garbage count', async () => {
+    expect(await headCommand.execute(['5x'], ctx(LINES))).toEqual({ success: false, error: 'head: invalid count: 5x' })
   })
-  it('head is marked as a filter', () => {
+  it('head is marked as a filter', async () => {
     expect(headCommand.filter).toBe(true)
   })
-  it('tail is marked as a filter', () => {
+  it('tail is marked as a filter', async () => {
     expect(tailCommand.filter).toBe(true)
   })
 })
 
 describe('wc', () => {
-  it('counts non-empty lines', () => {
-    expect(wcCommand.execute([], ctx(LINES))).toEqual({ success: true, output: '4' })
+  it('counts non-empty lines', async () => {
+    expect(await wcCommand.execute([], ctx(LINES))).toEqual({ success: true, output: '4' })
   })
-  it('is marked as a filter', () => {
+  it('is marked as a filter', async () => {
     expect(wcCommand.filter).toBe(true)
   })
 })
 
 describe('sort', () => {
-  it('sorts lexicographically, case-insensitive', () => {
-    expect(sortCommand.execute([], ctx(['b', 'A', 'c']))).toEqual({ success: true, output: ['A', 'b', 'c'] })
+  it('sorts lexicographically, case-insensitive', async () => {
+    expect(await sortCommand.execute([], ctx(['b', 'A', 'c']))).toEqual({ success: true, output: ['A', 'b', 'c'] })
   })
-  it('-r reverses', () => {
-    expect(sortCommand.execute(['-r'], ctx(['b', 'A', 'c']))).toEqual({ success: true, output: ['c', 'b', 'A'] })
+  it('-r reverses', async () => {
+    expect(await sortCommand.execute(['-r'], ctx(['b', 'A', 'c']))).toEqual({ success: true, output: ['c', 'b', 'A'] })
   })
-  it('is marked as a filter', () => {
+  it('is marked as a filter', async () => {
     expect(sortCommand.filter).toBe(true)
   })
 })

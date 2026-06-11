@@ -55,9 +55,9 @@ function createMockContext(): ExecuteContext {
 }
 
 describe('themeCommand', () => {
-  it('lists themes when no argument provided', () => {
+  it('lists themes when no argument provided', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute([], context)
+    const result = await themeCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -66,9 +66,9 @@ describe('themeCommand', () => {
     }
   })
 
-  it('shows asterisk next to current theme', () => {
+  it('shows asterisk next to current theme', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute([], context)
+    const result = await themeCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -78,9 +78,9 @@ describe('themeCommand', () => {
     }
   })
 
-  it('shows no asterisk next to non-current themes', () => {
+  it('shows no asterisk next to non-current themes', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute([], context)
+    const result = await themeCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -91,9 +91,9 @@ describe('themeCommand', () => {
     }
   })
 
-  it('sets theme when valid name provided', () => {
+  it('sets theme when valid name provided', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute(['dracula'], context)
+    const result = await themeCommand.execute(['dracula'], context)
 
     expect(result.success).toBe(true)
     expect(context.theme.set).toHaveBeenCalledWith('dracula')
@@ -102,9 +102,9 @@ describe('themeCommand', () => {
     }
   })
 
-  it('returns error for unknown theme', () => {
+  it('returns error for unknown theme', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute(['invalidtheme'], context)
+    const result = await themeCommand.execute(['invalidtheme'], context)
 
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -113,31 +113,31 @@ describe('themeCommand', () => {
     }
   })
 
-  it('calls context.theme.set with theme name', () => {
+  it('calls context.theme.set with theme name', async () => {
     const context = createMockContext()
-    themeCommand.execute(['gruvbox'], context)
+    await themeCommand.execute(['gruvbox'], context)
 
     expect(context.theme.set).toHaveBeenCalledWith('gruvbox')
   })
 
-  it('handles case-insensitive theme names', () => {
+  it('handles case-insensitive theme names', async () => {
     const context = createMockContext()
-    const result = themeCommand.execute(['DRACULA'], context)
+    const result = await themeCommand.execute(['DRACULA'], context)
 
     expect(result.success).toBe(true)
     expect(context.theme.set).toHaveBeenCalledWith('dracula')
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(themeCommand.name).toBe('theme')
     expect(themeCommand.description).toBe('Change terminal color theme')
   })
 })
 
 describe('fontCommand', () => {
-  it('lists fonts when no argument provided', () => {
+  it('lists fonts when no argument provided', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute([], context)
+    const result = await fontCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -146,9 +146,9 @@ describe('fontCommand', () => {
     }
   })
 
-  it('shows asterisk next to current font', () => {
+  it('shows asterisk next to current font', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute([], context)
+    const result = await fontCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -158,9 +158,9 @@ describe('fontCommand', () => {
     }
   })
 
-  it('shows no asterisk next to non-current fonts', () => {
+  it('shows no asterisk next to non-current fonts', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute([], context)
+    const result = await fontCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -170,9 +170,9 @@ describe('fontCommand', () => {
     }
   })
 
-  it('sets font when valid name provided', () => {
+  it('sets font when valid name provided', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute(['fira'], context)
+    const result = await fontCommand.execute(['fira'], context)
 
     expect(result.success).toBe(true)
     expect(context.font.set).toHaveBeenCalledWith('fira')
@@ -181,9 +181,9 @@ describe('fontCommand', () => {
     }
   })
 
-  it('returns error for unknown font', () => {
+  it('returns error for unknown font', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute(['invalidfont'], context)
+    const result = await fontCommand.execute(['invalidfont'], context)
 
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -192,31 +192,31 @@ describe('fontCommand', () => {
     }
   })
 
-  it('calls context.font.set with font name', () => {
+  it('calls context.font.set with font name', async () => {
     const context = createMockContext()
-    fontCommand.execute(['mono'], context)
+    await fontCommand.execute(['mono'], context)
 
     expect(context.font.set).toHaveBeenCalledWith('mono')
   })
 
-  it('handles case-insensitive font names', () => {
+  it('handles case-insensitive font names', async () => {
     const context = createMockContext()
-    const result = fontCommand.execute(['FIRA'], context)
+    const result = await fontCommand.execute(['FIRA'], context)
 
     expect(result.success).toBe(true)
     expect(context.font.set).toHaveBeenCalledWith('fira')
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(fontCommand.name).toBe('font')
     expect(fontCommand.description).toBe('Change terminal font')
   })
 })
 
 describe('neofetchCommand', () => {
-  it('returns system info array', () => {
+  it('returns system info array', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -224,9 +224,9 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('contains current theme name', () => {
+  it('contains current theme name', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -235,9 +235,9 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('contains current font name', () => {
+  it('contains current font name', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -246,9 +246,9 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('contains collection counts', () => {
+  it('contains collection counts', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -257,9 +257,9 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('contains zachary@home header', () => {
+  it('contains zachary@home header', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -268,9 +268,9 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('contains shell and terminal info', () => {
+  it('contains shell and terminal info', async () => {
     const context = createMockContext()
-    const result = neofetchCommand.execute([], context)
+    const result = await neofetchCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -281,7 +281,7 @@ describe('neofetchCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(neofetchCommand.name).toBe('neofetch')
     expect(neofetchCommand.description).toBe('Display system information')
   })

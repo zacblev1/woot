@@ -61,9 +61,9 @@ function createMockContext(): ExecuteContext {
 }
 
 describe('aboutCommand', () => {
-  it('returns array with author info', () => {
+  it('returns array with author info', async () => {
     const context = createMockContext()
-    const result = aboutCommand.execute([], context)
+    const result = await aboutCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -71,9 +71,9 @@ describe('aboutCommand', () => {
     }
   })
 
-  it('contains "Zachary"', () => {
+  it('contains "Zachary"', async () => {
     const context = createMockContext()
-    const result = aboutCommand.execute([], context)
+    const result = await aboutCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -82,9 +82,9 @@ describe('aboutCommand', () => {
     }
   })
 
-  it('contains "Creative Technologist"', () => {
+  it('contains "Creative Technologist"', async () => {
     const context = createMockContext()
-    const result = aboutCommand.execute([], context)
+    const result = await aboutCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -93,16 +93,16 @@ describe('aboutCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(aboutCommand.name).toBe('about')
     expect(aboutCommand.description).toBe('About the author')
   })
 })
 
 describe('contactCommand', () => {
-  it('returns TerminalLine array with links', () => {
+  it('returns TerminalLine array with links', async () => {
     const context = createMockContext()
-    const result = contactCommand.execute([], context)
+    const result = await contactCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -112,9 +112,9 @@ describe('contactCommand', () => {
     }
   })
 
-  it('contains email link with href', () => {
+  it('contains email link with href', async () => {
     const context = createMockContext()
-    const result = contactCommand.execute([], context)
+    const result = await contactCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -126,9 +126,9 @@ describe('contactCommand', () => {
     }
   })
 
-  it('contains GitHub link with href', () => {
+  it('contains GitHub link with href', async () => {
     const context = createMockContext()
-    const result = contactCommand.execute([], context)
+    const result = await contactCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -140,23 +140,23 @@ describe('contactCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(contactCommand.name).toBe('contact')
     expect(contactCommand.description).toBe('Contact information')
   })
 })
 
 describe('projectsCommand', () => {
-  it('calls context.openUrl with GitHub URL', () => {
+  it('calls context.openUrl with GitHub URL', async () => {
     const context = createMockContext()
-    projectsCommand.execute([], context)
+    await projectsCommand.execute([], context)
 
     expect(context.openUrl).toHaveBeenCalledWith('https://github.com/zacblev1')
   })
 
-  it('returns "Opening GitHub..." message', () => {
+  it('returns "Opening GitHub..." message', async () => {
     const context = createMockContext()
-    const result = projectsCommand.execute([], context)
+    const result = await projectsCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -164,16 +164,16 @@ describe('projectsCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(projectsCommand.name).toBe('projects')
     expect(projectsCommand.description).toBe('View projects')
   })
 })
 
 describe('whoamiCommand', () => {
-  it('returns "zachary"', () => {
+  it('returns "zachary"', async () => {
     const context = createMockContext()
-    const result = whoamiCommand.execute([], context)
+    const result = await whoamiCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -181,16 +181,16 @@ describe('whoamiCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(whoamiCommand.name).toBe('whoami')
     expect(whoamiCommand.description).toBe('Display current user')
   })
 })
 
 describe('dateCommand', () => {
-  it('returns a string', () => {
+  it('returns a string', async () => {
     const context = createMockContext()
-    const result = dateCommand.execute([], context)
+    const result = await dateCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -198,9 +198,9 @@ describe('dateCommand', () => {
     }
   })
 
-  it('contains current year', () => {
+  it('contains current year', async () => {
     const context = createMockContext()
-    const result = dateCommand.execute([], context)
+    const result = await dateCommand.execute([], context)
 
     expect(result.success).toBe(true)
     if (result.success) {
@@ -209,7 +209,7 @@ describe('dateCommand', () => {
     }
   })
 
-  it('has correct name and description', () => {
+  it('has correct name and description', async () => {
     expect(dateCommand.name).toBe('date')
     expect(dateCommand.description).toBe('Display current date and time')
   })

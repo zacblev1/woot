@@ -25,11 +25,11 @@ function flattenOutput(output: CommandOutput): string[] {
  * @param registry - The command registry to look up commands
  * @returns The command result (success with output or error)
  */
-export function executeCommand(
+export async function executeCommand(
   input: string,
   context: ExecuteContext,
   registry: CommandRegistry
-): CommandResult {
+): Promise<CommandResult> {
   const trimmed = input.trim()
 
   // Empty input returns empty success
@@ -44,7 +44,7 @@ export function executeCommand(
   }
 
   // First stage runs as a normal command
-  let result = executeSingle(segments[0], context, registry)
+  let result = await executeSingle(segments[0], context, registry)
 
   // Remaining stages must be filter commands fed via stdin
   for (const segment of segments.slice(1)) {
@@ -53,7 +53,7 @@ export function executeCommand(
     const command = registry.get(name)
     if (!command) return error(`command not found: ${name}`)
     if (!command.filter) return error(`${name}: not a filter command`)
-    result = command.execute(args, { ...context, stdin: flattenOutput(result.output) })
+    result = await command.execute(args, { ...context, stdin: flattenOutput(result.output) })
   }
 
   return result
@@ -62,11 +62,11 @@ export function executeCommand(
 /**
  * Execute a single (non-piped) command segment.
  */
-function executeSingle(
+async function executeSingle(
   segment: string,
   context: ExecuteContext,
   registry: CommandRegistry
-): CommandResult {
+): Promise<CommandResult> {
   // Parse command and args by splitting on whitespace
   const [commandName, ...args] = segment.split(/\s+/)
   const command = registry.get(commandName)

@@ -75,40 +75,40 @@ function createMockCommand(name: string): CommandDefinition {
 
 describe('executeCommand', () => {
   describe('empty input handling', () => {
-    it('returns success with empty output for empty string', () => {
+    it('returns success with empty output for empty string', async () => {
       const registry = new CommandRegistry()
       const context = createMockContext()
 
-      const result = executeCommand('', context, registry)
+      const result = await executeCommand('', context, registry)
 
       expect(result).toEqual({ success: true, output: '' })
     })
 
-    it('returns success with empty output for whitespace-only input', () => {
+    it('returns success with empty output for whitespace-only input', async () => {
       const registry = new CommandRegistry()
       const context = createMockContext()
 
-      const result = executeCommand('   ', context, registry)
+      const result = await executeCommand('   ', context, registry)
 
       expect(result).toEqual({ success: true, output: '' })
     })
 
-    it('returns success with empty output for tabs and newlines', () => {
+    it('returns success with empty output for tabs and newlines', async () => {
       const registry = new CommandRegistry()
       const context = createMockContext()
 
-      const result = executeCommand('\t\n  \t', context, registry)
+      const result = await executeCommand('\t\n  \t', context, registry)
 
       expect(result).toEqual({ success: true, output: '' })
     })
   })
 
   describe('unknown command handling', () => {
-    it('returns error for unknown command', () => {
+    it('returns error for unknown command', async () => {
       const registry = new CommandRegistry()
       const context = createMockContext()
 
-      const result = executeCommand('unknown', context, registry)
+      const result = await executeCommand('unknown', context, registry)
 
       expect(result).toEqual({
         success: false,
@@ -116,11 +116,11 @@ describe('executeCommand', () => {
       })
     })
 
-    it('includes command name in error message', () => {
+    it('includes command name in error message', async () => {
       const registry = new CommandRegistry()
       const context = createMockContext()
 
-      const result = executeCommand('foobar', context, registry)
+      const result = await executeCommand('foobar', context, registry)
 
       expect(result).toEqual({
         success: false,
@@ -130,47 +130,47 @@ describe('executeCommand', () => {
   })
 
   describe('command execution', () => {
-    it('executes known command', () => {
+    it('executes known command', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
       registry.register(cmd)
       const context = createMockContext()
 
-      const result = executeCommand('ls', context, registry)
+      const result = await executeCommand('ls', context, registry)
 
       expect(result.success).toBe(true)
       expect(cmd.execute).toHaveBeenCalled()
     })
 
-    it('passes parsed args to command', () => {
+    it('passes parsed args to command', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('ls -la /home', context, registry)
+      await executeCommand('ls -la /home', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith(['-la', '/home'], context)
     })
 
-    it('handles command with no args', () => {
+    it('handles command with no args', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('pwd')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('pwd', context, registry)
+      await executeCommand('pwd', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith([], context)
     })
 
-    it('passes correct context to command', () => {
+    it('passes correct context to command', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('test')
       registry.register(cmd)
       const context = createMockContext({ currentDirectory: '~/books' })
 
-      executeCommand('test arg1', context, registry)
+      await executeCommand('test arg1', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith(['arg1'], context)
       const passedContext = (cmd.execute as ReturnType<typeof vi.fn>).mock.calls[0][1]
@@ -179,60 +179,60 @@ describe('executeCommand', () => {
   })
 
   describe('case-insensitive lookup', () => {
-    it('finds command regardless of case', () => {
+    it('finds command regardless of case', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('LS', context, registry)
+      await executeCommand('LS', context, registry)
       expect(cmd.execute).toHaveBeenCalled()
 
-      executeCommand('Ls', context, registry)
+      await executeCommand('Ls', context, registry)
       expect(cmd.execute).toHaveBeenCalledTimes(2)
 
-      executeCommand('lS', context, registry)
+      await executeCommand('lS', context, registry)
       expect(cmd.execute).toHaveBeenCalledTimes(3)
     })
   })
 
   describe('argument parsing', () => {
-    it('splits args by whitespace', () => {
+    it('splits args by whitespace', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('echo')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('echo hello world', context, registry)
+      await executeCommand('echo hello world', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith(['hello', 'world'], context)
     })
 
-    it('handles multiple spaces between args', () => {
+    it('handles multiple spaces between args', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('echo')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('echo   hello    world', context, registry)
+      await executeCommand('echo   hello    world', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith(['hello', 'world'], context)
     })
 
-    it('trims leading and trailing whitespace', () => {
+    it('trims leading and trailing whitespace', async () => {
       const registry = new CommandRegistry()
       const cmd = createMockCommand('ls')
       registry.register(cmd)
       const context = createMockContext()
 
-      executeCommand('   ls   /home   ', context, registry)
+      await executeCommand('   ls   /home   ', context, registry)
 
       expect(cmd.execute).toHaveBeenCalledWith(['/home'], context)
     })
   })
 
   describe('command return value', () => {
-    it('returns the result from command execute', () => {
+    it('returns the result from command execute', async () => {
       const registry = new CommandRegistry()
       const expectedResult = { success: true as const, output: 'custom output' }
       const cmd: CommandDefinition = {
@@ -244,12 +244,12 @@ describe('executeCommand', () => {
       registry.register(cmd)
       const context = createMockContext()
 
-      const result = executeCommand('test', context, registry)
+      const result = await executeCommand('test', context, registry)
 
       expect(result).toEqual(expectedResult)
     })
 
-    it('returns error result from command', () => {
+    it('returns error result from command', async () => {
       const registry = new CommandRegistry()
       const errorResult = { success: false as const, error: 'something went wrong' }
       const cmd: CommandDefinition = {
@@ -261,7 +261,7 @@ describe('executeCommand', () => {
       registry.register(cmd)
       const context = createMockContext()
 
-      const result = executeCommand('fail', context, registry)
+      const result = await executeCommand('fail', context, registry)
 
       expect(result).toEqual(errorResult)
     })
@@ -281,43 +281,73 @@ describe('pipelines', () => {
     return registry
   }
 
-  it('pipes output lines into a filter', () => {
-    const result = executeCommand('emit | grep t', createMockContext(), pipeRegistry())
+  it('pipes output lines into a filter', async () => {
+    const result = await executeCommand('emit | grep t', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: true, output: ['two', 'three'] })
   })
 
-  it('chains multiple stages', () => {
-    const result = executeCommand('emit | grep t | wc', createMockContext(), pipeRegistry())
+  it('chains multiple stages', async () => {
+    const result = await executeCommand('emit | grep t | wc', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: true, output: '2' })
   })
 
-  it('a no-match grep stage yields zero through wc', () => {
-    const result = executeCommand('emit | grep zzz | wc', createMockContext(), pipeRegistry())
+  it('a no-match grep stage yields zero through wc', async () => {
+    const result = await executeCommand('emit | grep zzz | wc', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: true, output: '0' })
   })
 
-  it('flattens TerminalLine output to content strings', () => {
-    const result = executeCommand('rich | grep frank', createMockContext(), pipeRegistry())
+  it('flattens TerminalLine output to content strings', async () => {
+    const result = await executeCommand('rich | grep frank', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: true, output: ['    by Frank Herbert'] })
   })
 
-  it('rejects non-filter commands after a pipe', () => {
-    const result = executeCommand('emit | emit', createMockContext(), pipeRegistry())
+  it('rejects non-filter commands after a pipe', async () => {
+    const result = await executeCommand('emit | emit', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: false, error: 'emit: not a filter command' })
   })
 
-  it('reports unknown commands after a pipe', () => {
-    const result = executeCommand('emit | nope', createMockContext(), pipeRegistry())
+  it('reports unknown commands after a pipe', async () => {
+    const result = await executeCommand('emit | nope', createMockContext(), pipeRegistry())
     expect(result).toEqual({ success: false, error: 'command not found: nope' })
   })
 
-  it('propagates a first-stage error without running filters', () => {
+  it('propagates a first-stage error without running filters', async () => {
     const registry = pipeRegistry()
     registry.register({ name: 'boom', description: '', usage: '', execute: () => ({ success: false, error: 'boom failed' }) })
-    expect(executeCommand('boom | wc', createMockContext(), registry)).toEqual({ success: false, error: 'boom failed' })
+    expect(await executeCommand('boom | wc', createMockContext(), registry)).toEqual({ success: false, error: 'boom failed' })
   })
 
-  it('rejects empty pipe segments', () => {
-    expect(executeCommand('emit | | wc', createMockContext(), pipeRegistry())).toEqual({ success: false, error: 'syntax error near unexpected token `|`' })
+  it('rejects empty pipe segments', async () => {
+    expect(await executeCommand('emit | | wc', createMockContext(), pipeRegistry())).toEqual({ success: false, error: 'syntax error near unexpected token `|`' })
+  })
+})
+
+describe('async commands', () => {
+  it('awaits a promise-returning command', async () => {
+    const registry = createRegistry()
+    registry.register({
+      name: 'slow',
+      description: '',
+      usage: '',
+      execute: async () => {
+        await new Promise((r) => setTimeout(r, 5))
+        return { success: true as const, output: 'eventually' }
+      },
+    })
+    const result = await executeCommand('slow', createMockContext(), registry)
+    expect(result).toEqual({ success: true, output: 'eventually' })
+  })
+
+  it('pipes async output through filters', async () => {
+    const registry = createRegistry()
+    registry.register({
+      name: 'slowlist',
+      description: '',
+      usage: '',
+      execute: async () => ({ success: true as const, output: ['alpha', 'beta'] }),
+    })
+    registry.register(grepCommand)
+    const result = await executeCommand('slowlist | grep beta', createMockContext(), registry)
+    expect(result).toEqual({ success: true, output: ['beta'] })
   })
 })

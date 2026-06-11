@@ -57,10 +57,10 @@ function createMockContext(overrides: Partial<ExecuteContext> = {}): ExecuteCont
 
 describe('mkdirCommand', () => {
   describe('validation', () => {
-    it('returns error without path argument', () => {
+    it('returns error without path argument', async () => {
       const context = createMockContext()
 
-      const result = mkdirCommand.execute([], context)
+      const result = await mkdirCommand.execute([], context)
 
       expect(result).toEqual({
         success: false,
@@ -70,10 +70,10 @@ describe('mkdirCommand', () => {
   })
 
   describe('success path', () => {
-    it('returns success when vfs.mkdir returns null', () => {
+    it('returns success when vfs.mkdir returns null', async () => {
       const context = createMockContext()
 
-      const result = mkdirCommand.execute(['newdir'], context)
+      const result = await mkdirCommand.execute(['newdir'], context)
 
       expect(result).toEqual({
         success: true,
@@ -81,25 +81,25 @@ describe('mkdirCommand', () => {
       })
     })
 
-    it('calls vfs.mkdir with correct path', () => {
+    it('calls vfs.mkdir with correct path', async () => {
       const context = createMockContext()
 
-      mkdirCommand.execute(['mydir'], context)
+      await mkdirCommand.execute(['mydir'], context)
 
       expect(context.vfs.mkdir).toHaveBeenCalledWith('mydir')
     })
 
-    it('calls vfs.mkdir with nested path', () => {
+    it('calls vfs.mkdir with nested path', async () => {
       const context = createMockContext()
 
-      mkdirCommand.execute(['parent/child'], context)
+      await mkdirCommand.execute(['parent/child'], context)
 
       expect(context.vfs.mkdir).toHaveBeenCalledWith('parent/child')
     })
   })
 
   describe('error path', () => {
-    it('returns error message when vfs.mkdir returns error string', () => {
+    it('returns error message when vfs.mkdir returns error string', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -107,7 +107,7 @@ describe('mkdirCommand', () => {
         },
       })
 
-      const result = mkdirCommand.execute(['invalid/path'], context)
+      const result = await mkdirCommand.execute(['invalid/path'], context)
 
       expect(result).toEqual({
         success: false,
@@ -119,10 +119,10 @@ describe('mkdirCommand', () => {
 
 describe('touchCommand', () => {
   describe('validation', () => {
-    it('returns error without path argument', () => {
+    it('returns error without path argument', async () => {
       const context = createMockContext()
 
-      const result = touchCommand.execute([], context)
+      const result = await touchCommand.execute([], context)
 
       expect(result).toEqual({
         success: false,
@@ -132,10 +132,10 @@ describe('touchCommand', () => {
   })
 
   describe('success path', () => {
-    it('returns success when vfs.touch returns null', () => {
+    it('returns success when vfs.touch returns null', async () => {
       const context = createMockContext()
 
-      const result = touchCommand.execute(['newfile.txt'], context)
+      const result = await touchCommand.execute(['newfile.txt'], context)
 
       expect(result).toEqual({
         success: true,
@@ -143,25 +143,25 @@ describe('touchCommand', () => {
       })
     })
 
-    it('calls vfs.touch with correct path', () => {
+    it('calls vfs.touch with correct path', async () => {
       const context = createMockContext()
 
-      touchCommand.execute(['readme.md'], context)
+      await touchCommand.execute(['readme.md'], context)
 
       expect(context.vfs.touch).toHaveBeenCalledWith('readme.md')
     })
 
-    it('calls vfs.touch with path in subdirectory', () => {
+    it('calls vfs.touch with path in subdirectory', async () => {
       const context = createMockContext()
 
-      touchCommand.execute(['docs/notes.txt'], context)
+      await touchCommand.execute(['docs/notes.txt'], context)
 
       expect(context.vfs.touch).toHaveBeenCalledWith('docs/notes.txt')
     })
   })
 
   describe('error path', () => {
-    it('returns error message when vfs.touch returns error string', () => {
+    it('returns error message when vfs.touch returns error string', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -169,7 +169,7 @@ describe('touchCommand', () => {
         },
       })
 
-      const result = touchCommand.execute(['missing/file.txt'], context)
+      const result = await touchCommand.execute(['missing/file.txt'], context)
 
       expect(result).toEqual({
         success: false,
@@ -181,10 +181,10 @@ describe('touchCommand', () => {
 
 describe('rmCommand', () => {
   describe('validation', () => {
-    it('returns error without path argument', () => {
+    it('returns error without path argument', async () => {
       const context = createMockContext()
 
-      const result = rmCommand.execute([], context)
+      const result = await rmCommand.execute([], context)
 
       expect(result).toEqual({
         success: false,
@@ -194,10 +194,10 @@ describe('rmCommand', () => {
   })
 
   describe('success path', () => {
-    it('returns success when vfs.rm returns null', () => {
+    it('returns success when vfs.rm returns null', async () => {
       const context = createMockContext()
 
-      const result = rmCommand.execute(['oldfile.txt'], context)
+      const result = await rmCommand.execute(['oldfile.txt'], context)
 
       expect(result).toEqual({
         success: true,
@@ -205,25 +205,25 @@ describe('rmCommand', () => {
       })
     })
 
-    it('calls vfs.rm with correct path', () => {
+    it('calls vfs.rm with correct path', async () => {
       const context = createMockContext()
 
-      rmCommand.execute(['file-to-delete.txt'], context)
+      await rmCommand.execute(['file-to-delete.txt'], context)
 
       expect(context.vfs.rm).toHaveBeenCalledWith('file-to-delete.txt')
     })
 
-    it('calls vfs.rm with directory path', () => {
+    it('calls vfs.rm with directory path', async () => {
       const context = createMockContext()
 
-      rmCommand.execute(['old-directory'], context)
+      await rmCommand.execute(['old-directory'], context)
 
       expect(context.vfs.rm).toHaveBeenCalledWith('old-directory')
     })
   })
 
   describe('error path', () => {
-    it('returns error message when vfs.rm returns error string', () => {
+    it('returns error message when vfs.rm returns error string', async () => {
       const context = createMockContext({
         vfs: {
           ...createMockContext().vfs,
@@ -231,7 +231,7 @@ describe('rmCommand', () => {
         },
       })
 
-      const result = rmCommand.execute(['nonexistent'], context)
+      const result = await rmCommand.execute(['nonexistent'], context)
 
       expect(result).toEqual({
         success: false,
