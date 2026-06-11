@@ -1310,13 +1310,6 @@ export function Terminal() {
     }
   }
 
-  const handlePaletteExecute = (command: string) => {
-    const parts = command.split(' && ')
-    for (const part of parts) {
-      handleCommand(part.trim())
-    }
-  }
-
   // Register handleCommand for executeCommand (called every render; ref assignment is cheap)
   useEffect(() => {
     terminalCtx.registerCommandHandler(handleCommand)
@@ -1326,6 +1319,36 @@ export function Terminal() {
   useEffect(() => {
     handleCommandRef.current = handleCommand
   })
+
+  // `cmd && cmd` chains (deep links, palette). Each part runs through the
+  // freshly-assigned handleCommandRef after a real pause, so later parts see
+  // state set by earlier ones (same render/effect race the tour hit —
+  // a 0ms timer can beat React's own scheduled work).
+  const CHAIN_STEP_MS = 50
+  const chainTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  useEffect(() => {
+    const timers = chainTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const runCommandChain = async (raw: string) => {
+    const parts = raw.split("&&").map((p) => p.trim()).filter(Boolean)
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0) {
+        await new Promise<void>((resolve) => chainTimers.current.push(setTimeout(resolve, CHAIN_STEP_MS)))
+      }
+      await handleCommandRef.current(parts[i])
+    }
+  }
+
+  const runCommandChainRef = useRef(runCommandChain)
+  useEffect(() => {
+    runCommandChainRef.current = runCommandChain
+  })
+
+  const handlePaletteExecute = (command: string) => {
+    void runCommandChain(command)
+  }
 
   // Shareable deep links: /?cmd=ls%20~/books runs the command(s) on load.
   // Deferred to a macrotask so execution happens outside the effect body and
@@ -1337,10 +1360,7 @@ export function Terminal() {
     const cmd = new URLSearchParams(window.location.search).get("cmd")
     if (!cmd) return
     const timer = setTimeout(() => {
-      cmd.split("&&").forEach((part) => {
-        const trimmed = part.trim()
-        if (trimmed) handleCommandRef.current(trimmed)
-      })
+      void runCommandChainRef.current(cmd)
     }, 0)
     return () => clearTimeout(timer)
   }, [])
@@ -1398,12 +1418,10 @@ export function Terminal() {
 
   // Touch devices have no keydowns, so every key-bar button doubles as the
   // "user takes over" signal while the tour is driving.
-  const withTourGuard = (action: () => void) => () => {
-    if (tourActive.current) {
-      stopTour(true)
-      return
-    }
-    action()
+  const interruptTourIfDriving = (): boolean => {
+    if (!tourActive.current) return false
+    stopTour(true)
+    return true
   }
 
   const prompt = gameState.active ? `[${gameState.type}]` : `${currentDirectory} $`
@@ -1439,21 +1457,33 @@ export function Terminal() {
         <>
           <HistoryDisplay history={history} />
           <MobileKeyBar
-            onTab={withTourGuard(() => handleTabComplete(input))}
-            onHistoryUp={withTourGuard(() => {
+            onTab={() => {
+              if (interruptTourIfDriving()) return
+              handleTabComplete(input)
+            }}
+            onHistoryUp={() => {
+              if (interruptTourIfDriving()) return
               const cmd = handleHistoryUp()
               if (cmd !== null) setInput(cmd)
-            })}
-            onHistoryDown={withTourGuard(() => {
+            }}
+            onHistoryDown={() => {
+              if (interruptTourIfDriving()) return
               const cmd = handleHistoryDown()
               setInput(cmd ?? "")
-            })}
-            onInterrupt={withTourGuard(handleInterrupt)}
-            onEscape={withTourGuard(() => {
+            }}
+            onInterrupt={() => {
+              if (interruptTourIfDriving()) return
+              handleInterrupt()
+            }}
+            onEscape={() => {
+              if (interruptTourIfDriving()) return
               setShowPalette(false)
               setInput("")
-            })}
-            onCommandPalette={withTourGuard(handleCommandPalette)}
+            }}
+            onCommandPalette={() => {
+              if (interruptTourIfDriving()) return
+              handleCommandPalette()
+            }}
           />
           <InputLine
             ref={inputRef}

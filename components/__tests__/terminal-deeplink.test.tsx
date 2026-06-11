@@ -56,6 +56,17 @@ describe('Terminal ?cmd= deep links', () => {
     })
   })
 
+  it('later chain parts see state set by earlier parts (cd && search)', async () => {
+    // regression: parts used to run through one render's closure, so search
+    // saw a stale currentDirectory and reported "not in a collection directory"
+    window.history.replaceState({}, '', `/?cmd=${encodeURIComponent('cd books && search pulp')}`)
+    render(<WrappedTerminal />)
+    await waitFor(() => {
+      expect(screen.getByText(/1 results/)).toBeInTheDocument()
+    }, { timeout: 3000 })
+    expect(screen.queryByText(/not in a collection directory/)).not.toBeInTheDocument()
+  })
+
   it('does nothing without a cmd param', async () => {
     render(<WrappedTerminal />)
     // banner renders, but no pwd output appears
