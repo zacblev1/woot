@@ -2,6 +2,7 @@
 export { TerminalLine } from './TerminalLine'
 export { HistoryDisplay } from './HistoryDisplay'
 export { InputLine } from './InputLine'
+export { MobileKeyBar } from './MobileKeyBar'
 
 // Syntax highlighting
 export { tokenizeInput, renderTokens, highlightInput, highlightLine } from './SyntaxHighlighter'
