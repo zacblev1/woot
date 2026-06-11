@@ -43,7 +43,12 @@ new ideas land in the spec.
 
 ## Follow-up queue
 
-**Empty — all five queued bugs fixed 2026-06-11** (commits `cebf719..8c56032`):
+**Empty.** Post-slate additions (2026-06-11, browser-verified with Playwright +
+system Chrome): the tour was being aborted by its own launching Enter
+keystroke in real browsers (React flushes discrete-event effects synchronously
+— the window listener now attaches a task late, `b2b6209`), and **DOOM**
+shipped as a seventh game (`game doom`: raycast FPS, demons, iddqd/idkfa,
+high scores; `fe475bf`). All five earlier queued bugs fixed (commits `cebf719..8c56032`):
 the `&&` chain race (deep links + palette now run through `runCommandChain`
 with a state-flush pause, regression-tested), key-bar buttons all abort the
 tour, swipe steering for snake/tron/pacman (`lib/hooks/useSwipe.ts`),

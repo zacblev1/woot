@@ -106,6 +106,19 @@ describe('terminal easter eggs', () => {
     })
   })
 
+  it('doom cheats typed at the prompt point at the game', async () => {
+    const user = userEvent.setup()
+    render(<WrappedTerminal />)
+    await user.type(screen.getByRole('textbox'), 'iddqd{Enter}')
+    await waitFor(() => {
+      expect(screen.getByText(/cheats only work inside the game/)).toBeInTheDocument()
+    })
+    await user.type(screen.getByRole('textbox'), 'idkfa{Enter}')
+    await waitFor(() => {
+      expect(screen.getAllByText(/cheats only work inside the game/).length).toBe(2)
+    })
+  })
+
   it('input typed during the meltdown is swallowed, not executed', async () => {
     const user = userEvent.setup()
     render(<WrappedTerminal />)

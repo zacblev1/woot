@@ -1242,6 +1242,15 @@ export function Terminal() {
       return
     }
 
+    if (!gameState.active && /^(iddqd|idkfa)$/i.test(expandedCmd)) {
+      setHistory((prev) => [
+        ...prev,
+        { type: "success", content: "Nice try, marine — cheats only work inside the game. Try: game doom" },
+      ])
+      setInput("")
+      return
+    }
+
     if (!gameState.active && /^(vim|vi|nano|emacs)$/.test(expandedCmd)) {
       setEditorTrap(true)
       setHistory((prev) => [
