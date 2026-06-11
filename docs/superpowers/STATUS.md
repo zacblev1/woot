@@ -20,10 +20,9 @@ live presence, wall approval queue.
 
 ## How to pick back up
 
-**The A→D slate is complete.** Next up, per the user: a follow-up pass on the
-"Follow-up queue" below (small bugs noticed en route, deliberately not fixed
-mid-slate). The same working agreement applies: failing test first, full gate
-before every commit, finish with a review pass.
+**The A→D slate and the follow-up bug pass are complete.** Remaining known
+work is the deploy checklist below; after that, this effort is done unless
+new ideas land in the spec.
 
 ### Deploy checklist for the slate (when pushing/shipping)
 
@@ -42,35 +41,20 @@ before every commit, finish with a review pass.
   required context fields means sweeping every mock (a scripted pass — see
   Plan A Task 1 Step 2 for the pattern).
 
-## Follow-up queue (bugs noticed en route — fix after the A→D slate)
+## Follow-up queue
 
-- **Stale-state race in `&&` chains (suspected, untested):** deep links
-  (`/?cmd=cd books && search dune`) and the command palette both run chained
-  parts synchronously through one render's `handleCommand` closure, so part 2
-  sees a stale `currentDirectory`. This is the exact race the tour hit (fixed
-  there with `TOUR_REDUCED_STEP_MS = 50`); these two paths still have it.
-  VFS-backed commands (`pwd`, `ls`) are immune (the VFS object mutates
-  synchronously) — only `currentDirectory`-dependent ones (`search`, `genre`,
-  `format`, `type`) misbehave. Repro: load `/?cmd=cd%20books%20%26%26%20search%20dune`.
-- **Key bar ↑/↓/Tab during tour fight the typewriter (cosmetic):** they edit
-  the input mid-animation instead of aborting like Esc/Ctrl+C do. Either make
-  every key-bar button abort the tour, or no-op the editing ones while touring.
-- **Canvas games have no touch controls:** snake (new in C) shares the
-  tron/pacman limitation — arrow/WASD only, unplayable on phones. A swipe
-  handler (or reusing the mobile key bar's arrows during canvas games) would
-  cover all three.
-- **Typespeed initials prompt eats 'q':** a lone `q` (or any 1-3 alnum) is
-  treated as initials and posted; only `quit`/`skip` exit. Consider reserving
-  `q` or confirming before posting.
-- **Data typos surfaced by `stats`:** `data/books.json` has genre
-  `"Philosohpy"` (charted as its own bar); `data/hardware.json` Mac Mini M4
-  lists `"21GB"` memory (M4 Pro ships 24GB — likely a typo).
+**Empty — all five queued bugs fixed 2026-06-11** (commits `cebf719..8c56032`):
+the `&&` chain race (deep links + palette now run through `runCommandChain`
+with a state-flush pause, regression-tested), key-bar buttons all abort the
+tour, swipe steering for snake/tron/pacman (`lib/hooks/useSwipe.ts`),
+typespeed reserves `q` as quit at the initials prompt, and the
+Philosohpy/21GB data typos. Add new findings here as they come up.
 
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 939 passing · lint 0/0 · typecheck clean · build green (as of
-  sub-project D / slate completion).
+- Tests: 948 passing · lint 0/0 · typecheck clean · build green (as of the
+  post-slate bug-fix pass).
 - `useHighScores` accepts any `GameTypeName` from `lib/scores.ts`
   (GAME_TYPES: tron, pacman, basketball, typespeed, snake).
 - Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).
