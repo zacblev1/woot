@@ -82,5 +82,8 @@ export function createDefaultRegistry(): CommandRegistry {
   registry.register(commands.gameCommand)
   registry.register(commands.highscoresCommand)
 
+  // Wall
+  registry.register(commands.wallCommand)
+
   return registry
 }

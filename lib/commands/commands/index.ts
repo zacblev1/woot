@@ -26,6 +26,9 @@ export {
 // Highscores
 export { highscoresCommand } from './highscores'
 
+// Wall
+export { wallCommand } from './wall'
+
 // Info commands
 export {
   notesCommand,
