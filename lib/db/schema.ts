@@ -21,3 +21,24 @@ export const highScores = sqliteTable(
 
 export type HighScore = typeof highScores.$inferSelect
 export type NewHighScore = typeof highScores.$inferInsert
+
+export const wallMessages = sqliteTable(
+  'wall_messages',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    name: text('name', { length: 16 }), // nullable: anonymous posts render as "guest"
+    message: text('message', { length: 140 }).notNull(),
+    // SHA-256 of salt+IP — abuse tracing only, never exposed via the API
+    ipHash: text('ip_hash', { length: 64 }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [
+    // The board reads newest-first
+    index('idx_wall_messages_created').on(desc(t.createdAt)),
+  ]
+)
+
+export type WallMessage = typeof wallMessages.$inferSelect
+export type NewWallMessage = typeof wallMessages.$inferInsert

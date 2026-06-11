@@ -28,5 +28,5 @@ const dbInstance = createDbClient()
 export const db = dbInstance?.db ?? null
 export const client = dbInstance?.client ?? null
 
-export { highScores } from './schema'
-export type { HighScore, NewHighScore } from './schema'
+export { highScores, wallMessages } from './schema'
+export type { HighScore, NewHighScore, WallMessage, NewWallMessage } from './schema'
