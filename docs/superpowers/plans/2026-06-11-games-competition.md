@@ -1,5 +1,12 @@
 # Games & Competition (Sub-project C) Implementation Plan
 
+> ✅ **COMPLETED 2026-06-11** — all 9 tasks shipped (commits `090b3fe..413afe2`
+> plus a review-pass docs commit). Execution deviations: pinned game-list
+> assertions in `game.test.ts`/`completion.test.ts` updated as GAME_TYPES grew;
+> highscores empty-board test stubs fetch explicitly (unstubAllGlobals also
+> removes the vitest.setup stub); SnakeGame's gameover overlay renders from
+> mirrored state, not `stateRef` (react-hooks/refs lint).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **Repo note:** background subagents get permission-denied in this repo; use inline execution (superpowers:executing-plans) or foreground subagents only.
 

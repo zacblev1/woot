@@ -67,6 +67,13 @@ live presence, wall approval queue.
 - **Key bar ↑/↓/Tab during tour fight the typewriter (cosmetic):** they edit
   the input mid-animation instead of aborting like Esc/Ctrl+C do. Either make
   every key-bar button abort the tour, or no-op the editing ones while touring.
+- **Canvas games have no touch controls:** snake (new in C) shares the
+  tron/pacman limitation — arrow/WASD only, unplayable on phones. A swipe
+  handler (or reusing the mobile key bar's arrows during canvas games) would
+  cover all three.
+- **Typespeed initials prompt eats 'q':** a lone `q` (or any 1-3 alnum) is
+  treated as initials and posted; only `quit`/`skip` exit. Consider reserving
+  `q` or confirming before posting.
 - **Data typos surfaced by `stats`:** `data/books.json` has genre
   `"Philosohpy"` (charted as its own bar); `data/hardware.json` Mac Mini M4
   lists `"21GB"` memory (M4 Pro ships 24GB — likely a typo).
