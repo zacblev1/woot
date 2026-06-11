@@ -19,7 +19,7 @@
     "name": "Mac Mini M4",
     "type": "Desktop Computer",
     "processor": "Apple M4 Pro",
-    "memory": "21GB RAM",
+    "memory": "24GB RAM",
     "storage": "512GB SSD",
     "operating_system": "macOS Sequoia",
     "hostname": "thundar",
