@@ -19,6 +19,7 @@ export const helpCommand: CommandDefinition = {
       '  Files          mkdir, touch, rm',
       '  Games          game <type>, highscores, suggest',
       '  Blog           notes',
+      '  Guestbook      wall',
       '  Style          theme, font, sound, neofetch',
       '  Info           about, contact, projects, whoami, date',
       '  Other          clear, echo, exit, history, cowsay, tour',

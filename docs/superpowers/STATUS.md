@@ -13,37 +13,25 @@ all live there.
 | **A — Terminal depth** (pipes, history/!!, ghost suggest, easter eggs) | ✅ **Done** | `plans/2026-06-09-terminal-depth.md` | `bd5244e..ceb32d0` (13 commits) |
 | **B — First-visit & mobile** (tour, mobile key bar, stats) | ✅ **Done** | `plans/2026-06-11-first-visit-mobile.md` | `854e39a..cafd0af` (6 commits) |
 | **C — Games & competition** (async executor, daily Wordle, highscores, typespeed, Snake) | ✅ **Done** | `plans/2026-06-11-games-competition.md` | `090b3fe..` (9 commits) |
-| **D — Wall guestbook** (Turso, /api/wall, wall command) | ⬜ Not started | _none yet_ | — |
+| **D — Wall guestbook** (Turso, /api/wall, wall command) | ✅ **Done** | `plans/2026-06-11-wall-guestbook.md` | `1ae4d26..` (6 commits) |
 
 Deliberately deferred (see spec "Deferred / rejected"): the `ai` command,
 live presence, wall approval queue.
 
 ## How to pick back up
 
-1. Read the spec section for the next sub-project (D, the wall guestbook, is
-   the last one). C0's async executor already landed, so `wall` can be a
-   plain async registry command; generalize the `lib/scores.ts` rate limiter
-   into `lib/rate-limit.ts` per the spec.
-2. Write an implementation plan for it (superpowers:writing-plans) modeled on
-   `plans/2026-06-09-terminal-depth.md` — bite-sized TDD tasks with full code,
-   saved to `plans/`.
-3. Execute task-by-task (subagent-driven or inline), with the full gate before
-   every commit: `npm run lint` (0 errors / 0 warnings), `npm run typecheck`,
-   `npx vitest run`, `npm run build`.
-4. Finish each sub-project with a whole-range review pass (the Plan A final
-   review caught a real input-lock race — worth repeating).
+**The A→D slate is complete.** Next up, per the user: a follow-up pass on the
+"Follow-up queue" below (small bugs noticed en route, deliberately not fixed
+mid-slate). The same working agreement applies: failing test first, full gate
+before every commit, finish with a review pass.
 
-### Sequencing notes for B–D
+### Deploy checklist for the slate (when pushing/shipping)
 
-- **C0 (async executor)** is the enabler for `highscores` (C2) and `wall` (D):
-  widen `CommandDefinition.execute` to allow `Promise<CommandResult>`, make
-  `executeCommand` + `handleCommand` await. Do it first within C.
-- Adding `typespeed`/`snake` to `GAME_TYPES` in `lib/scores.ts` automatically
-  extends the scores API zod validation and GET validators.
-- The wall needs a new Drizzle table + committed migration; remember the
-  production caveat: the existing `drizzle/0000` migration CREATEs
-  `high_scores`, so baseline it before ever running `drizzle-kit migrate`
-  against a database that already has that table.
+- Baseline `drizzle/0000` on the existing Turso DB (it CREATEs `high_scores`,
+  which already exists in prod) **before** `drizzle-kit migrate`; then `0001`
+  (wall_messages) applies cleanly.
+- Set `WALL_ADMIN_TOKEN` (enables `wall purge`/DELETE) and optionally
+  `WALL_IP_SALT` (IP-hash salt; defaults to empty string) in production.
 
 ### Harness notes (for Claude sessions)
 
@@ -81,11 +69,8 @@ live presence, wall approval queue.
 ## Repo state reminders
 
 - **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 897+ passing · lint 0/0 · typecheck clean · build green (as of
-  sub-project C completion).
-- `useHighScores` now accepts any `GameTypeName` from `lib/scores.ts`
+- Tests: 939 passing · lint 0/0 · typecheck clean · build green (as of
+  sub-project D / slate completion).
+- `useHighScores` accepts any `GameTypeName` from `lib/scores.ts`
   (GAME_TYPES: tron, pacman, basketball, typespeed, snake).
-- Tour note: the closing tour narration omits `wall` (ships in D) — add a
-  `wall` line to `TOUR_STEPS` in `components/terminal.tsx` when D lands.
 - Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).
-- `WALL_ADMIN_TOKEN` env var will be needed when sub-project D ships.

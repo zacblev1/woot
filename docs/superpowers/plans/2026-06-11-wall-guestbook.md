@@ -1,5 +1,9 @@
 # Wall Guestbook (Sub-project D) Implementation Plan
 
+> ✅ **COMPLETED 2026-06-11** — all 6 tasks shipped (commits `1ae4d26..`).
+> Review-pass note: /api/wall stays dynamic (ƒ) despite the argless GET
+> because the file also exports POST/DELETE — verified in the build output.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > **Repo note:** background subagents get permission-denied; use inline execution.
 

@@ -94,7 +94,6 @@ interface TourStep {
 }
 
 // Guided demo: narration lines, then a command typed and executed for real.
-// Closing narration will gain a `wall` line when the guestbook ships.
 const TOUR_STEPS: TourStep[] = [
   { narrate: ["", "*** GUIDED TOUR ***", "Sit back — I'll drive. Press any key to take over.", ""] },
   { narrate: ["Everything here is a command. help lists them:"], type: "help" },
@@ -110,6 +109,7 @@ const TOUR_STEPS: TourStep[] = [
       "",
       "That's the tour. A few things to try:",
       "  theme        change the look (rumor: a code unlocks an extra one)",
+      "  wall         sign the guestbook",
       "  game tron    light cycles",
       "  Ctrl+K       fuzzy command palette",
       "",

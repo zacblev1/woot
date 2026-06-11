@@ -113,6 +113,7 @@ export const COMMAND_DESCRIPTIONS: Record<string, string> = {
   stats: 'Collection statistics as bar charts',
   tour: 'Guided demo of the terminal',
   highscores: 'Arcade leaderboards',
+  wall: 'The guestbook wall',
   ls: 'List directory contents',
   cd: 'Change directory',
   pwd: 'Print working directory',
