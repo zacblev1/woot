@@ -10,7 +10,7 @@ import dynamic from "next/dynamic"
 import { useState, useRef, useEffect } from "react"
 import type { TerminalLine } from "@/lib/types/terminal"
 import { themes, fonts, HIDDEN_THEMES, type ThemeName, type FontName } from "@/lib/terminal-config"
-import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS } from "./terminal/index"
+import { HistoryDisplay, InputLine, type InputLineHandle, VALID_COMMANDS, MobileKeyBar } from "./terminal/index"
 import { useTerminalContext } from '@/lib/terminal-context'
 import { createDefaultRegistry, executeCommand, type ExecuteContext } from '@/lib/commands'
 import type { CommandOutput } from '@/lib/types/terminal'
@@ -1139,6 +1139,23 @@ export function Terminal() {
       ) : (
         <>
           <HistoryDisplay history={history} />
+          <MobileKeyBar
+            onTab={() => handleTabComplete(input)}
+            onHistoryUp={() => {
+              const cmd = handleHistoryUp()
+              if (cmd !== null) setInput(cmd)
+            }}
+            onHistoryDown={() => {
+              const cmd = handleHistoryDown()
+              setInput(cmd ?? "")
+            }}
+            onInterrupt={handleInterrupt}
+            onEscape={() => {
+              setShowPalette(false)
+              setInput("")
+            }}
+            onCommandPalette={handleCommandPalette}
+          />
           <InputLine
             ref={inputRef}
             value={input}
