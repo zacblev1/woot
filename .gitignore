@@ -2,3 +2,8 @@ node_modules
 .next
 .gstack/
 tsconfig.tsbuildinfo
+
+# Debian VM image: build outputs (~305 MB) are deployed via a volume, not git
+/public/vm/
+/tools/debian-vm/.work/
+/tools/debian-vm/node_modules/

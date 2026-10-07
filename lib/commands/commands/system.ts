@@ -22,6 +22,7 @@ export const helpCommand: CommandDefinition = {
       '  Guestbook      wall',
       '  Style          theme, font, sound, neofetch',
       '  Info           about, contact, projects, whoami, date',
+      '  Linux          debian (a real Debian machine, in your browser)',
       '  Other          clear, echo, exit, history, cowsay, tour',
       '',
     ])

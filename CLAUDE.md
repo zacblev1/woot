@@ -64,6 +64,7 @@ terminal behavior — if it fails, you changed shipped behavior.
 - **VFS** (`lib/vfs.ts`): virtual filesystem populated from `data/*.json`; user mutations (mkdir/touch/rm) persist to localStorage
 - **Boot sequence** (`components/boot-sequence.tsx`): first-visit overlay (sessionStorage); skipped under `prefers-reduced-motion`
 - **Games** (`components/games/`): text games are pure logic modules (`logic.ts` + tests) routed through `GameController`; canvas games (tron, pacman, basketball) are self-contained components lazy-loaded via `next/dynamic`
+- **Debian VM** (`debian` command, `components/debian-vm/`): a real Debian 12 running client-side in v86, shown as an overlay like the canvas games. The image is built offline by `tools/debian-vm/build.sh` into `public/vm/` (gitignored; deployed as a volume). The guest has no NIC (`net_device: none`, pinned by tests). See `tools/debian-vm/README.md`
 - **High scores**: `/app/api/scores` (GET list, POST submit) — zod-validated (`lib/scores.ts`: gameType enum, score bounds, initials), per-IP rate-limited, cached GETs; returns empty data when Turso env vars are absent
 - **SEO**: metadata + OG image in `app/layout.tsx` / `app/opengraph-image.tsx`; site URL resolution in `lib/site.ts` (`NEXT_PUBLIC_SITE_URL` overrides)
 

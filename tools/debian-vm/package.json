@@ -1,0 +1,12 @@
+{
+  "name": "woot-debian-vm-tools",
+  "private": true,
+  "description": "Offline build of the in-browser Debian VM image (see README.md)",
+  "type": "module",
+  "dependencies": {
+    "v86": "0.5.470"
+  },
+  "devDependencies": {
+    "playwright-core": "1.63.0"
+  }
+}

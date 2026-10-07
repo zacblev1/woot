@@ -18,6 +18,24 @@ all live there.
 Deliberately deferred (see spec "Deferred / rejected"): the `ai` command,
 live presence, wall approval queue.
 
+### Debian VM (`debian` command) — ✅ built, not yet deployed
+
+Real Debian 12 running in the visitor's browser via v86: no server-side
+execution and no NIC. Requested via the site form by a student in a CS
+class. Spec: **`specs/2026-10-07-debian-vm-design.md`**. App code is in
+`components/debian-vm/` + `lib/commands/commands/debian.ts`. The image is
+built by `tools/debian-vm/build.sh` into `public/vm/` (~307 MB, gitignored
+and dockerignored), and `tools/debian-vm/probe.mjs` is the end-to-end browser
+check (see its README).
+
+**Deployed image location:** `~/homelab/data/woot-vm/`, bind-mounted
+read-only at `/app/public/vm` (`services/woot/docker-compose.yml`) and
+excluded from NAS backups because it's regenerable. To rebuild:
+`tools/debian-vm/build.sh ~/homelab/data/woot-vm`, then restart the
+container. Without the mount, `debian` just says the image isn't installed.
+**Remaining from spec "Size work":** prune kernel modules (stored size only)
+and try 128 MB guest RAM (snapshot size).
+
 ## How to pick back up
 
 **The A→D slate and the follow-up bug pass are complete.** Remaining known
@@ -57,9 +75,9 @@ Philosohpy/21GB data typos. Add new findings here as they come up.
 
 ## Repo state reminders
 
-- **Nothing is pushed** — all work since `d536c24` is local on `main`.
-- Tests: 948 passing · lint 0/0 · typecheck clean · build green (as of the
-  post-slate bug-fix pass).
+- `main` is pushed to `origin`; changes ship via PR (homelab `AGENTS.md`).
+- Tests: 1012 passing · lint 0/0 · typecheck clean · build green (as of the
+  Debian VM work, 2026-10-07).
 - `useHighScores` accepts any `GameTypeName` from `lib/scores.ts`
   (GAME_TYPES: tron, pacman, basketball, typespeed, snake).
 - Site URL for metadata/RSS comes from `NEXT_PUBLIC_SITE_URL` (set in prod).

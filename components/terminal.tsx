@@ -41,9 +41,14 @@ const DoomGame = dynamic(() => import("@/components/games/doom-game").then(mod =
   loading: () => <div className="p-4 text-red-500 font-mono">Loading DOOM... rip and tear</div>
 })
 
+const DebianVm = dynamic(() => import("@/components/debian-vm").then(mod => mod.DebianVm), {
+  ssr: false,
+  loading: () => <div className="p-4 text-primary font-mono">Loading Debian...</div>
+})
+
 interface GameState {
   active: boolean
-  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "snake" | "doom" | "suggest" | null
+  type: "number" | "wordle" | "trivia" | "blackjack" | "rps" | "tron" | "pacman" | "basketball" | "typespeed" | "snake" | "doom" | "debian" | "suggest" | null
   data?: Record<string, unknown>
 }
 
@@ -1477,6 +1482,10 @@ export function Terminal() {
       ) : gameState.type === "doom" && gameState.active ? (
         <div className="absolute inset-0 z-50 bg-background">
           <DoomGame onExit={() => setGameState({ active: false, type: null })} />
+        </div>
+      ) : gameState.type === "debian" && gameState.active ? (
+        <div className="absolute inset-0 z-50 bg-background">
+          <DebianVm vfs={vfs} onExit={() => setGameState({ active: false, type: null })} />
         </div>
       ) : (
         <>

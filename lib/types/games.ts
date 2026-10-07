@@ -1,5 +1,7 @@
 // Game type discriminator
 export type GameType = 'number' | 'wordle' | 'trivia' | 'blackjack' | 'rps' | 'tron' | 'pacman' | 'basketball' | 'typespeed' | 'snake' | 'doom'
+  // Not a game: the Debian VM overlay launches through the same host hook.
+  | 'debian'
 
 // Individual game data types
 export interface NumberGameData {

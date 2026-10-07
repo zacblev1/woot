@@ -1,0 +1,10 @@
+[Unit]
+Description=Apply host terminal size to the serial console
+After=serial-getty@ttyS0.service
+
+[Service]
+ExecStart=/usr/local/sbin/woot-winsize
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

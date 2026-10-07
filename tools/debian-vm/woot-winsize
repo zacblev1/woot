@@ -1,0 +1,11 @@
+#!/bin/sh
+# Apply terminal size updates from the host (ttyS1) to the console (ttyS0).
+# Protocol: one "ROWS COLS" line per update. Anything else is ignored.
+stty -F /dev/ttyS1 raw -echo 115200
+while read -r rows cols; do
+    case "$rows$cols" in
+        ''|*[!0-9]*) continue ;;
+    esac
+    [ "$rows" -ge 1 ] && [ "$rows" -le 500 ] && [ "$cols" -ge 1 ] && [ "$cols" -le 1000 ] || continue
+    stty -F /dev/ttyS0 rows "$rows" cols "$cols"
+done < /dev/ttyS1
