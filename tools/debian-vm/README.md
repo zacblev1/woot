@@ -65,3 +65,24 @@ Edit the package list in `Dockerfile` and rebuild. Unused packages cost server
 disk only, not visitor downloads (the files are lazy-loaded). The guest helpers
 are `woot-winsize` (applies host terminal size from ttyS1) and the OSC 7337 line
 in `~visitor/.bash_logout` (tells the host the session ended).
+
+## Easter eggs (`fun/`) — spoilers
+
+Installed by the `fun/` layer in the `Dockerfile`, so the first `ls` isn't empty
+and there's plenty to find:
+
+| What | Where |
+|---|---|
+| Starter files: `README.txt` (hints), `hello.c`, `hello.py`, `DO_NOT_OPEN.txt`, `portfolio` → `/home/zachary` | `fun/home/` → `~visitor` |
+| `make me a sandwich` / `sudo make me a sandwich` (xkcd 149) | `fun/home/Makefile` |
+| Treasure hunt, one Linux skill per step: `ls -a` → `base64 -d` → `grep -r` (1000-file haystack) → `find` → `sudo` (root-only vault) → `gcc` (answer: 42) | `fun/home/.treasure/`, `fun/build/` (clue 2, needle, haystack generator), `fun/vault/` → `/opt/museum/basement/old-vault/` |
+| Museum to wander: `/opt/museum` | `fun/museum/` |
+| Toys: `hack`, `selfdestruct`, `party`, `magic8`, `coffee` (418), `arcade`, `matrix` | `fun/bin/` → `/usr/local/bin` |
+| Games: pacman4console, nsnake, ninvaders, bastet, moon-buggy, greed, bsdgames (adventure, wump, robots, worm, hangman…) | Debian packages |
+| Shell responses: `xyzzy`, `plugh`, `moo`, `hi`, `cd..`, `ping`, `google`, `please`; `apt install` explains there's no internet (`apt moo` still works) | `fun/bash.bashrc.snippet` → `/etc/bash.bashrc` |
+| Custom fortunes (CS jokes and facts) | `fun/fortunes/woot` |
+| The hamster: `ps aux` shows `hamster-wheel (powers this computer -- please do not kill)`. Killing it prints a lament on the console, and systemd hires a new one 6 s later | `fun/hamster/` |
+| A note for anyone who gets into `/root` | `fun/root/README.txt` |
+
+`probe.mjs` checks the starter files, the sandwich, a full scripted solve of the
+treasure hunt, `hack`, and the hamster's death and rebirth.

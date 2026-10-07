@@ -1,0 +1,31 @@
+
+# ---- woot easter eggs (tools/debian-vm/fun) ----------------------------------
+alias please='sudo'
+
+command_not_found_handle() {
+    case "$1" in
+        xyzzy)  echo "Nothing happens. (Wrong game! Try: adventure)" ;;
+        plugh)  echo 'A hollow voice says "Fool."' ;;
+        hello|hi|hey|yo|sup)
+                echo "Hi! I'm a computer. Nice to meet you. Try: cat README.txt" ;;
+        moo)    /usr/games/cowsay "moo" ;;
+        cd..)   echo "So close! You need a space:  cd .." ;;
+        ping)   echo "ping: there's no network in here. ...pong." ;;
+        google|chatgpt|internet|browser|firefox|chrome|wifi)
+                echo "There's no internet in here (on purpose). You'll have to use your brain."
+                echo "Good news: every command has a manual.  man <command>" ;;
+        help|halp|HELP)
+                echo "Start with:  cat ~/README.txt" ;;
+        *)      printf 'bash: %s: command not found\n' "$1" >&2
+                return 127 ;;
+    esac
+}
+
+__woot_no_internet() {
+    echo "This computer has no internet (on purpose!), so it can't download anything."
+    echo "Good news: $(ls /usr/bin /usr/games | wc -l) programs are already installed. Try: arcade"
+    return 1
+}
+apt()     { case "$1" in install|update|upgrade|full-upgrade|dist-upgrade) __woot_no_internet ;; *) command apt "$@" ;; esac; }
+apt-get() { case "$1" in install|update|upgrade|dist-upgrade) __woot_no_internet ;; *) command apt-get "$@" ;; esac; }
+# ------------------------------------------------------------------------------

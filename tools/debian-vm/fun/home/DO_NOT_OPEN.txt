@@ -1,0 +1,8 @@
+
+  You opened it.
+
+  Of course you did. Good. That's the whole job, honestly: when something
+  says "don't look here," a programmer looks there.
+
+  Since you're the curious type:   ls -a
+

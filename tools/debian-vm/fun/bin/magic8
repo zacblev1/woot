@@ -1,0 +1,16 @@
+#!/bin/bash
+# Ask the Magic 8 Ball a yes/no question.
+if [ $# -eq 0 ]; then
+    echo 'Ask a question!   magic8 "will it rain tomorrow?"'
+    exit 1
+fi
+answers=(
+    "It is certain." "Without a doubt." "Yes, definitely." "Most likely."
+    "Signs point to yes." "Reply hazy, try again." "Ask again later."
+    "Cannot predict now. Have you tried turning it off and on again?"
+    "Don't count on it." "My sources say no." "Very doubtful."
+    "Segmentation fault (just kidding: yes)." "The answer is 42."
+)
+echo "You asked: $*"
+sleep 0.5; echo "*shake shake shake*"; sleep 0.8
+echo "  ${answers[RANDOM % ${#answers[@]}]}"

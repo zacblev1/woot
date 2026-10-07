@@ -1,0 +1,17 @@
+
+  ~~~ TREASURE HUNT: CLUE 2 of 5 ~~~
+
+  Nice decoding!
+
+  The next clue is a needle in a haystack. Literally:
+
+      ls /usr/share/woot/haystack | wc -l
+
+  That's how many files are in there. Exactly ONE of them contains the
+  word NEEDLE. Opening them one at a time would take all day, so make
+  the computer do it. grep searches inside files:
+
+      grep -rl NEEDLE /usr/share/woot/haystack
+
+  (-r means search every file in the folder, -l means just tell me which file)
+

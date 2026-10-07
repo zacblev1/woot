@@ -1,0 +1,22 @@
+#!/bin/bash
+# You were told not to.
+RED=$'\e[1;31m'; R=$'\e[0m'
+trap 'printf "%s\n\nSelf-destruct aborted. Coward. (Respectfully.)\n" "$R"; exit 130' INT
+
+echo "${RED}SELF-DESTRUCT SEQUENCE ACTIVATED${R}"
+echo "(press Ctrl+C to abort)"
+echo
+for i in 10 9 8 7 6 5 4 3 2 1; do
+    printf '%s  %2d...%s\n' "$RED" "$i" "$R"
+    sleep 0.6
+done
+echo
+echo "[   13.370000] Kernel panic - not syncing: user typed selfdestruct"
+sleep 0.4
+echo "[   13.370001] CPU: 0 PID: 1 Comm: woot Not tainted 6.1.0-woot #1"
+sleep 0.4
+echo "[   13.370002] ---[ end Kernel panic - not syncing ]---"
+sleep 1.2
+echo
+figlet "jk" 2>/dev/null || echo "jk"
+echo "This computer is fine. Probably. Definitely. Mostly."

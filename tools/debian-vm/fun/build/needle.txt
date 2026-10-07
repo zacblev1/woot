@@ -1,0 +1,19 @@
+hay hay straw hay hay hay
+hay hay hay NEEDLE hay hay
+
+  ~~~ TREASURE HUNT: CLUE 3 of 5 ~~~
+
+  You found the needle. grep just read a thousand files faster than you
+  read this sentence.
+
+  Somewhere under /opt there's a vault. You don't know exactly where,
+  only that its name has the word "vault" in it. The `find` command
+  searches by name, and * is a wildcard meaning "anything":
+
+      find /opt -name '*vault*'
+
+  When you get there, you'll find it's locked. Who's the boss of this
+  computer? (Hint: there's a word you can put in front of any command
+  to run it as the boss. It starts with "s" and ends with "udo".)
+
+hay hay hay hay straw hay

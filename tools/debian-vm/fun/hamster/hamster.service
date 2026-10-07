@@ -1,0 +1,15 @@
+[Unit]
+Description=The hamster that powers this computer
+After=serial-getty@ttyS0.service
+
+[Service]
+User=visitor
+ExecStart=/usr/local/sbin/hamster-wheel
+ExecStopPost=/usr/local/sbin/hamster-died
+Restart=always
+RestartSec=6
+RuntimeDirectory=woot-hamster
+RuntimeDirectoryPreserve=yes
+
+[Install]
+WantedBy=multi-user.target
