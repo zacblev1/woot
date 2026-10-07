@@ -70,5 +70,8 @@ export {
 // Fun commands
 export { cowsayCommand } from './fun'
 
+// Debian VM
+export { debianCommand } from './debian'
+
 // Game command
 export { gameCommand, VALID_GAMES } from './game'

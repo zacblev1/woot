@@ -1,0 +1,8 @@
+
+  This is a real Debian 12 (i386) machine, running entirely inside your
+  browser tab via v86. Nothing here touches a server.
+
+  - You're `visitor`, with passwordless sudo. Break things! A reload fixes it.
+  - No network. Try: python3, gcc, vim, nano, htop, man, git, neofetch, cowsay, sl
+  - Type `exit` (or press Ctrl+]) to return to the portfolio terminal.
+

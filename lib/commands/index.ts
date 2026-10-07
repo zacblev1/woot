@@ -85,5 +85,8 @@ export function createDefaultRegistry(): CommandRegistry {
   // Wall
   registry.register(commands.wallCommand)
 
+  // Debian VM
+  registry.register(commands.debianCommand)
+
   return registry
 }

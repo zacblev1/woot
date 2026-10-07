@@ -3,7 +3,9 @@ import nextTypescript from 'eslint-config-next/typescript'
 
 const eslintConfig = [
   {
-    ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'next-env.d.ts'],
+    // tools/ holds offline build scripts (e.g. the Debian VM image), not app
+    // code; public/vm/ is that image's build output (vendored v86 bundle).
+    ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'next-env.d.ts', 'tools/**', 'public/vm/**'],
   },
   ...nextCoreWebVitals,
   ...nextTypescript,
