@@ -1,0 +1,33 @@
+#!/bin/bash
+# Look extremely busy. Does nothing. (Real hacking is mostly reading docs.)
+G=$'\e[1;32m'; D=$'\e[0;32m'; R=$'\e[0m'
+trap 'printf "%s\n" "$R"; exit 130' INT
+
+target="${1:-the mainframe}"
+steps=("Bypassing firewall" "Rerouting through 7 proxies" "Decrypting 2048-bit RSA keys"
+       "Downloading more RAM" "Reversing the polarity" "Enhancing... enhancing..."
+       "Hacking $target")
+
+hexline() { local s=""; for _ in {1..16}; do s+=$(printf '%02x ' $((RANDOM % 256))); done; echo "$s"; }
+
+bar() {
+    local label=$1 i full='#########################' empty='                         '
+    for i in $(seq 0 4 100); do
+        printf '\r%s%-34s [%s%s] %3d%%%s' "$G" "$label" "${full:0:i/4}" "${empty:0:25-i/4}" "$i" "$R"
+        sleep 0.02
+    done
+    echo
+}
+
+clear
+echo "${G}>>> INITIATING HACK SEQUENCE <<<${R}"
+echo
+for s in "${steps[@]}"; do
+    for _ in 1 2; do echo "${D}$(hexline)${R}"; done
+    bar "$s"
+done
+echo
+figlet -f big "ACCESS GRANTED" 2>/dev/null | sed "s/^/$G/;s/$/$R/" || echo "${G}ACCESS GRANTED${R}"
+echo
+echo "(This did absolutely nothing. Real hacking is mostly reading"
+echo " documentation very carefully. Try: man man)"

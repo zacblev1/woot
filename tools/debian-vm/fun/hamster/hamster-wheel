@@ -1,0 +1,9 @@
+#!/bin/bash
+# The hamster that powers this computer. (It doesn't. Don't tell it.)
+# Runs as the visitor so a plain `kill` works; see hamster.service.
+if [ -e /run/woot-hamster/died ]; then
+    rm -f /run/woot-hamster/died
+    printf '\r\n  *squeak*  A new hamster has been hired. Power restored.\r\n\r\n' > /dev/ttyS0 2>/dev/null
+fi
+# A symlink to sleep, so the process is *named* hamster-wheel (pkill/killall work).
+exec -a "hamster-wheel  (powers this computer -- please do not kill)" /usr/local/lib/woot/hamster-wheel infinity

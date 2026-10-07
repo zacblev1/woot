@@ -1,0 +1,5 @@
+#!/bin/bash
+# ExecStopPost for hamster.service: runs however the hamster stopped (kill, kill -9, pkill...).
+touch /run/woot-hamster/died
+printf '\r\n\r\n  You killed the hamster.\r\n  This computer is now running on hopes and dreams.\r\n  (A replacement has been ordered. Check again in a few seconds: ps aux | grep hamster)\r\n\r\n' > /dev/ttyS0 2>/dev/null
+exit 0

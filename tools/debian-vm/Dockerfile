@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 \
       gcc libc6-dev make \
       git \
-      neofetch cowsay fortune-mod fortunes-min sl figlet \
+      neofetch cowsay fortune-mod fortunes-min sl figlet toilet lolcat ncal \
+      cmatrix bsdgames ninvaders moon-buggy bastet nsnake greed pacman4console \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen && \
@@ -63,6 +64,29 @@ RUN printf '%s\n' 9p 9pnet 9pnet_virtio virtio virtio_ring virtio_pci >> /etc/in
     chmod +x /etc/initramfs-tools/scripts/boot-9p && \
     echo 'BOOT=boot-9p' >> /etc/initramfs-tools/initramfs.conf && \
     update-initramfs -u
+
+# Easter eggs, toys, the treasure hunt and the hamster (see fun/ and README.md).
+COPY fun/ /tmp/fun/
+RUN set -e; F=/tmp/fun; \
+    install -m 755 "$F"/bin/* /usr/local/bin/; \
+    ln -s /usr/bin/cmatrix /usr/local/bin/matrix; \
+    install -d /usr/local/lib/woot; ln -s /bin/sleep /usr/local/lib/woot/hamster-wheel; \
+    install -m 755 "$F"/hamster/hamster-wheel "$F"/hamster/hamster-died /usr/local/sbin/; \
+    install -m 644 "$F"/hamster/hamster.service /etc/systemd/system/; \
+    systemctl enable hamster.service; \
+    cat "$F"/bash.bashrc.snippet >> /etc/bash.bashrc; \
+    install -m 644 "$F"/fortunes/woot /usr/share/games/fortunes/woot; \
+    strfile -s /usr/share/games/fortunes/woot; \
+    cp -a "$F"/home/. /home/visitor/; \
+    base64 "$F"/build/clue2.txt > /home/visitor/.treasure/clue2.b64; \
+    ln -s /home/zachary /home/visitor/portfolio; \
+    chown -R visitor:visitor /home/visitor; \
+    python3 "$F"/build/make-haystack.py /usr/share/woot/haystack "$F"/build/needle.txt 1000; \
+    cp -a "$F"/museum /opt/museum; chown -R root:root /opt/museum; \
+    install -d -m 700 /opt/museum/basement/old-vault; \
+    install -m 644 "$F"/vault/* /opt/museum/basement/old-vault/; \
+    install -m 644 "$F"/root/README.txt /root/README.txt; \
+    rm -rf "$F"
 
 COPY motd /etc/motd
 # Signal the state builder once a shell is up (consumed by build-state.mjs).

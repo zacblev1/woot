@@ -1,0 +1,25 @@
+#!/bin/bash
+# List the games installed on this machine.
+cat <<'EOF'
+
+  ======================  THE ARCADE  ======================
+
+  pacman4console   Pac-Man, made of letters           (q quits)
+  nsnake           Snake. Don't bite yourself.
+  ninvaders        Space Invaders
+  bastet           Tetris, but it hates you. Bastard Tetris.
+  moon-buggy       Drive on the moon. Jump the craters.
+  greed            Eat numbers. Don't get trapped.
+  robots           Escape the robots by making them crash
+  worm             The original snake, from 1980-something
+  hangman          You know this one
+  adventure        Colossal Cave (1976), the first text adventure
+                   ever. Try typing:  go in   (or xyzzy)
+  wump             Hunt the Wumpus (1973). Bring arrows.
+  tetris-bsd       Regular Tetris, for the faint of heart
+
+  Most quit with q or Ctrl+C. Older games: try Ctrl+C.
+
+  ==========  most of these games are older than you  ==========
+
+EOF

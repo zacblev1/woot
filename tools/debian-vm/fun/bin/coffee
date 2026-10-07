@@ -1,0 +1,14 @@
+#!/bin/bash
+# HTTP status 418 is real (RFC 2324). Look it up when you're back on the internet.
+cat <<'EOF'
+             ;,'
+     _o_    ;:;'
+ ,-.'---`.__ ;
+((j`=====',-'
+ `-\     /
+    `-=-'     Error 418: I'm a teapot.
+
+I can't brew coffee. I am, fundamentally, a teapot. This is an actual
+official internet error code, invented as an April Fools' joke in 1998.
+Some real websites still return it.
+EOF

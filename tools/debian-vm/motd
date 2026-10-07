@@ -3,6 +3,7 @@
   browser tab via v86. Nothing here touches a server.
 
   - You're `visitor`, with passwordless sudo. Break things! A reload fixes it.
-  - No network. Try: python3, gcc, vim, nano, htop, man, git, neofetch, cowsay, sl
+  - New here? Type  ls  and then  cat README.txt  (there are secrets).
+  - No internet in here, on purpose. Everything you need is already installed.
   - Type `exit` (or press Ctrl+]) to return to the portfolio terminal.
 

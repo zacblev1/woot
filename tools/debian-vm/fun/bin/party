@@ -1,0 +1,15 @@
+#!/bin/bash
+# Why not.
+# Rainbow in awk, not lolcat: lolcat is Ruby, which takes ~5 s to start under emulation.
+rainbow() {
+    awk 'BEGIN { n = split("196 202 208 214 220 226 190 154 118 82 46 48 51 45 39 33 27 57 93 129 165 201", c, " ") }
+         { o = ""; for (i = 1; i <= length($0); i++) o = o sprintf("\033[38;5;%sm%s", c[int((i + NR * 3) / 3) % n + 1], substr($0, i, 1)); print o "\033[0m" }'
+}
+# Hand-picked, all-ages cows (the full cowsay set has a few that aren't).
+cows=(bunny cheese default dragon duck elephant fox ghostbusters gnu kangaroo koala moose sheep snowman stegosaurus turkey turtle tux unipony vader)
+
+{
+    figlet -f big PARTY
+    figlet -f big TIME
+    cowsay -f "${cows[RANDOM % ${#cows[@]}]}" "woooooo"
+} | rainbow

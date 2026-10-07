@@ -93,6 +93,24 @@ await page.keyboard.type(":q!\n")
 await page.waitForTimeout(1500)
 r = await sh("echo vim-closed", 10000)
 check("vim opens and quits", vimScreen !== "" && /vim-closed/.test(r.out))
+// Easter eggs (fun/): the home folder isn't empty, the hunt is solvable, the hamster lives.
+// (find exits 1 on the locked vault by design, hence `| head -1` in the hunt.)
+r = await sh("ls")
+check("home folder has the starter files", /README\.txt/.test(r.out) && /portfolio/.test(r.out))
+r = await sh("make me a sandwich; sudo make me a sandwich | head -1")
+check("make me a sandwich (xkcd 149)", /Make it yourself/.test(r.out) && /Okay\./.test(r.out))
+r = await sh(
+  "cd ~/.treasure && base64 -d clue2.b64 | grep -q NEEDLE && grep -rl NEEDLE /usr/share/woot/haystack | xargs grep -q vault" +
+    " && V=$(find /opt -name '*vault*' 2>/dev/null | head -1) && sudo cp $V/vault.c ~/ && cd ~ && gcc vault.c -o vault && echo 42 | ./vault | grep 'VAULT IS OPEN'",
+  120000
+)
+check("treasure hunt solvable end to end", /THE VAULT IS OPEN\s*\*\*\*/.test(r.out), `${r.ms} ms`)
+r = await sh("hack >/dev/null; echo hack-exit=$?", 60000)
+check("hack runs", /hack-exit=0/.test(r.out))
+await page.keyboard.type("pkill hamster-wheel\n")
+let hamster = await waitText(/You killed the hamster/, 15000).then(() => true, () => false)
+hamster = hamster && (await waitText(/new hamster has been hired/, 20000).then(() => true, () => false))
+check("killing the hamster is noticed, and it comes back", hamster)
 if (shot) await page.screenshot({ path: shot })
 
 await page.keyboard.press("Control+BracketRight")

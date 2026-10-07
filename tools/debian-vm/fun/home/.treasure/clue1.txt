@@ -1,0 +1,14 @@
+
+  ~~~ TREASURE HUNT: CLUE 1 of 5 ~~~
+
+  You found the hidden folder! In Linux, any file whose name starts with a
+  dot is hidden. `ls -a` means "show me ALL of them."
+
+  Clue 2 is scrambled. It's written in base64, a way of turning any data
+  into plain letters and numbers. Computers use it constantly (email
+  attachments, images inside web pages...).
+
+  Unscramble it:
+
+      base64 -d clue2.b64
+
