@@ -1,0 +1,12 @@
+.git
+node_modules
+.next
+.planning
+.superpowers
+docs
+**/__tests__
+*.md
+.env*
+Dockerfile
+.dockerignore
+npm-debug.log*
